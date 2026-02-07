@@ -1,0 +1,139 @@
+Below is the pug code that represents a Bootstrap 5 .card. What I would like to do is expand the .direct-chat-messages#deep-seek-chat-messages element vertticly to the remaining heigth of the screen minus the other item outside of the card. Is this possible?
+------------------------------------------------------------------------------------------------------------------------------------------------
+Below is the contining pug file.
+----------------------------------------------------------------------------------------------------------------------------------------------------
+extends layout
+include ../user/deep-seek-chat.pug
+block content
+    
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h3.mb-0 DeepSeek Api Dashboard
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/users/dashboard') users
+              li.breadcrumb-item.active(aria-current='page')
+                | Dashboard
+          // end::Row
+        // end::Container
+    // end::App Content Header
+    .row.g-4.mb-4
+      // begin::Col
+      .col-md-12.connectedSortable#callout
+        .callout.callout-info#callout-info
+
+          if currentUser
+            p
+              | Logged in as #{currentUser.username}
+              | 
+              a(href='/users/logout') Logout
+          else
+            p
+              a(href='/users/login') Login
+              | 
+              a(href='/users/register') Register
+
+      // end::Col
+    // begin::Row
+    .row
+      // Start col
+      .col-md-12.connectedSortable
+        .body-wrapper.d-flex.flex-column.min-vh-100
+          - const u = user ? { id: user.id, username: user.username, email: user.email, password: user.password, dateCreated: user.dateCreated, dateModified: user.dateModified, role: user.role, avatar: user.avatar } : {}
+          +userCard(u)
+
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+    // sortablejs
+    script.
+      const connectedSortables =
+      document.querySelectorAll(".connectedSortable");
+      connectedSortables.forEach((connectedSortable) => {
+      let sortable = new Sortable(connectedSortable, {
+      group: "shared",
+      handle: ".card-header",
+      });
+      });
+      const cardHeaders = document.querySelectorAll(
+      ".connectedSortable .card-header",
+      );
+      cardHeaders.forEach((cardHeader) => {
+      cardHeader.style.cursor = "move";
+      });
+
+---------------------------------------------------------------------------------------------------------------------------
+Below is the card code
+----------------------------------------------------------------------------------------------------------------------------
+mixin userCard(u)
+  if u && u.id
+    script.
+      window.USER = !{JSON.stringify(u)};
+
+    .card.direct-chat.direct-chat-warning.mb-3
+      .card-header
+        .card-tools
+          span.btn-tool.text-muted#current-session-name Current session: None
+          a.btn.btn-sm.btn-tool(href='javascript:OpenModal("saveChatModal")')
+            i.far.fa-save
+          button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+            i.bi.bi-plus-lg(data-lte-icon='expand')
+            i.bi.bi-dash-lg(data-lte-icon='collapse')
+          button.btn.btn-tool(type='button' title='Contacts' data-lte-toggle='chat-pane')
+            i.bi.bi-chat-text-fill
+          button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+            i.bi.bi-x-lg
+          button.btn.btn-tool#clearChat(type='button')
+            i.bi.bi-dash-lg
+          button.btn.btn-tool(type='button' data-lte-toggle='fullscreen' style='z-index: 10000;')
+            i.bi.bi-fullscreen(data-lte-icon='maximize' style='display: block;')
+            i.bi.bi-fullscreen-exit(data-lte-icon='minimize' style='display: none;')
+      .card-body
+        .input-group.input-group-sm.mb-1
+          span.form-control.form-control-sm Saved Chats
+          select#chat-list.form-control.form-control-sm
+          .button-group.mb-3
+            button.btn.btn-primary.btn-sm#reset-chat(type='button') New Chat
+        .direct-chat-messages#deep-seek-chat-messages
+        .direct-chat-contacts
+          ul.contacts-list#user-list
+      .card-footer
+        form#deep-seek-chat-form(method='post')
+          .input-group
+            button.input-group-text#send-btn(type="submit")
+              span(class="bi bi-chat-text")   
+            input.form-control#deep-seek-message-input(type='text' name='message' placeholder='Type Message ...')
+            input.form-control#file-input(type='file' style='display: none;')
+            span.input-group-text(type='button' onclick="$('#file-input').click();")
+              span.material.material-attach-file.mbr-iconfont.mbr-iconfont-btn
+        //- Save Chat Modal
+      #saveChatModal.modal.fade(tabindex='-1')
+        .modal-dialog.modal-dialog-centered
+          .modal-content
+            .modal-header
+              h5.modal-title Save Chat Session
+              button.btn-close(type='button', data-bs-dismiss='modal')
+            .modal-body
+              form#save-chat-form
+                .mb-3
+                  label.form-label(for='chatName') Chat Name
+                  input.form-control#chatName(type='text' required placeholder='e.g. Research Session 1')
+            .modal-footer
+              button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Cancel
+              button.btn.btn-primary#saveChat(type='button') Save Chat
+      #toast-container.toast-container.position-fixed.top-0.end-0.p-3.zindex-popover
+    
+    script.
+      if (window.USER) {
+        const s = document.createElement('script');
+        s.src = `/js/deep-seek-chat.js?id=${encodeURIComponent(window.USER.id)}&username=${encodeURIComponent(window.USER.username)}&avatar=${encodeURIComponent(window.USER.avatar)}`;
+        document.head.append(s);
+      }
+
+  else
+    script.
+      console.warn("USER data missing or invalid");

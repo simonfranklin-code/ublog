@@ -1,0 +1,23 @@
+extends layout.pug
+block baseDirectoryBlock
+    != blog.BaseDirectory
+block titleBlock
+    title #{blogPost.Title}
+block headStylesBlock
+    != blog.HeadStylesBlock
+block headScriptsBlock
+    != blog.HeadScriptsBlock
+block metaDescriptionBlock
+    != blogPost.MetaDescription
+block metaKewordsBlock
+    != blogPost.MetaKeywords
+block blogHeader
+    != blog.BlogHeader
+block content
+    != htmlContent
+block footer
+    != blog.BlogFooter
+block blogPostFooter
+    != blogPost.Footer
+    script.
+        const _blogPostId = #{blogPost.BlogPostId};

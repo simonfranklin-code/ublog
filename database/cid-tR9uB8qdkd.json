@@ -1,0 +1,77 @@
+{
+  "alias": false,
+  "_styles": {
+    "padding-top": "(@paddingTop * 1rem)",
+    "padding-bottom": "(@paddingBottom * 1rem)",
+    "& when (@bg-type = 'color')": {
+      "background-color": "@bg-value"
+    },
+    "& when (@bg-type = 'image')": {
+      "background-image": "url(@bg-value)"
+    },
+    ".mbr-fallback-image.disabled": {
+      "display": "none"
+    },
+    ".mbr-fallback-image": {
+      "display": "block",
+      "background-size": "cover",
+      "background-position": "center center",
+      "width": "100%",
+      "height": "100%",
+      "position": "absolute",
+      "top": "0",
+      "& when (@bg-type = 'video')": {
+        "background-image": "url(@fallBackImage)"
+      }
+    },
+    ".content-wrapper": {
+      "background": "@cardColor",
+      "@media (max-width: 991px)": {
+        ".row": {
+          "flex-direction": "column-reverse"
+        },
+        ".image-wrapper": {
+          "margin-bottom": "2rem"
+        }
+      },
+      "@media (max-width: 767px)": {
+        "padding": "1rem"
+      },
+      "@media (min-width: 768px) and (max-width: 991px)": {
+        "padding": "2rem"
+      },
+      "@media (min-width: 992px)": {
+        "padding": "5rem 3rem",
+        ".text-wrapper": {
+          "padding-right": "2rem"
+        }
+      }
+    },
+    ".image-wrapper img": {
+      "width": "100%",
+      "object-fit": "cover"
+    },
+    ".card-title": {
+      "color": "#fafafa"
+    },
+    ".mbr-text, .mbr-section-btn": {
+      "color": "#bbbbbb"
+    }
+  },
+  "_name": "features16",
+  "_sourceTheme": "mobirise5",
+  "_customHTML": "<section data-bs-version=\"5.1\" class=\"features16  cid-tR9uB8qdkd\" group=\"Features\" data-bg-video=\"{{bg.type == 'video' && bg.value.url}}\" mbr-class=\"{'mbr-parallax-background': bg.parallax}\">\n\n    <mbr-parameters>\n        <header>Size</header>\n        <input type=\"checkbox\" title=\"Full Width\" name=\"fullWidth\" checked>\n        <input type=\"range\" inline title=\"Top\" name=\"paddingTop\" min=\"0\" max=\"10\" step=\"1\" value=\"0\">\n        <input type=\"range\" inline title=\"Bottom\" name=\"paddingBottom\" min=\"0\" max=\"10\" step=\"1\" value=\"3\">\n        <input type=\"range\" name=\"imageWidth\" title=\"Image\" min=\"4\" max=\"8\" step=\"1\" value=\"4\">\n        <header>Show/Hide</header>\n        <input type=\"checkbox\" title=\"Title\" name=\"showTitle\" checked>\n        <input type=\"checkbox\" title=\"Text\" name=\"showText\" checked>\n        <input type=\"checkbox\" title=\"Buttons\" name=\"showButtons\">\n        <input type=\"color\" title=\"Card Color\" name=\"cardColor\" value=\"#232323\" selected>\n        <header>Background</header>\n        <fieldset type=\"background\" name=\"bg\" parallax>\n            <input type=\"image\" title=\"Image\" value=\"assets/images/background3.webp\">\n            <input type=\"color\" title=\"Color\" value=\"#353535\" selected>\n            <input type=\"video\" title=\"Video\" value=\"https://vimeo.com/428046504\">\n        </fieldset>\n        <header condition=\"bg.type === 'video'\">Fallback Image</header>\n        <input type=\"image\" title=\"Fallback Image\" value=\"assets/images/background13.webp\" name=\"fallBackImage\" condition=\"bg.type === 'video'\">\n        <input type=\"checkbox\" title=\"Overlay\" name=\"overlay\" condition=\"bg.type !== 'color'\" checked>\n        <input type=\"color\" title=\"Overlay Color\" name=\"overlayColor\" value=\"#ffffff\" condition=\"overlay && bg.type !== 'color'\">\n        <input type=\"range\" inline title=\"Opacity\" name=\"overlayOpacity\" min=\"0\" max=\"1\" step=\"0.1\" value=\"0.5\" condition=\"overlay && bg.type !== 'color'\">\n    </mbr-parameters>\n\n    <div class=\"mbr-fallback-image disabled\" mbr-if=\"bg.type == 'video'\"></div>\n    <div class=\"mbr-overlay\" mbr-if=\"overlay && bg.type!== 'color'\" mbr-style=\"{'opacity': overlayOpacity, 'background-color': overlayColor}\">\n    </div>\n    <div mbr-class=\"{'container': !fullWidth, 'container-fluid': fullWidth}\">\n        <div class=\"content-wrapper\">\n            <div class=\"row align-items-center\">\n                <div class=\"col-12 col-lg\">\n                    <div class=\"text-wrapper\">\n                        <h6 class=\"mbr-fonts-style\" mbr-theme-style=\"display-5\" mbr-if=\"showTitle\" data-app-selector=\".card-title\"><a href=\"Solid-Foundation-Knowledge-is-Power-in-Digital-Marketing.html\" class=\"text-primary\">1. Solid Foundation: Knowledge is Power in digital marketing:</a></h6>\n                        <p class=\"mbr-text mbr-fonts-style mb-4\" mbr-theme-style=\"display-4\" mbr-if=\"showText\" data-app-selector=\".mbr-text, .mbr-section-btn\">\n                            To establish yourself as a Digital Marketing Guru, it is crucial to build a strong foundation of knowledge. Start by understanding the fundamentals of marketing, consumer behavior, and brand management. Gain insights into different digital marketing channels such as Search Engine Optimization (SEO), Social Media Marketing, Email Marketing, Content Marketing, and <a href=\"Pay-Per-Click-Advertising-(PPC).html\" class=\"text-primary\">Pay-Per-Click (PPC) Advertising.</a></p>\n                        <div mbr-buttons mbr-theme-style=\"display-4\" class=\"mbr-section-btn mt-3\" mbr-if=\"showButtons\">\n                            <a class=\"btn btn-warning\" href=\"https://mobiri.se\" data-app-placeholder=\"Type Text\">Learn more</a>\n                        </div>\n                    </div>\n                </div>\n                <div class=\"col-12 col-lg-{{imageWidth}}\">\n                    <div class=\"image-wrapper\">\n                        <img src=\"assets/images/28c7edbd-fe14-47c8-b085-4cbb6b3a17d6-694x694.webp\" alt=\"Solid Foundation: Knowledge is Power in digital marketing\">\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</section>",
+  "_anchor": "Solid-Foundation-Knowledge-is-Power-in-digital-marketing",
+  "_isUserblock": true,
+  "_cid": "tR9uB8qdkd",
+  "_PHPplaceholders": [
+  ],
+  "_JSplaceholders": [
+  ],
+  "_protectedParams": [
+  ],
+  "_global": false,
+  "_once": false,
+  "_params": {
+  }
+}

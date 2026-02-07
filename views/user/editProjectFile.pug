@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h2 Edit Component: #{component._anchor}
+  form(method='POST')
+    .mb-3
+      label.form-label(for='customHTML') HTML
+      textarea.form-control(name='customHTML' id='customHTML' rows='10')= component._customHTML
+    .mb-3
+      label.form-label(for='styles') Styles (JSON)
+      textarea.form-control(name='styles' id='styles' rows='5')= JSON.stringify(component._styles, null, 2)
+    button.btn.btn-primary(type='submit') Save
+    button.btn.btn-secondary(type='button' id='preview-btn') Preview
+  hr
+  h4 Preview
+  #preview.border.p-3.mt-3

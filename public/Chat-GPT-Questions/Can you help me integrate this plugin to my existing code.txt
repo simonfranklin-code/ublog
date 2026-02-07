@@ -1,0 +1,1888 @@
+Can you help me integrate this plugin to my existing code, code below
+---------------------------------------------------------------------------------------------
+userHtmlSectionController.js
+---------------------------------------------------------------------------------------------
+exports.getBlogPostSectionByAnchor = async (req, res) => {
+
+    const blogSlug = req.params.blogSlug;
+    const slug = req.params.slug;
+    const anchor = req.params.anchor;
+    const blogPostFromSlug = await BlogPost.getBlogPostBySlug(slug);
+    const blogPostTitle = blogPostFromSlug.Title;
+
+    const blogFromSlug = await Blog.getBlogBySlug(blogSlug);
+    const footer = blogPostFromSlug.Footer;
+
+    let htmlSectionId = null;
+    let sql = 'SELECT * FROM HtmlSections WHERE Slug = ? AND Anchor = ? ORDER BY ViewIndex ASC';
+    db.all(sql, [slug.toLowerCase(), anchor], async (err, rows) => {
+        if (err) {
+            throw err;
+        }
+        var htmlContent = "";
+        var htmlPage = '';
+        var row;
+        let schema = null;
+        let params = null;
+        let rendered = null;
+        let cid = '';
+        let styles = null;
+        let _css = '';
+        let _params;
+        let renderedHtml
+        if (rows && rows.length > 0) {
+            row = rows[0];
+            htmlContent += row.Html;
+            htmlSectionId = row.HtmlSectionID;
+            htmlContent += `<input type="hidden" id ="HtmlSectionID" name ="HtmlSectionID" value="${row.HtmlSectionID}">`;
+            htmlPage = row.Page;
+
+            if (row.Component !== null && row.Component !== 'undefined' && row.Component !== '') {
+                let component = JSON.parse(row.Component);
+                let customHtml = component._customHTML;
+                styles = component._styles;
+                cid = component._cid;
+                schema = parseMbrParameters(customHtml);
+                params = extractDefaultParams(customHtml);
+                const { html, css } = await renderCustomHTML(customHtml, params, {
+                    PROJECT_PATH: '',
+                    styles: styles,
+                    cid: cid,
+                });
+                _css = css;
+                renderedHtml = html;
+            }
+        }
+        res.render('user/htmlSection', {
+            htmlContent: htmlContent,
+            title: blogPostTitle,
+            blog: blogFromSlug,
+            blogPost: blogPostFromSlug,
+            htmlSectionId: htmlSectionId,
+            anchor: anchor,
+            footer: footer,
+            htmlPage: htmlPage,
+            id: htmlSectionId,
+            schema: schema,
+            params: params,
+            css: _css,
+            rendered: `<style>${_css}</style>\n${renderedHtml}`
+        });
+
+    });
+
+
+}
+--------------------------------------------------------------------------------------------
+htmlSection.pug
+--------------------------------------------------------------------------------------------
+extends htmlSectionPreviewLayout.pug
+include ./mixins/codeEditor.pug
+block baseDirectoryBlock
+  != blog.BaseDirectory
+block titleBlock
+  title #{title}
+block headStylesBlock
+   != blog.HeadStylesBlock
+block headScriptsBlock
+   != blog.HeadScriptsBlock
+
+
+block content
+
+    script.
+        blogSlug  = "#{blog.Slug}";
+        blogPostSlug = "#{blogPost.Slug}";
+        var curr = null;
+        var compIndex, ifrHTML, ifrCSS_LESS, ifrCSS, renderd, ifrRenderedHtml, ifrParams, pageName, pageAnchor;
+        var pageName = !{ JSON.stringify(htmlPage) };
+        var pageAnchor = !{ JSON.stringify(anchor) };
+        var css = !{ JSON.stringify(css) };
+        var renderedHtml = !{ JSON.stringify(rendered) };
+        var params = !{ JSON.stringify(params) };
+
+        htmlSectionId = "#{htmlSectionId}";
+    .card.m-0(draggable='false', style='height: auto; width: auto; transition: 0.15s;')
+        // begin::Header
+        #navbarSupportedContent.card-header
+            #card-tools.card-tools.navbar-dropdown
+                button#edit-html.btn.btn-tool(type='button', data-bs-toggle="popover", data-bs-title='Edit Html Section', data-bs-content='Toggles the contentEditable attribute.' )
+                    i.fas.fa-edit(aria-hidden='true')
+                button#save-html.btn.btn-tool(type='button')
+                    i.fas.fa-save(aria-hidden='true')
+                button#image-html.btn.btn-tool(type='button')
+                    i.fas.fa-image(aria-hidden='true')
+                button#insert-link.btn.btn-tool(type='button')
+                    i.fas.fa-link(aria-hidden='true')
+                button#remove-link.btn.btn-tool(type='button')
+                    i.fas.fa-unlink(aria-hidden='true')
+                button#font-size.btn.btn-tool(type='button')
+                    i.fas.fa-text-height(aria-hidden='true')
+                button#font-family.btn.btn-tool(type='button')
+                    i.fas.fa-font(aria-hidden='true')
+                button#font-color.btn.btn-tool(type='button')
+                    i.fas.fa-palette(aria-hidden='true')
+                button.btn.btn-tool(type='button', data-lte-toggle='fullscreen', style='z-index: 10000;')
+                    i.bi.bi-fullscreen(data-lte-icon='maximize')
+                    i.bi.bi-fullscreen-exit(data-lte-icon='minimize')
+        .card-body
+            ul#editorTab.nav.nav-tabs(role='tablist')
+                li.nav-item(role='presentation')
+                    button#wysiwyg-tab.nav-link.active(data-bs-toggle='tab' data-bs-target='#wysiwyg-tab-pane' type='button' role='tab' aria-controls='wysiwyg-tab-pane' aria-selected='true') Wysiwyg
+                li.nav-item(role='presentation')
+                    button#code-tab.nav-link(data-bs-toggle='tab' data-bs-target='#code-tab-pane' type='button' role='tab' aria-controls='code-tab-pane' aria-selected='false') Code
+                li.nav-item(role='presentation')
+                    button#mobirise-tab.nav-link(data-bs-toggle='tab' data-bs-target='#mobirise-tab-pane' type='button' role='tab' aria-controls='mobirise-tab-pane' aria-selected='false') Mobirise
+            #editorTabContent.tab-content
+                #wysiwyg-tab-pane.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='wysiwyg-tab' tabindex='0')
+                    #editableHtmlContent( contenteditable="false")       
+                        !=rendered
+
+                #code-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='code-tab' tabindex='0')
+                    iframe#viewHtmlSectionEditorFrame.viewHtmlSectionFrame(style='height: 100vh; width:100vw;' frameborder='0' scrolling='no')
+                #mobirise-tab-pane.tab-pane.fade.pt-0.mt-0(role='tabpanel' aria-labelledby='mobirise-tab' tabindex='0')
+                    +codeEditor('/monaco/editor.html', pageName, pageAnchor, htmlContent, blog.BaseDirectory, id, schema, params, rendered, css)
+        .card-footer
+            input#imageUploadInput(type='file' name='imageUploadInput' accept='image/*' style='position:absolute;left-3000px;top:-3000px;')
+    .modal.fade#confirmDeleteModal(tabindex='-1' role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title Confirm Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    p Are you sure you want to delete this HTML section?
+                .modal-footer
+                    button.btn.btn-secondary.btn-sm(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-danger.btn-sm#confirmDeleteBtn(type='button') Delete
+    // Link Insertion Modal
+    .modal.fade#insertLinkModal(tabindex='-1' role='dialog' aria-labelledby='insertLinkModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#insertLinkModalLabel Insert Link
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form#insertLinkForm
+                        .form-group
+                            label(for='linkUrl') URL
+                            input.form-control#linkUrl(type='text' name='linkUrl' required)
+                        .form-group
+                            label(for='linkText') Text
+                            input.form-control#linkText(type='text' name='linkText' readonly)
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-primary#insertLinkBtn(type='button') Insert Link
+    // Font Size Modal
+    .modal.fade(id='fontSizeModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title Font Size
+                        button.close(type='button', data-dismiss='modal', aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    select#fontSizeSelect.form-control
+                        option(value='12px') 12px
+                        option(value='14px') 14px
+                        option(value='16px') 16px
+                        option(value='18px') 18px
+                        option(value='20px') 20px
+                        option(value='24px') 24px
+                .modal-footer
+                    button.btn.btn-primary(type='button', id='applyFontSize') Apply
+                    button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Font Family Modal
+    .modal.fade(id='fontFamilyModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title Font Family
+                    button.close(type='button', data-dismiss='modal', aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    select#fontFamilySelect.form-control
+                        option(value='Arial') Arial
+                        option(value='Courier New') Courier New
+                        option(value='Georgia') Georgia
+                        option(value='Times New Roman') Times New Roman
+                        option(value='Verdana') Verdana
+                .modal-footer
+                    button.btn.btn-primary(type='button', id='applyFontFamily') Apply
+                    button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Font Color Modal
+    .modal.fade(id='fontColorModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                h5.modal-title Font Color
+                    button.close(type='button', data-dismiss='modal', aria-label='Close')
+                    span(aria-hidden='true') &times;
+                .modal-body
+                    input#fontColorInput(type='color', class='form-control')
+                .modal-footer
+                    button.btn.btn-primary(type='button', id='applyFontColor') Apply
+                    button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Find and replace Modal
+    .modal.fade(id='findAndReplaceModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title Find and replace
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                .modal-body
+                    form#findAndReplaceForm
+                        .formgroup.mb-2
+                            label(for="find-text") Find:
+                            input.form-control.form-control-sm#find-text(type="text" name="find-text" required)
+                        .formgroup.mb-2
+                            label(for="replace-text") Replace with:
+                            input.form-control.form-control-sm#replace-text(type="text" name="replace-text")
+                        .formgroup.mb-2
+                            label(for="replace-all") Replace all:
+                            input#replace-all(type="checkbox" name="replace-all")
+          
+                .modal-footer
+                    button.btn.btn-primary.btn-sm#buttonreplace(type="button") Replace
+                    |
+                    button.btn.btn-secondary.btn-sm(type='button', data-bs-dismiss='modal') Close
+    script(src='https://cdn.jsdelivr.net/npm/less@4.2.0/dist/less.min.js')
+    script(src='https://cdn.jsdelivr.net/npm/lodash.debounce@4.0.8/index.min.js')
+    script(src='/js/html-editor.js')
+block footer
+    #toast-container.position-fixed.top-0.end-0.p-3( style="z-index: 10000;")    
+
+    
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+    // sortablejs
+    script.
+        const connectedSortables =
+        document.querySelectorAll(".connectedSortable");
+        connectedSortables.forEach((connectedSortable) => {
+        let sortable = new Sortable(connectedSortable, {
+        group: "shared",
+        handle: ".card-header",
+        });
+        });
+        const cardHeaders = document.querySelectorAll(
+        ".connectedSortable .card-header",
+        );
+        cardHeaders.forEach((cardHeader) => {
+        cardHeader.style.cursor = "move";
+        });
+
+    
+--------------------------------------------------------------------------------------------
+ codeEditor.pug
+--------------------------------------------------------------------------------------------
+include editor
+mixin codeEditor(monacoHtmlUrl, _pageName, anchor, htmlContent, baseDirectory, id, schema, params, rendered, css )
+  .row
+    .col-md-12.align-items-start
+      #editorTab.nav.nav-tabs.mt-0(role='tablist' aria-orientation="horizontal")
+        button#JSON-tab.nav-link.active(data-bs-toggle='tab' data-bs-target='#JSON-tab-pane' type='button' role='tab' aria-controls='JSON-tab-pane' aria-selected='true') JSON
+        button#html-tab.nav-link(data-bs-toggle='tab' data-bs-target='#html-tab-pane' type='button' role='tab' aria-controls='html-tab-pane' aria-selected='false') Html
+        button#css-less-tab.nav-link(data-bs-toggle='tab' data-bs-target='#css-less-tab-pane' type='button' role='tab' aria-controls='css-less-tab-pane' aria-selected='false') CSS/LESS
+        button#css-tab.nav-link(data-bs-toggle='tab' data-bs-target='#css-tab-pane' type='button' role='tab' aria-controls='css-tab-pane' aria-selected='false') CSS
+        button#render-tab.nav-link(data-bs-toggle='tab' data-bs-target='#render-tab-pane' type='button' role='tab' aria-controls='render-tab-pane' aria-selected='false') Render
+        button#render-html-tab.nav-link(data-bs-toggle='tab' data-bs-target='#render-html-tab-pane' type='button' role='tab' aria-controls='render-html-tab-pane' aria-selected='false') Rendered HTML
+        button#params-tab.nav-link(data-bs-toggle='tab' data-bs-target='#params-tab-pane' type='button' role='tab' aria-controls='params-tab-pane' aria-selected='false') Params JSON
+      #editorTabContent.tab-content(style='width: 100%;')
+        #JSON-tab-pane.tab-pane.fade.active(role='tabpanel' aria-labelledby='JSON-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-JSON.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #html-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='html-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-html.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #css-less-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='css-less-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-css-less.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #css-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='css-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-css.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #render-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='render-tab' tabindex='0' style='width: 100%;')
+          #editableDraftHtmlContent.witsec-code-editor-iframe 
+            != rendered 
+        #render-html-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='render-html-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-render-html.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #params-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='params-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-params.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+  //- Offcanvas for mbr-parameters editor
+  div.offcanvas.offcanvas-end#paramsCanvas(tabindex='-1')
+    .offcanvas-header
+      h5.offcanvas-title Parameters Editor
+      button.btn-close(type='button', data-bs-dismiss='offcanvas', aria-label='Close')
+    .offcanvas-body
+      +editor(id, schema, params, rendered)
+      //- Dynamic form fields will be appended here via jQuery
+      div.mt-3
+        button#saveParams.btn.btn-sm.btn-primary(type='button') Save
+        button.btn.btn-sm.btn-secondary(type='button', data-bs-dismiss='offcanvas') Cancel
+
+  script(src='/js/plugins/renderer.jquery.less.js').
+------------------------------------------------------------------------------------------
+editor.pug
+------------------------------------------------------------------------------------------
+mixin editor(id, schema, params, rendered) 
+
+  .row
+    .col-md-12
+      h5.mb-3 Controls
+        if !schema || !schema.controls || schema.controls.length === 0
+          p.text-muted No controls defined in schema.
+        else
+          form#controls(data-id=id)
+            each ctrl, i in schema.controls
+              if ctrl.kind === 'header'
+                h6.mt-3.text-secondary(data-condition=ctrl.attrs.condition)= ctrl.title
+
+              else if ctrl.kind === 'checkbox'
+                .form-check.mb-2(data-condition=ctrl.attrs.condition)
+                  input.form-check-input(
+                    type='checkbox',
+                    name=ctrl.name,
+                    id=`f-${i}`,
+                    checked=(params[ctrl.name] || ctrl.attrs.checked)
+                  )
+                  label.form-check-label(for=`f-${i}`)= ctrl.title
+
+              else if ctrl.kind === 'range'
+                .mb-3(data-condition=ctrl.attrs.condition)
+                  label.form-label(for=`f-${i}`)= ctrl.title
+                  input.form-range(
+                    type='range',
+                    name=ctrl.name,
+                    id=`f-${i}`,
+                    min=ctrl.attrs.min,
+                    max=ctrl.attrs.max,
+                    step=ctrl.attrs.step,
+                    value=(params[ctrl.name] ? params[ctrl.name] : ctrl.value)
+                  )
+                  .small.text-muted
+                    | Min #{ctrl.attrs.min}, Max #{ctrl.attrs.max}, Step #{ctrl.attrs.step}
+
+              else if ctrl.kind === 'color'
+                .mb-3(data-condition=ctrl.attrs.condition)
+                  label.form-label(for=`f-${i}`)= ctrl.title
+                  input.form-control.form-control-color(
+                    type='color',
+                    name=ctrl.name,
+                    id=`f-${i}`,
+                    value=(params[ctrl.name] ? ctrl.value : '')
+                  )
+              else if ctrl.kind === 'select'
+                .mb-3(data-condition=ctrl.attrs && ctrl.attrs.condition)
+                  label.form-label(for=`f-${i}`)= ctrl.title
+                  select.form-select(name=ctrl.name, id=`f-${i}`)
+                    each opt in ctrl.options
+                      option(
+                        value=opt.value,
+                        selected=(params[ctrl.name] ? params[ctrl.name] == opt.value : opt.selected)
+                      )= opt.label
+              else if ctrl.kind === 'image' || ctrl.kind === 'video'
+                .mb-3(data-condition=ctrl.attrs.condition)
+                  label.form-label(for=`f-${i}`)= ctrl.title
+                  input.form-control(
+                    type='text',
+                    placeholder=ctrl.kind === 'image' ? 'Image URL' : 'Video URL',
+                    name=(ctrl.name || `${ctrl.kind}Value-${i}`),
+                    id=`f-${i}`,
+                    value=ctrl.value
+                  )
+
+              else if ctrl.kind === 'background'
+                .mb-3(data-condition=ctrl.attrs.condition)
+                  label.form-label Background
+                  .btn-group.mb-2(role='group')
+                    - const types = ['image','color','video']
+                    each t in types
+                      input.btn-check(
+                        type='radio',
+                        name='bg.type',
+                        id=`bg-${t}`,
+                        value=t,
+                        checked=(params.bg && params.bg.type===t)
+                      )
+                      label.btn.btn-outline-secondary(for=`bg-${t}`)= t
+
+                  each opt, j in ctrl.options
+                    if opt.kind === 'image'
+                      .mb-2.bg-sub
+                        label.form-label(for=`bg-img-${j}`)= opt.title
+                        input.form-control(
+                          type='text',
+                          id=`bg-img-${j}`,
+                          name='bg.image',
+                          value=(params.bg && params.bg.type==='image' ? (params.bg.value || opt.value) : opt.value)
+                        )
+
+                    if opt.kind === 'color'
+                      .mb-2.bg-sub
+                        label.form-label(for=`bg-col-${j}`)= opt.title
+                        input.form-control.form-control-color(
+                          type='color',
+                          id=`bg-col-${j}`,
+                          name='bg.color',
+                          value=(params.bg && params.bg.type==='color' ? (params.bg.value || opt.value) : opt.value)
+                        )
+
+                    if opt.kind === 'video'
+                      .mb-2.bg-sub
+                        label.form-label(for=`bg-vid-${j}`)= opt.title
+                        input.form-control(
+                          type='text',
+                          id=`bg-vid-${j}`,
+                          name='bg.video',
+                          value=(params.bg && params.bg.type==='video' ? (params.bg.value || opt.value) : opt.value)
+                        )
+
+                  .form-check.mt-2
+                    input.form-check-input(
+                    type='checkbox',
+                    id='bg-parallax',
+                    name='bg.parallax',
+                    checked=(params.bg && params.bg.parallax || false)
+                    )
+                    label.form-check-label(for='bg-parallax') Parallax
+--------------------------------------------------------------------------------------------
+defaultParams.js
+--------------------------------------------------------------------------------------------
+const { parseMbrParameters } = require('./parser');
+
+/**
+ * Build a default params object from a Mobirise component's <mbr-parameters>
+ * @param {string} customHTML - the Mobirise _customHTML string
+ * @returns {object} params - key/value map of parameter defaults
+ */
+function extractDefaultParams(customHTML) {
+    const { controls } = parseMbrParameters(customHTML);
+    const params = {};
+
+    controls.forEach(ctrl => {
+        if (ctrl.kind === 'checkbox') {
+            params[ctrl.name] = ctrl.attrs.checked || false;
+        }
+
+        else if (ctrl.kind === 'range') {
+            const val = ctrl.value || ctrl.attrs.min || 0;
+            params[ctrl.name] = Number(val);
+        }
+
+        else if (ctrl.kind === 'color' || ctrl.kind === 'image' || ctrl.kind === 'video') {
+            params[ctrl.name] = ctrl.value || '';
+        }
+
+        else if (ctrl.kind === 'background') {
+            // Find selected option (or default to first)
+            let selected = ctrl.options.find(o => o.attrs.selected) || ctrl.options[0];
+            params[ctrl.name] = {
+                type: selected.kind,
+                value: selected.value,
+                parallax: ctrl.attrs.parallax || false
+            };
+        }
+
+        else if (ctrl.kind === 'select') {
+            // Default to the first option or the explicitly selected one
+            const selected = ctrl.options.find(o => o.selected) || ctrl.options[0];
+            params[ctrl.name] = selected ? selected.value : null;
+        }
+    });
+
+    return params;
+}
+
+module.exports = { extractDefaultParams };
+-------------------------------------------------------------------------------------------
+parser.js
+-------------------------------------------------------------------------------------------
+// lib/parser.js
+const cheerio = require('cheerio');
+
+function attrBool(val) {
+    if (val === '' || val === true || val === 'true' || val === 'checked') return true;
+    if (val === 'false' || val === undefined) return false;
+    return !!val;
+}
+
+function parseMbrParameters(customHTML) {
+    const $ = cheerio.load(customHTML, { xmlMode: false, decodeEntities: true });
+    const $params = $('mbr-parameters');
+    const controls = [];
+    if ($params.length === 0) return { controls, meta: { found: false } };
+
+    $params.children().each((_, el) => {
+        const tag = el.tagName?.toLowerCase();
+        const $el = $(el);
+        if (tag === 'header') {
+            controls.push({ kind: 'header', title: $el.text().trim(), attrs: { condition: $el.attr('condition') || null } });
+            return;
+        }
+        if (tag === 'input') {
+            const type = ($el.attr('type') || 'text').toLowerCase();
+            controls.push({
+                kind: type,
+                name: $el.attr('name') || null,
+                title: $el.attr('title') || null,
+                value: $el.attr('value') ?? null,
+                attrs: {
+                    condition: $el.attr('condition') || null,
+                    min: $el.attr('min') || null,
+                    max: $el.attr('max') || null,
+                    step: $el.attr('step') || null,
+                    inline: attrBool($el.attr('inline')),
+                    selected: attrBool($el.attr('selected')),
+                    checked: attrBool($el.attr('checked')),
+                },
+            });
+            return;
+        }
+        if (tag === 'select') {
+            const options = [];
+            $el.children('option').each((__, opt) => {
+                const $opt = $(opt);
+                options.push({
+                    label: $opt.text().trim(),
+                    value: $opt.attr('value') ?? $opt.text().trim(),
+                    selected: attrBool($opt.attr('selected')),
+                });
+            });
+            controls.push({
+                kind: 'select',
+                name: $el.attr('name') || null,
+                title: $el.attr('title') || null,
+                value:
+                    options.find((o) => o.selected)?.value ??
+                    options[0]?.value ??
+                    null,
+                options,
+            });
+            return;
+        }
+
+        if (tag === 'fieldset') {
+            const fType = ($el.attr('type') || '').toLowerCase();
+            const name = $el.attr('name') || null;
+            const parallax = attrBool($el.attr('parallax'));
+            const children = [];
+            $el.children('input').each((__, child) => {
+                const $c = $(child);
+                children.push({
+                    kind: ($c.attr('type') || 'text').toLowerCase(),
+                    name: $c.attr('name') || null,
+                    title: $c.attr('title') || null,
+                    value: $c.attr('value') ?? null,
+                    attrs: { selected: attrBool($c.attr('selected')), condition: $c.attr('condition') || null },
+                });
+            });
+            controls.push({ kind: fType || 'fieldset', name, title: name, attrs: { parallax }, options: children });
+        }
+    });
+
+    return { controls, meta: { found: true, count: controls.length } };
+}
+
+module.exports = { parseMbrParameters };
+------------------------------------------------------------------------------------------
+renderer.js
+------------------------------------------------------------------------------------------
+// lib/renderer.js
+const cheerio = require('cheerio');
+const less = require('less');
+
+function safeEval(expr, params) {
+    try {
+        const fn = new Function('params', `with (params) { return (${expr}); }`);
+        return fn(params);
+    } catch (e) {
+        return undefined;
+    }
+}
+
+function parseObjectLiteralLike(str) {
+    try {
+        // normalize keys and quotes
+        const jsonish = str
+            .replace(/([a-zA-Z0-9_-]+)\s*:/g, '"$1":') // unquoted keys → quoted
+            .replace(/'/g, '"');                      // single quotes → double quotes
+        return JSON.parse(jsonish);
+    } catch {
+        return {};
+    }
+}
+
+async function compileStyles(rawLess, params, cid) {
+    // Build a map of variables from params
+    const modifyVars = {};
+
+
+
+    await flattenParams(params);
+    async function flattenParams(obj, prefix = '') {
+        for (const [key, val] of Object.entries(obj)) {
+            if (val && typeof val === 'object' && !Array.isArray(val)) {
+                flattenParams(val, prefix ? `${prefix}-${key}` : key);
+            } else {
+                const varName = prefix ? `${prefix}-${key}` : key;
+
+                if (typeof val === 'string') {
+                    // replace @PROJECT_PATH@ placeholders and quote
+                    const safeVal = val.replace(/@PROJECT_PATH@\//g, '');
+                    if (varName === 'hamburgerColor' || varName === 'menuBgColor' || varName === 'bgColor' || varName === 'overlayColor' || varName === 'cardColor' || varName === 'tColor') {
+                        modifyVars[varName] = `${safeVal}`;
+                    } else {
+                        if (varName === 'bg-value' && safeVal.startsWith('#')) {
+                            modifyVars[varName] = `${safeVal}`;
+                        } else { modifyVars[varName] = `"${safeVal}"`; }
+                    }
+
+                } else {
+                    modifyVars[varName] = val;
+                }
+            }
+        }
+    }
+    // Wrap with component scope
+    const scopedLess = `.cid-${cid} { ${rawLess} }`;
+
+    const out = await less.render(scopedLess, { modifyVars });
+    return out.css;
+}
+
+/* Parse mbr-class expression into [ [className, conditionExpr], ... ].
+   This handles quoted keys and arbitrary condition expressions (commas inside parens/strings are ignored). */
+function parseMbrClassPairs(expr) {
+    if (!expr || typeof expr !== 'string') return [];
+
+    // strip outer braces if present
+    let s = expr.trim();
+    if (s.startsWith('{') && s.endsWith('}')) s = s.slice(1, -1);
+
+    const tokens = [];
+    let cur = '';
+    let depth = 0;
+    let quote = null;
+    for (let i = 0; i < s.length; i++) {
+        const ch = s[i];
+        if (quote) {
+            cur += ch;
+            if (ch === quote) quote = null;
+            continue;
+        }
+        if (ch === '"' || ch === "'") {
+            cur += ch;
+            quote = ch;
+            continue;
+        }
+        if (ch === '(' || ch === '[' || ch === '{') {
+            depth++;
+            cur += ch;
+            continue;
+        }
+        if (ch === ')' || ch === ']' || ch === '}') {
+            depth--;
+            cur += ch;
+            continue;
+        }
+        // split on commas at top level
+        if (ch === ',' && depth === 0) {
+            tokens.push(cur);
+            cur = '';
+            continue;
+        }
+        cur += ch;
+    }
+    if (cur.trim()) tokens.push(cur);
+
+    const pairs = [];
+    for (const token of tokens) {
+        // find top-level colon (not inside quotes/parens)
+        let idx = -1;
+        let d = 0;
+        let q = null;
+        for (let i = 0; i < token.length; i++) {
+            const ch = token[i];
+            if (q) {
+                if (ch === q) q = null;
+                continue;
+            }
+            if (ch === '"' || ch === "'") { q = ch; continue; }
+            if (ch === '(' || ch === '[' || ch === '{') { d++; continue; }
+            if (ch === ')' || ch === ']' || ch === '}') { d--; continue; }
+            if (ch === ':' && d === 0) { idx = i; break; }
+        }
+        if (idx === -1) continue; // malformed
+        const rawKey = token.slice(0, idx).trim();
+        let key = rawKey;
+        // strip quotes from key if present
+        if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+            key = key.slice(1, -1);
+        }
+        const valueExpr = token.slice(idx + 1).trim();
+        pairs.push([key, valueExpr]);
+    }
+
+    return pairs;
+}
+
+async function renderCustomHTML(customHTML, params = {}, { PROJECT_PATH = '', styles = null, cid = null, anchor = null } = {}) {
+
+    const $ = cheerio.load(customHTML, { decodeEntities: false });
+
+    // Remove <mbr-parameters> block
+    $('mbr-parameters').remove();
+
+    // Replace @PROJECT_PATH@ only in safe attributes
+    const PATH_ATTRS = ['src', 'href', 'data-src', 'data-bg', 'data-poster'];
+
+    $(' *').each((_, el) => {
+        const $el = $(el);
+        for (const [k, v] of Object.entries(el.attribs || {})) {
+            if (typeof v === 'string' && v.includes('@PROJECT_PATH@/') && PATH_ATTRS.includes(k)) {
+                $el.attr(k, v.replace(/@PROJECT_PATH@\//g, PROJECT_PATH));
+            }
+        }
+    });
+
+    // Replace {{expr}} tokens in attributes
+    $(' *').each((_, el) => {
+        const $el = $(el);
+        for (const [k, v] of Object.entries(el.attribs || {})) {
+            if (!v) continue;
+            const replaced = v.replace(/{{([^}]+)}}/g, (_, expr) => {
+                const out = safeEval(expr, params);
+                return out == null ? '' : String(out);
+            });
+            if (replaced !== v) $el.attr(k, replaced);
+        }
+    });
+
+    // Replace {{expr}} in attributes (including class and style)
+    $('*').each((_, el) => {
+        const $el = $(el);
+        for (const [k, v] of Object.entries(el.attribs || {})) {
+            if (!v) continue;
+            const replaced = v.replace(/{{([^}]+)}}/g, (_, expr) => {
+                const out = safeEval(expr, params);
+                return out == null ? '' : String(out);
+            });
+            if (replaced !== v) $el.attr(k, replaced);
+        }
+    });
+
+    // Handle mbr-if
+    $('[mbr-if]').each((_, el) => {
+        const $el = $(el);
+        const cond = $el.attr('mbr-if');
+        const ok = !!safeEval(cond, params);
+        if (!ok) $el.remove();
+        else $el.removeAttr('mbr-if');
+    });
+
+    // Handle mbr-class (robust parser + evaluator)
+    $('[mbr-class]').each((_, el) => {
+        const $el = $(el);
+        const expr = $el.attr('mbr-class') || '';
+        const pairs = parseMbrClassPairs(expr);
+
+        for (const [cls, condExpr] of pairs) {
+            let val = false;
+            try {
+                val = !!safeEval(condExpr, params);
+            } catch (e) {
+                val = false;
+            }
+
+            if (val) {
+                // add if not present
+                const cur = ($el.attr('class') || '').split(/\s+/).filter(Boolean);
+                if (!cur.includes(cls)) $el.addClass(cls);
+            } else {
+                // remove if present
+                $el.removeClass(cls);
+            }
+        }
+
+        $el.removeAttr('mbr-class');
+    });
+
+
+    // Handle mbr-style
+    $('[mbr-style]').each((_, el) => {
+        const $el = $(el);
+        const expr = $el.attr('mbr-style');
+        const map = parseObjectLiteralLike(expr);
+        const stylesInline = [];
+        Object.entries(map).forEach(([prop, v]) => {
+            const val = typeof v === 'string' ? safeEval(v, params) : v;
+            if (val !== undefined && val !== '') stylesInline.push(`${prop}: ${val}`);
+        });
+        if (stylesInline.length) {
+            $el.attr(
+                'style',
+                (el.attribs?.style ? el.attribs.style + '; ' : '') + stylesInline.join('; ')
+            );
+        }
+        $el.removeAttr('mbr-style');
+    });
+
+    // Replace {{expr}} in attributes and text nodes (supports nested params)
+    $(' *').each((_, el) => {
+        const $el = $(el);
+
+        // Attributes
+        for (const [k, v] of Object.entries(el.attribs || {})) {
+            if (!v) continue;
+            const replaced = v.replace(/{{([^}]+)}}/g, (_, expr) => {
+                const out = safeEval(expr.trim(), params); // handles bg.value, overlay.opacity
+                return out == null ? '' : String(out);
+            });
+            if (replaced !== v) $el.attr(k, replaced);
+        }
+
+        // Text nodes
+        $el.contents().filter((__, node) => node.type === 'text').each((__, node) => {
+            node.data = node.data.replace(/{{([^}]+)}}/g, (_, expr) => {
+                const out = safeEval(expr.trim(), params);
+                return out == null ? '' : String(out);
+            });
+        });
+    });
+
+    // Extra pass: specifically resolve {{}} in class attributes
+    $('[class]').each((_, el) => {
+        const $el = $(el);
+        const cls = $el.attr('class');
+        if (!cls) return;
+
+        const replaced = cls.replace(/{{([^}]+)}}/g, (_, expr) => {
+            const out = safeEval(expr.trim(), params);
+            return out == null ? '' : String(out);
+        });
+
+        if (replaced !== cls) $el.attr('class', replaced);
+    });
+
+    // Handle mbr-theme-style (apply value as class)
+    $('[mbr-theme-style]').each((_, el) => {
+        const $el = $(el);
+        const className = $el.attr('mbr-theme-style');
+        if (className) {
+            $el.addClass(className);
+        }
+        $el.removeAttr('mbr-theme-style');
+    });
+
+    // Add cid-XXX class to top-level <section>
+    if (cid) {
+        const $root = $('body').children().first();
+        if ($root.length && $root.is('section')) {
+            $root.addClass(`cid-${cid}`);
+            $root.attr('id', anchor);
+        }
+    }
+
+    let html = $('body').children().first().toString();
+
+
+    let css = '';
+    if (styles && cid) {
+        const vars = Object.entries(params)
+            .map(([k, v]) => (typeof v === 'object' ? '' : `@${k}: ${v};`))
+            .join('\\n');
+        try {
+            const out = await compileStyles(json2css(styles), params, cid);
+            css = out;
+        } catch (e) {
+            console.error('LESS compile error', e);
+        }
+    }
+
+    return { html, css };
+}
+function json2css(json) {
+    var css = "";
+    var prevdepth = 0;
+
+    function eachRecursive(obj, depth = 0) {
+        for (var k in obj) {
+            // Indentation
+            var spaces = " ".repeat(depth * 2);
+
+            // If we're getting another hash, dive deeper
+            if (typeof obj[k] == "object" && obj[k] !== null) {
+                // Let's not have a white line as first line
+                css += (css ? "\n" : "");
+
+                // Open brackets
+                css += spaces + k + " {\n";
+
+                // Dive deeper
+                eachRecursive(obj[k], depth + 1);
+            } else {
+                // Write the css
+                css += spaces + k + ": " + obj[k] + ";\n";
+            }
+
+            // If current depth is less than previous depth, we've exited a hash, so let's place a closing bracket
+            if (depth < prevdepth || JSON.stringify(obj[k]) == "{}") {
+                css += spaces + "}\n";
+            }
+            prevdepth = depth;
+        }
+    }
+
+    // Go!
+    eachRecursive(json);
+
+    // Return beautiful css :)
+    return css.trim();
+}
+
+module.exports = { renderCustomHTML };
+------------------------------------------------------------------------------------
+htmlSection.js
+------------------------------------------------------------------------------------
+const db = require('./db');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const fs = require('fs').promises;
+const path = require('path');
+const BlogPost = require('./BlogPost');
+const Blog = require('./Blog');
+const MobiriseProject = require('./MobiriseProject');
+const { renderCustomHTML } = require('../lib/renderer');
+const { extractDefaultParams } = require('../lib/defaultParams');
+// Create the HtmlSections table if it doesn't exist
+db.serialize(() => {
+    db.run(`
+
+        CREATE TABLE IF NOT EXISTS "HtmlSections" (
+	        "HtmlSectionID"	INTEGER NOT NULL UNIQUE,
+	        "Html"	TEXT,
+	        "BlogPostId"	INTEGER NOT NULL,
+	        "DateCreated"	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	        "DateUpdated"	DATETIME,
+	        "ViewIndex"	INTEGER,
+	        "Anchor"	TEXT NOT NULL,
+	        "Slug"	TEXT,
+	        "UserId"	INTEGER,
+	        "Page"	TEXT,
+	        "Header"	TEXT,
+	        "Body"	TEXT,
+	        "Component"	TEXT,
+            "Css"	TEXT,
+	        "ParamsJson"	TEXT,
+	        PRIMARY KEY("HtmlSectionID" AUTOINCREMENT),
+	        CONSTRAINT "FK_HtmlSections_BlogPosts_BlogPostId" FOREIGN KEY("BlogPostId") REFERENCES "BlogPosts"("BlogPostId") ON DELETE CASCADE
+        );
+    `);
+});
+
+class HtmlSection {
+
+
+
+    static add(html, blogPostId, viewIndex, anchor, slug, page, header, body, component, css, paramsJson) {
+        const dateCreated = new Date().toLocaleString();
+        return new Promise((resolve, reject) => {
+            db.run(`INSERT INTO HtmlSections (Html, BlogPostId, ViewIndex, Anchor, Slug, Page, Header, Body, Component, Css, ParamsJson) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [html, blogPostId, viewIndex, anchor, slug, page, header, body, component, css, paramsJson], function (err) {
+                    if (err) return reject(err);
+                    resolve(this.lastID);
+                });
+        });
+    }
+
+
+    static edit(htmlSectionId, html, viewIndex, anchor, slug, page, header, body, component, css, paramsJson) {
+        const dateUpdated = new Date().toISOString();
+        return new Promise((resolve, reject) => {
+            db.run(`UPDATE HtmlSections SET Html = ?, ViewIndex = ?, Anchor = ?, Slug = ?, Page = ?, Header = ?, Body = ?, DateUpdated = ?, Component = ?, Css = ?, ParamsJson = ?  WHERE HtmlSectionID = ?`,
+                [html, viewIndex, anchor, slug, page, header, body, dateUpdated, component, css, paramsJson, htmlSectionId], function (err) {
+                    if (err)
+                        return reject(err);
+                    resolve(this.changes);
+                });
+        });
+    }
+
+    static deleteBySlug(slug) {
+        return new Promise((resolve, reject) => {
+            db.run(`DELETE FROM HtmlSections WHERE Slug = ?`,
+                [slug], function (err) {
+                    if (err) return reject(err);
+                    resolve(this.changes);
+                });
+        });
+    }
+
+    static delete(htmlSectionId) {
+        return new Promise((resolve, reject) => {
+            db.run(`DELETE FROM HtmlSections WHERE HtmlSectionID = ?`, [htmlSectionId], function (err) {
+                if (err) return reject(err);
+                resolve(this.changes);
+            });
+        });
+    }
+
+    static get(htmlSectionId) {
+        return new Promise((resolve, reject) => {
+            db.get(`SELECT * FROM HtmlSections WHERE HtmlSectionID = ?`, [htmlSectionId], (err, row) => {
+                if (err) return reject(err);
+                resolve(row);
+            });
+        });
+    }
+
+    static async getAll(page = 1, limit = 5, sortField = 'ViewIndex', sortOrder = 'DESC', filters = {}) {
+        const offset = (page - 1) * limit;
+        let whereClause = '';
+        let params = [];
+        if (filters.anchor) {
+            whereClause += ' AND Anchor LIKE ?';
+            params.push(`%${filters.anchor}%`);
+        }
+        if (filters.blogPostId) {
+            whereClause += ' AND BlogPostId = ?';
+            params.push(filters.blogPostId);
+        }
+        const query = `SELECT * FROM HtmlSections WHERE 1=1${whereClause} ORDER BY ${sortField} ${sortOrder} LIMIT ? OFFSET ?`;
+        return new Promise((resolve, reject) => {
+            db.all(query, [...params, limit, offset], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
+    static async getWitsecSearchDb() {
+
+        const query = `SELECT Page AS page, Anchor AS anchor, Header AS header, Body AS body FROM HtmlSections`;
+        return new Promise((resolve, reject) => {
+            db.all(query, [], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
+    static async getAllInternal(blogPostId) {
+
+        const query = `SELECT * FROM HtmlSections WHERE BlogPostId = ? ORDER BY ViewIndex ASC`;
+        return new Promise((resolve, reject) => {
+            db.all(query, [blogPostId], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
+    static getHtmlSectionsCount(filter = {}) {
+        let query = 'SELECT COUNT(*) AS count FROM HtmlSections WHERE 1=1';
+        const params = [];
+
+        if (filter.name) {
+            query += ' AND name LIKE ?';
+            params.push(`%${filter.name}%`);
+        }
+
+        if (filter.blogPostId) {
+            query += ' AND BlogPostId = ?';
+            params.push(`${filter.blogPostId}`);
+        }
+
+        return new Promise((resolve, reject) => {
+            db.get(query, params, (err, row) => {
+                if (err) {
+                    this.logError(err);
+                    return reject(err);
+                }
+                resolve(row.count);
+            });
+        });
+    }
+
+    // Fetch HTML content from the given URL
+    static async fetchHTML(htmlFilePath) {
+        try {
+            // Read the file content
+            const html = await fs.readFile(htmlFilePath, 'utf-8');
+            //console.log('HTML Content:', html);
+            return html;
+        } catch (error) {
+            console.error(`Error fetching the file: ${htmlFilePath}:`, error);
+            throw error;
+        }
+
+    }
+
+    // Extract a single HTML section based on its id attribute using cheerio
+    static extractHtmlSectionById(html, id) {
+        const $ = cheerio.load(html);
+        const section = $(`section#${id}`);
+
+        if (section.length > 0) {
+            return [$.html(section), section.attr('id')];
+        }
+
+        return null;
+    }
+
+    // Extract HTML section using cheerio
+    static extractHtmlSections(html) {
+        const $ = cheerio.load(html);
+        const sections = [];
+
+        $('section').each((index, element) => {
+            sections.push([$.html(element), $(element).attr('id')]);
+        });
+
+        return sections;
+    }
+
+    // Update HTML sections in the database
+    static async insertHtmlSections(blogPostId, htmlSections, blogSlug, slug, pageName) {
+
+        await this.deleteBySlug(slug);
+        let data = [];
+        let i = 0;
+        let paramsJson = {};
+        if (htmlSections !== 'undefined' && htmlSections.length > 0) {
+            data = JSON.parse(await fs.readFile(`./public/${blogSlug}/assets/witsec-search/search.json`, 'utf-8'));
+
+
+            for await (const section of htmlSections) {
+                i++;
+
+                let _item = {};
+                let htmlContent = section[0]; // Destructure the outer HTML and id (anchor) from each sub-array
+                let anchor = section[1];
+                let lastId = 0;
+                try {
+                    for (const item of data) {
+                        if (item.page.toLowerCase() === slug.toLowerCase() + '.html' && item.anchor === anchor) {
+                            _item.page = item.page;
+                            _item.anchor = item.anchor;
+                            _item.header = item.header;
+                            _item.body = item.body;
+
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error updating HtmlSection ${anchor}`, error);
+                }
+
+                try {
+                    if (_item === null) {
+                        
+                        let css = null;
+                        let component = await MobiriseProject.findComponentByPage(pageName, anchor);
+                        if (component) {
+                            lastId = await this.add(htmlContent, blogPostId, i, anchor, slug, pageName, '', '', JSON.stringify(component));
+                            console.log(`HtmlSection ${anchor} inserted successfully.`);
+
+
+                        }
+                    } else {
+                        let component = null;
+                        let css = null;
+                        component = await MobiriseProject.findComponentByPage(pageName, anchor);
+                        if (component) {
+                            lastId = await this.add(htmlContent, blogPostId, i, anchor, slug, pageName, _item.header || '', _item.body || '', JSON.stringify(component));
+                            console.log(`HtmlSection ${anchor} inserted successfully.`);
+
+
+                        }
+                    }
+
+                    if (lastId > 0) {
+                        let component = await MobiriseProject.findComponentByPage(pageName, anchor);
+                        let customHtml = component._customHTML;
+                        let styles = component._styles;
+                        let cid = component._cid;
+                        let params = extractDefaultParams(customHtml);
+
+                        const { html, css } = await renderCustomHTML(customHtml, params, {
+                            PROJECT_PATH: '',
+                            styles: styles,
+                            cid: cid,
+                            anchor: anchor
+                        });
+                        
+                        if (_item === null) {
+                            this.edit(lastId, '<style>' + css + '</style>' + html, i, anchor, slug, pageName, '', '', JSON.stringify(component), css, JSON.stringify(paramsJson));
+                        } else {
+                            this.edit(lastId, '<style>' + css + '</style>' + html, i, anchor, slug, _item.page, _item.header, _item.body, JSON.stringify(component), css, JSON.stringify(params));
+                        }
+
+                        //if (_item === null) {
+                        //    this.edit(lastId, htmlContent, i, anchor, slug, pageName, '', '', JSON.stringify(component), css, JSON.stringify(paramsJson));
+                        //} else {
+                        //    this.edit(lastId, htmlContent, i, anchor, slug, _item.page, _item.header, _item.body, JSON.stringify(component), css, JSON.stringify(params));
+                        //}
+
+                    }
+                } catch (error) {
+                    console.error(`Error updating HtmlSection ${anchor}`, error);
+                }
+            }
+
+
+
+
+        }
+
+    }
+
+    // Main function to execute the steps
+    static async importHtml(url, blogPostId, blogSlug, slug, pageName) {
+        try {
+            const html = await this.fetchHTML(url);
+            const htmlSections = await this.extractHtmlSections(html);
+            await this.insertHtmlSections(blogPostId, htmlSections, blogSlug.Slug, slug, pageName);
+            return new Promise((resolve, reject) => {
+                if (htmlSections === 'undefined') {
+                    reject(new Error('htmlSections is undefined'));
+                } else if (htmlSections.length <= 0) {
+                    reject(new Error('htmlSections is <= 0'));
+                } else {
+
+                    resolve(htmlSections);
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in main function', error);
+        }
+    }
+
+    // Main function to execute the steps
+    static async importSingleHtmlSection(url, id) {
+        try {
+            const html = await HtmlSection.fetchHTML(url);
+            const htmlSections = await HtmlSection.extractHtmlSectionById(html, id);
+            //await HtmlSection.updateHtmlSections(blogPostId, htmlSections);
+            return new Promise((resolve, reject) => {
+                if (htmlSections === 'undefined') {
+                    reject(new Error('htmlSections is undefined'));
+                } else if (htmlSections.length <= 0) {
+                    reject(new Error('htmlSections is <= 0'));
+                } else {
+
+                    resolve(htmlSections);
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in main function', error);
+        }
+    }
+
+    static logError(err) {
+        const errorMessage = `${new Date().toISOString()} - Error: ${err.message}\n`;
+        fs.appendFile('error.log', errorMessage, (fsErr) => {
+            if (fsErr) {
+                console.error('Failed to write to log file:', fsErr);
+            }
+        });
+    }
+
+}
+
+module.exports = HtmlSection;
+-------------------------------------------------------------------------------------------
+html-editor.js
+-------------------------------------------------------------------------------------------
+$(document).ready(function () {
+
+    let currentHtmlSectionId = 0;
+    let currentHtmlSectionAnchor = '';
+    let selectedText = '';
+    let htmlSections = null;
+    let selectedBlogPostIndex;
+    let currentTab = $('#editorTab .nav-link.active')[0];
+    
+
+    $(window).resize(function () {
+        $(".witsec-code-editor-iframe").height(window.innerHeight - 140);	// 140 is the height of the header
+    });
+
+    $('button[data-bs-toggle="tab"]').on('show.bs.tab', function (event) {
+        currentTab = event.target
+        if (currentTab.id === 'code-tab') {
+            let iframeSrc = `/users/htmlSections/editor/` + htmlSectionId;
+            $('#viewHtmlSectionEditorFrame').attr('src', iframeSrc);
+        } else if (currentTab.id === 'wysiwyg-tab') {
+
+            const iframeWindow = $('#viewHtmlSectionEditorFrame')[0].contentWindow;
+            $('#editableHtmlContent').html(iframeWindow.editor.getValue());
+            $('#imageUploadInput').on('change', imageUpload);
+        } else if (currentTab.id === 'mobirise-tab') {
+
+            // Set editor columns to max height available
+            $(".witsec-code-editor-iframe").css("height", window.innerHeight - 140);	// 40 is the height of the header
+            // Set references for quick access
+            ifrJSON = $("#witsec-code-editor-iframe-JSON")[0].contentWindow;
+            ifrHTML = $("#witsec-code-editor-iframe-html")[0].contentWindow;
+            ifrCSS_LESS = $("#witsec-code-editor-iframe-css-less")[0].contentWindow;
+            ifrCSS = $("#witsec-code-editor-iframe-css")[0].contentWindow;
+            ifrRenderedHtml = $("#witsec-code-editor-iframe-render-html")[0].contentWindow;
+            ifrParams = $("#witsec-code-editor-iframe-params")[0].contentWindow;
+            var url = `/editor/getComponentByPageNameAndAnchor/${pageName}/${pageAnchor}`;
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function (data) {
+                    curr = data.component;
+                    // For HTML editor inside iframe
+                    const modelJSON = ifrJSON.editor.getModel();
+                    ifrJSON.monaco.editor.setModelLanguage(modelJSON, "php");
+                    // For HTML editor inside iframe
+                    const modelHTML = ifrHTML.editor.getModel();
+                    ifrHTML.monaco.editor.setModelLanguage(modelHTML, "php");
+
+                    // For CSS/LESS editor
+                    const modelLESSCSS = ifrCSS_LESS.editor.getModel();
+                    ifrCSS_LESS.monaco.editor.setModelLanguage(modelLESSCSS, "less");
+
+                    // For CSS/LESS editor
+                    const modelCSS = ifrCSS.editor.getModel();
+                    ifrCSS.monaco.editor.setModelLanguage(modelCSS, "less");
+
+                    // For CSS/LESS editor
+                    const modelRenderedHtml = ifrRenderedHtml.editor.getModel();
+                    ifrRenderedHtml.monaco.editor.setModelLanguage(modelRenderedHtml, "php");
+
+                    // For CSS/LESS editor
+                    const modelParams = ifrParams.editor.getModel();
+                    ifrParams.monaco.editor.setModelLanguage(modelParams, "php");
+
+                    // Empty the editors (this will put the cursor back on line 1)
+                    ifrJSON.editor.setValue("");
+                    ifrHTML.editor.setValue("");
+                    ifrCSS_LESS.editor.setValue("");
+                    ifrCSS.editor.setValue("");
+                    ifrRenderedHtml.editor.setValue("");
+                    ifrParams.editor.setValue("");
+
+                    // Put the HTML and CSS in the editor windows
+                    ifrJSON.editor.setValue(JSON.stringify(curr, null, 4));
+                    ifrHTML.editor.setValue(curr._customHTML.replace(/<\/script/img, "<\/script"));	// Escape closing script tag to prevent bad things from happening
+                    ifrCSS_LESS.editor.setValue(json2css(curr._styles));
+                    ifrCSS.editor.setValue(css);
+                    ifrRenderedHtml.editor.setValue(renderedHtml.replace(/<\/script/img, "<\/script"));	// Escape closing script tag to prevent bad things from happening
+                    ifrParams.editor.setValue(JSON.stringify(params));
+
+                    
+                },
+                error: function (err) {
+                    console.error('Error fetching blog posts:', err);
+                }
+            });
+        } else if (currentTab.id === 'render-tab') {
+            openParamsEditor();
+        }
+
+    });
+
+    $('#buttonreplace').on('click', function (e) {
+        $('#findAndReplaceForm').submit();
+    });
+
+
+
+    $('#edit-html').on('click', function () {
+        const contentDiv = $('#editableHtmlContent');
+        const isEditable = contentDiv.attr('contenteditable') === 'true';
+        contentDiv.attr('contenteditable', !isEditable);
+        $('#save-html').attr('disabled', isEditable);
+    });
+
+
+    $('#save-html').on('click', function () {
+        try {
+            const iframeWindow = $('#viewHtmlSectionEditorFrame')[0].contentWindow;
+            const tab = $('#editorTab .nav-link.active')[0];
+            const htmlSectionId = $("#HtmlSectionID").val();
+            if (tab.id === 'code-tab') {
+
+                if (typeof iframeWindow.saveCode === 'function') {
+                    window.updatedHtml = iframeWindow.saveCode(htmlSectionId);
+
+                }
+            }
+            else if (tab.id === 'wysiwyg-tab') {
+                window.updatedHtml = $('#editableHtmlContent').html();
+                $.ajax({
+                    url: '/users/htmlSections/update',
+                    method: 'POST',
+                    data: {
+                        HtmlSectionID: htmlSectionId,
+                        Html: window.updatedHtml
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            
+                        } else {
+                            alert('Failed to save content.');
+                        }
+
+                    },
+                    error: function (err) {
+                        alert(JSON.stringify(err));
+                    }
+                });
+            }
+        } catch (e) {
+            alert(JSON.stringify(e));
+        }
+
+
+
+
+    });
+
+    $('#findAdReplaceBtn').on('click', function (e) {
+        e.preventDefault();
+        $('#findAndReplaceModal').modal('show');
+    });
+
+
+    $('#findAndReplaceForm').on('submit', function (e) {
+        e.preventDefault();
+        const find = $('#find-text').val();
+        const replace = $('#replace-text').val();
+        let blogPostId = null;
+
+        if ($('#replace-all').is(':checked')) {
+            blogPostId = null;
+        } else {
+            blogPostId = $('#blogPostIdFilter').val();
+        }
+
+
+        $.ajax({
+            url: '/admin/htmlSections/findAndReplace',
+            method: 'POST',
+            data: {
+                find: find,
+                replace: replace,
+                blogPostId: blogPostId
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#findAndReplaceModal').modal('hide');
+                    alert(response.message)
+                } else {
+                    alert('Find And Replace Failed.');
+                }
+            },
+            error: function (err) {
+                alert(JSON.stringify(err));
+            }
+        });
+    });
+
+
+    $('#importHtmlSectionBtn').on('click', function () {
+
+        const htmlSectionsFromDb = htmlSections;
+
+        $.ajax({
+            url: '/admin/htmlSections/importSingleHtmlSectionById/solid-foundation-knowledge-is-power-in-digital-marketing/2',
+            method: 'GET',
+
+            success: function (htmlSectionsFromFile) {
+
+                if (htmlSectionsFromDb !== 'undefined' && htmlSectionsFromDb.length > 0) {
+                    for (let i = 0; i < htmlSectionsFromFile.length; i++) {
+                        const htmlSectionId = htmlSectionsFromDb[i].HtmlSectionID;
+                        const dbAnchor = htmlSectionsFromDb[i].Anchor;
+                        const [htmlContent, anchor] = htmlSectionsFromFile[i];
+                        const blogPostId = $('#blogPostIdFilter').val();
+                        if (dbAnchor === anchor) {
+
+                            $.ajax({
+                                url: '/admin/htmlSections/updateBySectionId',
+                                method: 'POST',
+                                data: {
+                                    blogPostId,
+                                    htmlSectionId,
+                                    htmlContent
+                                },
+                                success: function (data) {
+                                    console.log(JSON.stringify(data));
+                                },
+                                error: function (err) {
+                                    console.log(JSON.stringify(err));
+                                }
+                            });
+                        }
+                    }
+
+                }
+                ///alert(JSON.stringify(data));
+            },
+            error: function (err) {
+                alert(JSON.stringify(err));
+            }
+        });
+    });
+
+    $('#image-html').on('click', triggerImageUpload);
+
+    $('.image-wrapper > img').on('click', triggerImageUpload);
+    function triggerImageUpload() {
+        const $input = $('#imageUploadInput');
+        $('#imageUploadInput').on('change', imageUpload);
+        $input.click();
+    }
+    function imageUpload() {
+        try {
+
+
+            var url = window.location.pathname;
+            var anchor = url.split("/")['5'];
+
+            const file = this.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                $.ajax({
+                    url: '/admin/htmlSections/uploadImage',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            const imageUrl = response.imageUrl;
+                            const section = $('#' + anchor);
+                            if (section.hasClass('header1')) {
+                                section.attr('style', 'background-image: url("' + imageUrl + '")');
+                            } else {
+                                $('.image-wrapper > img').attr('src', imageUrl);
+                            }
+
+                        } else {
+                            alert('Image upload failed.');
+                        }
+                    },
+                    error: function (err) {
+                        alert('An error occurred while uploading the image. ' + JSON.stringify(err));
+                    }
+                });
+                this.files[0] = null;
+            }
+        } catch (err) {
+            alert(JSON.stringify(err));
+        }
+    }
+    $('#imageUploadInput').on('change', imageUpload);
+
+
+    $(document).on('click', '.delete-btn', function () {
+        const htmlSectionId = $(this).data('id');
+        $('#confirmDeleteBtn').data('id', htmlSectionId);
+        $('#confirmDeleteModal').modal('show');
+    });
+
+    $('#confirmDeleteBtn').on('click', function () {
+        const htmlSectionId = $(this).data('id');
+        $.post(`/admin/htmlSections/delete/${htmlSectionId}`, function (response) {
+            if (response.success) {
+                $('#confirmDeleteModal').modal('hide');
+                fetchHtmlSections();
+            }
+        });
+    });
+
+
+
+
+    // Function to get the selected text
+    function getSelectionText() {
+        let text = '';
+        if (window.getSelection) {
+            text = window.getSelection().toString();
+        } else if (document.selection && document.selection.type != 'Control') {
+            text = document.selection.createRange().text;
+        }
+        return text;
+    }
+
+    // Event handler for the Insert Link button
+    $('#insert-link').on('click', function () {
+        selectedText = getSelectionText();
+        if (selectedText.length > 0) {
+            $('#linkText').val(selectedText);
+            $('#insertLinkModal').modal('show');
+        } else {
+            alert('Please select the text you want to hyperlink.');
+        }
+    });
+
+    // Event handler for the Insert Link button in the modal
+    $('#insertLinkBtn').on('click', function () {
+        const linkUrl = $('#linkUrl').val();
+        const linkText = $('#linkText').val();
+
+        if (linkUrl && linkText) {
+            const anchorTag = `<a href="${linkUrl}" target="_blank">${linkText}</a>`;
+            const contentDiv = $('#editableHtmlContent');
+            const currentHtml = contentDiv.html();
+            const newHtml = currentHtml.replace(linkText, anchorTag);
+            contentDiv.html(newHtml);
+            $('#insertLinkModal').modal('hide');
+        } else {
+            alert('Please enter the URL.');
+        }
+    });
+
+    // Event handler for the Remove Link button
+    $('#remove-link').on('click', function () {
+        // Get the selected link
+        const selectedElement = window.getSelection().anchorNode.parentNode;
+
+        if (selectedElement.tagName === 'A') {
+            // Remove the link while preserving the text
+            const linkText = selectedElement.innerText;
+            $(selectedElement).replaceWith(linkText);
+        } else {
+            alert('Please select a link to remove.');
+        }
+    });
+
+    // Function to get the selected text node
+    function getSelectedTextNode() {
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            return range.commonAncestorContainer.nodeType === 3 ? range.commonAncestorContainer : range.commonAncestorContainer.firstChild;
+        }
+        return null;
+    }
+
+    // Event handler for the Font Size button
+    $('#font-size').on('click', function () {
+        selectedText = getSelectedTextNode();
+        if (selectedText) {
+            $('#fontSizeModal').modal('show');
+        } else {
+            alert('Please select the text you want to change.');
+        }
+    });
+
+    // Event handler for the Apply button in the Font Size modal
+    $('#applyFontSize').on('click', function () {
+        const fontSize = $('#fontSizeSelect').val();
+        if (selectedText) {
+            $(selectedText).css('font-size', fontSize);
+            $('#fontSizeModal').modal('hide');
+        }
+    });
+
+    // Event handler for the Font Family button
+    $('#font-family').on('click', function () {
+        selectedText = getSelectedTextNode();
+        if (selectedText) {
+            $('#fontFamilyModal').modal('show');
+        } else {
+            alert('Please select the text you want to change.');
+        }
+    });
+
+    // Event handler for the Apply button in the Font Family modal
+    $('#applyFontFamily').on('click', function () {
+        const fontFamily = $('#fontFamilySelect').val();
+        if (selectedText) {
+            $(selectedText).css('font-family', fontFamily);
+            $('#fontFamilyModal').modal('hide');
+        }
+    });
+
+    // Event handler for the Font Color button
+    $('#font-color').on('click', function () {
+        selectedText = getSelectedTextNode();
+        if (selectedText) {
+            $('#fontColorModal').modal('show');
+        } else {
+            alert('Please select the text you want to change.');
+        }
+    });
+
+    // Event handler for the Apply button in the Font Color modal
+    $('#applyFontColor').on('click', function () {
+        const fontColor = $('#fontColorInput').val();
+        if (selectedText) {
+            $(selectedText).css('color', fontColor);
+            $('#fontColorModal').modal('hide');
+        }
+    });
+    // Function to translate JSON to CSS
+    function json2css(json) {
+        var css = "";
+        var prevdepth = 0;
+
+        function eachRecursive(obj, depth = 0) {
+            for (var k in obj) {
+                // Indentation
+                var spaces = " ".repeat(depth * 2);
+
+                // If we're getting another hash, dive deeper
+                if (typeof obj[k] == "object" && obj[k] !== null) {
+                    // Let's not have a white line as first line
+                    css += (css ? "\n" : "");
+
+                    // Open brackets
+                    css += spaces + k + " {\n";
+
+                    // Dive deeper
+                    eachRecursive(obj[k], depth + 1);
+                } else {
+                    // Write the css
+                    css += spaces + k + ": " + obj[k] + ";\n";
+                }
+
+                // If current depth is less than previous depth, we've exited a hash, so let's place a closing bracket
+                if (depth < prevdepth || JSON.stringify(obj[k]) == "{}") {
+                    css += spaces + "}\n";
+                }
+                prevdepth = depth;
+            }
+        }
+
+        // Go!
+        eachRecursive(json);
+
+        // Return beautiful css :)
+        return css.trim();
+    }
+
+
+    // Function to check if LESS variables are present in <mbr-parameters>
+    function checkLessVars(html, css) {
+        // Extract variables from LESS
+        let regex = /@[a-zA-Z0-9_\-{]+/gm;
+        let vars = [];
+        vars = css.match(regex);
+
+        // Clean up found vars
+        vars.forEach((v, i) => {
+            vars[i] = v.replace(/@/g, "").replace(/{/g, "").replace(/^bg-.+$/, "bg");
+        });
+
+        // Remove at-rules, style variables and other 'reserved' words
+        let reserved = ["charset", "color-profile", "counter-style", "document", "font-face", "font-feature-values", "import", "keyframes", "media", "namespace", "page", "property", "supports", "viewport"];
+        reserved = reserved.concat(["arrowColor", "dangerColor", "display1Font", "display1Size", "display2Font", "display2Size", "display4Font", "display4Size", "display5Font", "display5Size", "display7Font", "display7Size", "infoColor", "isAnimatedOnScroll", "isGhostButtonBorder", "isRoundedButtons", "isScrollToTopButton", "mainFont", "primaryColor", "secondaryColor", "successColor", "underlinedLinks", "warningColor"]);
+        vars = vars.filter(function (el) {
+            return reserved.indexOf(el) < 0;
+        });
+
+        // Remove duplicates
+        vars = vars.filter((a, b) => vars.indexOf(a) === b)
+
+        // Check if found LESS vars exist in <mbr-parameters>
+        let noexist = [];
+        html = $(html);
+        vars.forEach(function (v) {
+            if (html.find("mbr-parameters [name='" + v + "']").length == 0)
+                noexist[noexist.length] = v;
+        });
+
+        return (noexist.length === 0 ? false : noexist);
+    }
+
+    function openParamsEditor() {
+
+
+        const canvas = new bootstrap.Offcanvas(document.getElementById('paramsCanvas'));
+        canvas.show();
+    }
+
+    // Type inference
+    function inferInputType(name, value) {
+        if (/color/i.test(name)) return "color";
+        if (/size|width|height|px|em|rem|[0-9]$/.test(value)) return "number";
+        if (value === "true" || value === "false" || value === "1" || value === "0") return "checkbox";
+        return "text";
+    }
+
+    // Save handler
+    $(document).on("click", "#saveParams", function (e) {
+        e.preventDefault();
+        const $form = $("#paramsForm");
+        const $comp = $form.data("component");
+
+        $form.find(".param-item").each(function () {
+            const name = $(this).data("param");
+            const $input = $(this).find("input");
+            let val;
+
+            if ($input.attr("type") === "checkbox") {
+                val = $input.is(":checked") ? "true" : "false";
+            } else {
+                val = $input.val();
+            }
+
+            $comp.find(`mbr-parameters [name="${name}"]`).attr("value", val);
+        });
+        var anchor = $comp.attr("_anchor");
+        $.ajax({
+            url: `/editor/edit/${pageName}/${anchor}`,
+            method: "POST", 
+            data: {
+                anchor: $comp.attr("_anchor"),
+                html: $comp.prop("outerHTML")
+            },
+            success: () => alert("Saved successfully!"),
+            error: (err) => console.error("Save failed", err)
+        });
+
+        bootstrap.Offcanvas.getInstance(document.getElementById('paramsCanvas')).hide();
+    });
+
+    // 🔥 Live preview: recompile LESS whenever a parameter changes
+    $(document).on("input change", ".param-input", function () {
+        const $form = $("#paramsForm");
+        const $comp = $form.data("component");
+
+        // Update parameter value live
+        const name = $(this).attr("name");
+        let val;
+        if ($(this).attr("type") === "checkbox") {
+            val = $(this).is(":checked") ? "true" : "false";
+        } else {
+            val = $(this).val();
+        }
+        $comp.find(`mbr-parameters [name="${name}"]`).attr("value", val);
+
+        // Extract LESS vars from <mbr-parameters>
+        const vars = {};
+        $comp.find("mbr-parameters [name]").each(function () {
+            vars["@" + $(this).attr("name")] = $(this).attr("value");
+        });
+
+        // Assume original LESS is stored in <style type="text/less">
+        const lessCode = $comp.find("style[type='text/less']").text();
+
+        if (lessCode && typeof less !== "undefined") {
+            less.render(lessCode, { modifyVars: vars })
+                .then(output => {
+                    const preview = ifrPreview.document;
+                    let styleEl = preview.getElementById("live-less-style");
+                    if (!styleEl) {
+                        styleEl = preview.createElement("style");
+                        styleEl.id = "live-less-style";
+                        preview.head.appendChild(styleEl);
+                    }
+                    styleEl.innerHTML = output.css;
+                })
+                .catch(err => console.error("LESS compile error", err));
+        }
+    });
+
+});

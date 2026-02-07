@@ -1,0 +1,81 @@
+extends layout
+block titleBlock
+  title #{title}
+
+block content 
+    // begin::App Content Header
+    .app-content-header
+        // begin::Container
+        .container-fluid
+            // begin::Row
+            .row
+                .col-sm-6
+                    h3.mb-0 #{title}
+                .col-sm-6
+                    ol.breadcrumb.float-sm-end
+                        li.breadcrumb-item
+                            a(href='/users/dashboard') Dashboard
+                        li.breadcrumb-item.active(aria-current='page')
+                            | #{title}
+    .row.g-4
+        // begin::Col
+        .col-12.connectedSortable
+            .callout.callout-info.mb-4
+                | Use the Follow Users form to find and follow Users.
+        // end::Col
+    .row.g-4
+      .col-12.connectedSortable
+        // Add Friend Section
+        .card.card-primary.card-outline.mb-4
+          .card-header
+            h4.card-title Follow Users
+          .card-body
+            form#searchUserForm(method="POST", action="/friends/search")
+              .form-group
+                label(for="search") Search Users
+                input.form-control(type="text" id="search" name="search" placeholder="Enter username or email")
+                button.btn.btn-primary.mt-3(type="submit") Search
+
+    .row.g-4
+      .col-12.connectedSortable
+        .card.card-primary.card-outline.mb-4
+          .card-header(style="cursor: move;")
+            h3.card-title Search Results
+            .card-tools
+              span.badge.text-bg-danger 8 New Members
+              button.btn.btn-tool(type="button", data-lte-toggle="card-collapse")
+                i.bi.bi-plus-lg(data-lte-icon="expand")
+                i.bi.bi-dash-lg(data-lte-icon="collapse")
+              button.btn.btn-tool(type="button", data-lte-toggle="card-remove")
+                i.bi.bi-x-lg
+          .card-body.p-0
+            .row#userSearchResults.text-center.m-1
+
+          .card-footer.text-center
+            a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href="javascript:") View All Users
+
+
+
+    .row.g-4
+      .col-12.connectedSortable
+        .card.card-primary.card-outline.mb-4
+          .card-header
+            h4.card-title Followers List
+          .card-body
+            .row#followersList.text-center.m-1
+            // Dynamically populated with followers using JavaScript
+
+    .row.g-4
+      .col-12.connectedSortable
+        .card.card-primary.card-outline.mb-4
+          .card-header
+            h4.card-title Following List
+          .card-body
+            .row#followingList.text-center.m-1
+            // Dynamically populated with followers using JavaScript
+
+    script(src="/js/followers.js").
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous').
+    script(src='/js/init-sortables.js')
+    script.
+        initSortables();

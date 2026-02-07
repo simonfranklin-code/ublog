@@ -1,0 +1,61 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title Monaco Editor with jQuery AJAX
+    // Load jQuery
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js")
+    script(src="https://code.jquery.com/jquery-3.7.1.min.js")
+  body(style='width:100vw; height:100vh; border:0; margin:0; padding:0;')
+    div#container(style='width:100vw; height: 100vh; border:0; margin:0; padding:0;')
+    script.
+      let currentHtml = null;
+      
+        require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.44.0/min/vs' }});
+        require(['vs/editor/editor.main'], function () {
+            // Initialize the editor
+            window.editor = monaco.editor.create(document.getElementById('container'), {
+                language: "php",
+                theme: "vs-dark",
+                tabSize: 2,
+                wordWrap: "off"
+            });
+
+            // Use jQuery's AJAX to fetch HTML content
+            $.ajax({
+                url: '/users/htmlSections/#{id}', // Replace with your HTML file path
+                method: 'GET',
+                success: function (data) {
+                    // Set the editor's value to the fetched HTML content
+                    window.editor.setValue(data.Html);
+                },
+                error: function (error) {
+                    console.error('Error fetching the HTML file:', error);
+                }
+            });
+        });
+
+        function saveCode(htmlSectionId){
+            $.ajax({
+                url: '/users/htmlSections/update',
+                method: 'POST',
+                data: {
+                    HtmlSectionID: htmlSectionId,
+                    Html: window.editor.getValue()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        return response.html;
+                    } else {
+                        alert('Failed to save content.');
+                    }
+                    
+                },
+                error: function(err) {
+                    alert(JSON.stringify(err));
+                }
+            });
+        }
+
+

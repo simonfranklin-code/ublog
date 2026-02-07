@@ -1,0 +1,381 @@
+extends layout
+block titleBlock
+  title #{title}
+block content
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h3.mb-0 #{title}
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/admin/dashboard') Admin
+              li.breadcrumb-item.active(aria-current='page')
+                | #{title}
+          // end::Row
+        // end::Container
+    // end::App Content Header
+    .row.g-4#items
+      // begin::Col
+      .col-md-12.connectedSortable#callout
+        .callout.callout-info#callout-info
+          | For detailed documentation of Form visit 
+          a.callout-link(href='https://getbootstrap.com/docs/5.3/forms/overview/' target='_blank' rel='noopener noreferrer')
+            | Bootstrap Form
+      // end::Col
+      // begin::Col
+      .col-md-12.connectedSortable#filterBlogPosts
+        // begin::Filters
+        .card.card-primary.card-outline.mb-4#filter-blog-posts
+          // begin::Header
+          .card-header
+            .card-title Filter Blogs
+          // end::Header
+          // begin::Form
+          form#filterForm
+            // begin::Body
+            .card-body
+              .row.g-4
+                .col-6
+                  .form-group.mb-2 
+                    label(for='title') Title
+                    input.form-control.form-control-sm#titleFilter(name='title' placeholder='Title')
+                  .form-group.mb-2 
+                    label(for='owner') Owner
+                    input.form-control.form-control-sm#OwnerFilter(name='owner' placeholder='Owner')
+                .col-6 
+                  .form-group.mb-2
+                    label(for='blogIdFilter') Blog ID
+                    select#blogIdFilter.form-control.form-control-sm(type='text' name='blogId')
+                  .form-group.mb-2
+                    label(for='limit') Blogs limit
+                    select.form-control.form-control-sm(name='limit' id='limit' required)
+                      option(value=1) 1
+                      option(value=2) 2
+                      option(value=3) 3
+                      option(value=5) 5
+                      option(value=10) 10
+                      option(value=15) 15
+                      option(value=20) 20
+                      option(value=25) 25
+                
+            // end::Body
+            // begin::Footer
+            .card-footer
+              button.btn.btn-primary.btn-sm#filterButton Filter
+              |  &nbsp;
+              button.btn.btn-primary.btn-sm#newBlogBtn New Blog  
+            // end::Footer
+          // end::Form
+        // end::Quick Example
+    
+      .col-md-12.connectedSortable#blogPostslist
+        // begin::Blog Post Table
+        .card.card-secondry.card-outline.mb-4#blog-posts-list
+          // begin::Header
+          .card-header
+            .card-title Blog Posts list
+          // end::Header
+          // begin::Body
+          .card-body
+            .table-responsive
+                table.table.table-hover.table-striped.rounded
+                  thead
+                    tr
+                      th
+                        a(href='#' class='sort' data-field='BlogId') Id
+                      th
+                        a(href='#' class='sort' data-field='Title') Title
+                      th Description
+                      th
+                        a(href='#' class='sort' data-field='Owner') Owner
+                      th
+                        a(href='#' class='sort' data-field='DateCreated') Date Created
+                      th Actions
+                  tbody#blogsTableBody
+                
+          // end::Body
+          // begin::Footer
+          .card-footer
+            nav
+              ul.pagination
+                li.page-item
+                  button.btn.btn-sm.page-link(type='button' id='previousPage') Previous
+                li.page-item
+                  span.page-link(id='currentPage') 1
+                li.page-item
+                  button.btn.btn-sm.page-link(type='button' id='nextPage') Next
+          // end::Footer
+        // end::Blog Post Table
+
+
+    //- button.btn.btn-primary.btn-sm.mb-3#newBlogBtn New Blog
+    //- form#filterForm
+    //-   .form-row
+    //-     .form-group.col-md-2
+    //-       label(for='title') Title
+    //-       input.form-control.form-control-sm#titleFilter(name='title' placeholder='Title')
+    //-     .form-group.col-md-2
+    //-       label(for='owner') Owner
+    //-       input.form-control.form-control-sm#OwnerFilter(name='owner' placeholder='Owner')
+    //-     .form-group-col-md-3
+    //-       label(for='limit') Blogs limit
+    //-       select.form-control.form-control-sm(name='limit' id='limit' required)
+    //-         option(value=1) 1
+    //-         option(value=2) 2
+    //-         option(value=3) 3
+    //-         option(value=5) 5
+    //-         option(value=10) 10
+    //-         option(value=15) 15
+    //-         option(value=20) 20
+    //-         option(value=25) 25
+    //-     .form-group.col-md-1.align-self-end
+    //-       button.btn.btn-primary.btn-sm#filterButton Filter
+    //- table.table.rounded#blogsTable(width='100%')
+    //-   thead
+    //-     tr
+    //-       th
+    //-         a(href='#' class='sort' data-field='BlogId') Id
+    //-       th
+    //-         a(href='#' class='sort' data-field='Title') Title
+    //-       th Description
+    //-       th
+    //-         a(href='#' class='sort' data-field='Owner') Owner
+    //-       th
+    //-         a(href='#' class='sort' data-field='DateCreated') Date Created
+    //-       th Actions
+    //-   tbody#blogsTableBody
+    //- nav
+    //-   ul.pagination
+    //-     li.page-item
+    //-       button.page-link(type='button' id='previousPage') Previous
+    //-     li.page-item
+    //-       span.page-link(id='currentPage') 1
+    //-     li.page-item
+    //-       button.page-link(type='button' id='nextPage') Next
+
+    //- .alert.alert-danger#logError(style='display: none;') Error fetching blogs
+
+
+    // Modals
+    // Create/Edit Modal
+    .modal.fade#blogModal(tabindex='-1' role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title#blogModalTitle New Blog
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#blogForm
+              input(type='hidden' id='blogId' name='id')
+              .form-group
+                label(for='blogTitle') Title
+                input.form-control.form-control-sm#blogTitle(name='title' required)
+              .form-group
+                label(for='blogDescription') Description
+                textarea.form-control.form-control-sm#blogDescription(name='description')
+              .form-group
+                label(for='blogOwner') Owner
+                input.form-control.form-control-sm#blogOwner(name='owner' required)
+              .form-group
+                label(for='blogUserId') User Id
+                input.form-control.form-control-sm#blogUserId(name='userId' required)
+              .form-group
+                label(for='blogBaseDirectory') Base Directory
+                input.form-control.form-control-sm#blogBaseDirectory(name='baseDirectory' required)
+              .form-group
+                label(for='blogMetaKeywords') Meta Keywords
+                input.form-control.form-control-sm#blogMetaKeywords(name='metaKeywords' required)
+              .form-group
+                label(for='blogMetaDescription') Meta Description
+                textarea.form-control.form-control-sm#blogMetaDescription(name='metaDescription')
+              .form-group
+                label(for='blogHeadStylesBlock') Head Styles Block
+                textarea.form-control.form-control-sm#blogHeadStylesBlock(name='headStylesBlock')
+              .form-group
+                label(for='blogHeadScriptsBlock') Head Scripts Block
+                textarea.form-control.form-control-sm#blogHeadScriptsBlock(name='headScriptsBlock')
+              .form-group
+                label(for='blogSlug') Slug
+                input.form-control.form-control-sm#blogSlug(name='slug' required)
+              .form-group
+                label(for='blogHeader') Blog Header
+                textarea.form-control.form-control-sm#blogHeader(name='blogHeader' rows='8')
+              .form-group
+                label(for='blogFooter') Blog Footer
+                textarea.form-control.form-control-sm#blogFooter(name='blogFooter' rows='8')              
+          .modal-footer
+            button.btn.btn-secondary.btn-sm(type='button' data-bs-dismiss='modal') Close
+            | &nbsp;
+            button.btn.btn-primary.btn-sm#saveBtn(type='button') Save
+
+    // Delete Confirmation Modal
+    .modal.fade#confirmDeleteModal(tabindex='-1' role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title Confirm Delete
+            button.close(type='button' data-dismiss='modal' aria-label='Close')
+              span(aria-hidden='true') &times;
+          .modal-body
+            p Are you sure you want to delete this blog?
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-dismiss='modal') Cancel
+            button.btn.btn-danger#confirmDeleteBtn(type='button') Delete
+
+    script.  
+      $(document).ready(function () {
+        let currentPage = 1;
+        let sortField = 'DateCreated';
+        let sortOrder = 'DESC';
+
+        
+
+        function fetchBlogs() {
+            const title = $('#titleFilter').val();
+            const owner = $('#ownerFilter').val();
+            const limit = $('#limit').val();
+            
+            $.ajax({
+                url: '/admin/blogs/api',
+                data: { page: currentPage, limit: limit, sortField, sortOrder, title, owner },
+                success: function (data) {
+                    const tbody = $('#blogsTableBody');
+                    tbody.empty();
+                    data.blogs.forEach(blog => {
+                        tbody.append(`
+                            <tr>
+                              <td>${blog.BlogId}</td>
+                              <td>${blog.Title}</td>
+                  
+                              <td class="admin-blogs-ellipsis" data-bs-toggle="popover" data-bs-title="Blog description details" data-bs-content="${blog.Description}">${blog.Description}</td>
+                              <td>${blog.Owner}</td>
+                              <td>${new Date(blog.DateCreated).toLocaleString()}</td>
+                              <td>
+                                <button class="btn btn-warning btn-sm edit-btn" data-id="${blog.BlogId}">Edit</button>
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="${blog.BlogId}">Delete</button>
+                              </td>
+                            </tr>
+                          `);
+                    });
+                    $('#currentPage').text(currentPage);
+                    $('#previousPage').toggleClass('disabled', currentPage <= 1);
+                    $('#nextPage').toggleClass('disabled', currentPage >= data.totalPages);
+
+                    $('#previousPage').prop('disabled', currentPage <= 1);
+                    $('#nextPage').prop('disabled', currentPage >= data.totalPages);
+
+                    $('[data-toggle="popover"]').popover({
+                      trigger: 'hover',
+                      placement: 'left',
+                      container: 'body'
+                    });
+                    //- $('#previousPage').toggleClass('disabled', currentPage <= 1);
+                    //- $('#nextPage').toggleClass('disabled', currentPage >= data.totalPages);
+                }
+            });
+
+        }
+
+        $('#saveBtn').on('click', function (e) {
+            e.preventDefault();
+            $('#blogForm').submit();
+            fetchBlogs();
+        });
+
+        $('#filterButton').on('click', function (e) {
+            e.preventDefault();
+            currentPage = 1;
+            fetchBlogs();
+        });
+
+        
+
+        $('#previousPage').on('click', function (e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                fetchBlogs();
+            }
+        });
+
+        $('#nextPage').on('click', function (e) {
+            e.preventDefault();
+            currentPage++;
+            fetchBlogs();
+        });
+
+        $('.sort').on('click', function (e) {
+            e.preventDefault();
+            const field = $(this).data('field');
+            sortOrder = (sortField === field && sortOrder === 'ASC') ? 'DESC' : 'ASC';
+            sortField = field;
+            fetchBlogs();
+        });
+
+        $('#newBlogBtn').on('click', function (e) {
+            e.preventDefault();
+            $('#blogModalTitle').text('New Blog');
+            $('#blogForm')[0].reset();
+            $('#blogId').val('');
+            $('#blogModal').modal('show');
+        });
+
+        $(document).on('click', '.edit-btn', function () {
+            const blogId = $(this).data('id');
+            $.get(`/admin/blogs/${blogId}`, function (blog) {
+                $('#blogModalTitle').text('Edit Blog');
+                $('#blogId').val(blog.BlogId);
+                $('#blogTitle').val(blog.Title);
+                $('#blogDescription').val(blog.Description);
+                $('#blogOwner').val(blog.Owner);
+                $('#blogUserId').val(blog.UserId);
+                $('#blogBaseDirectory').val(blog.BaseDirectory);
+                $('#blogMetaKeywords').val(blog.MetaKeywords);
+                $('#blogMetaDescription').val(blog.MetaDescription);
+                $('#blogHeadStylesBlock').val(blog.HeadStylesBlock);
+                $('#blogHeadScriptsBlock').val(blog.HeadScriptsBlock);
+                $('#blogSlug').val(blog.Slug);
+                $('#blogHeader').val(blog.BlogHeader);
+                $('#blogFooter').val(blog.BlogFooter);
+                
+                $('#blogModal').modal('show');
+            });
+        });
+
+        $('#blogForm').on('submit', function (e) {
+            e.preventDefault();
+            const blogId = $('#blogId').val();
+            const url = blogId ? `/admin/blogs/edit/${blogId}` : '/admin/blogs/create';
+            $.post(url, $(this).serialize(), function (response) {
+                if (response.success) {
+                    $('#blogModal').modal('hide');
+                    fetchBlogs();
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-btn', function () {
+            const blogId = $(this).data('id');
+            $('#confirmDeleteBtn').data('id', blogId);
+            $('#confirmDeleteModal').modal('show');
+        });
+
+        $('#confirmDeleteBtn').on('click', function () {
+            const blogId = $(this).data('id');
+            $.post(`/admin/blogs/delete/${blogId}`, function (response) {
+                if (response.success) {
+                    $('#confirmDeleteModal').modal('hide');
+                    fetchBlogs();
+                }
+            });
+        });
+
+        fetchBlogs();
+        $('#collapseBlogs').addClass('show');
+      $('#activity-logs').addClass('active');
+      });

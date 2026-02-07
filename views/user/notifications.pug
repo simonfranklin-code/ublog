@@ -1,0 +1,204 @@
+extends layout
+block titleBlock
+  title #{title}
+
+block content 
+    // begin::App Content Header
+    .app-content-header
+        // begin::Container
+        .container-fluid
+            // begin::Row
+            .row
+                .col-sm-6
+                    h3.mb-0 #{title}
+                .col-sm-6
+                    ol.breadcrumb.float-sm-end
+                        li.breadcrumb-item
+                            a(href='/users/dashboard') User
+                        li.breadcrumb-item.active(aria-current='page')
+                            | #{title}
+    .row.g-4
+        // begin::Col
+        .col-12.connectedSortable
+            .callout.callout-info.mb-4
+                | Use the Follow Users form to find and follow Users.
+        // end::Col
+
+
+
+    .row.g-4
+
+        .col-md-6
+            input#filterMessage.form-control(type="text", placeholder="Filter by message")
+
+        .col-md-6
+            label(for='limit') limit
+            select.form-control.form-control-sm(name='limit' id='limit' required)
+                option(value=1) 1
+                option(value=2) 2
+                option(value=3) 3
+                option(value=5 selected) 5
+                option(value=10) 10
+                option(value=15) 15
+                option(value=20) 20
+                option(value=25) 25
+                option(value=50) 50
+                option(value=75) 75
+                option(value=100) 100
+    .row.g-4
+        .col-md-12
+            // Notifications Table
+            table.table.table-dark.table-striped.table-hover.mt-3
+                thead
+                    tr
+                    th 
+                      a(href='#' class='sort' data-field='NotificationId') ID
+                    th 
+                      a(href='#' class='sort' data-field='Message') Message
+                    th 
+                      a(href='#' class='sort' data-field='CreatedAt') Created At
+                    th Status
+                    th Actions
+                tbody#notificationTable
+                    // Dynamic Rows Loaded Here
+
+            // Pagination
+            nav.mt-3
+              ul.pagination
+                li.page-item
+                  button.page-link(type='button' id='previousPage') Previous
+                li.page-item
+                  span.page-link(id='currentPage') 1
+                li.page-item
+                  button.page-link(type='button' id='nextPage') Next
+
+
+    script(src="/js/socket.io.js")
+    script.
+      let currentPage = 1;
+      let filter = '';
+      let sortColumn = 'CreatedAt';
+      let sortOrder = 'desc';
+      let limit = 10;
+      const socket = io(); // Connect to Socket.IO server
+
+
+      // Initial Load
+      $(document).ready(function() {
+      // Load Notifications
+          function loadNotifications(page = 1) {
+            filter = $('#filterMessage').val();
+            limit = $('#limit').val();
+
+            $.ajax({
+              url: '/notifications/getNotifications',
+              method: 'POST',
+              data: { 
+                page, 
+                filter, 
+                sortColumn, 
+                sortOrder,
+                limit
+              },
+              success: function(response) {
+                if (response.success) {
+                  renderTable(response.notifications);
+                  //renderPagination(response.totalPages, page);
+                  $('#currentPage').text('Page ' + currentPage + ' of ' + response.totalPages + ' pages');
+                    
+                  $('#previousPage').prop('disabled', currentPage <= 1);
+                  $('#nextPage').prop('disabled', currentPage >= response.totalPages);
+
+                  $('[data-bs-toggle="popover"]').popover({
+                    trigger: 'hover',
+                    placement: 'left',
+                    container: 'body'
+                  });
+                  
+                } else {
+                  alert('Failed to load notifications');
+                } 
+              },
+              error: function(err) {
+                alert(JSON.stringify(err));
+              }
+            });
+          }
+
+          // Render Table Rows
+          function renderTable(notifications) {
+            const table = $('#notificationTable');
+            table.empty();
+            notifications.forEach(notification => {
+              const status = notification.Read ? 'Read' : 'Unread';
+              const row = `
+                <tr>
+                  <td>${notification.NotificationId}</td>
+                  <td>${notification.Message}</td>
+                  <td>${notification.CreatedAt}</td>
+                  <td>${status}</td>
+                  <td>
+                    ${!notification.Read ? `<button class="btn btn-sm btn-primary" onclick="markAsRead(${notification.NotificationId})">Mark as Read</button>` : ''}
+                  </td>
+                </tr>
+              `;
+              table.append(row);
+            });
+
+
+          }
+
+          // Mark Notification as Read
+          function markAsRead(NotificationId) {
+            $.ajax({
+              url: '/notifications/markAsRead',
+              method: 'POST',
+              data: { NotificationId },
+              success: function(response) {
+                if (response.success) {
+                  loadNotifications(currentPage);
+                } else {
+                  alert('Failed to mark notification as read');
+                }
+              },
+              error: function() {
+                alert('Error marking notification as read');
+              }
+            });
+          }
+
+          // Event Listeners
+          $('#filterMessage').on('change keyup', function() {
+            loadNotifications();
+          });
+      // Listen for real-time notifications
+          socket.on('newNotification', (notification) => {
+            alert('New Notification: ' + notification.Message);
+            loadNotifications(); // Reload notifications dynamically
+          });
+
+          $('#previousPage').on('click', function (e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+              currentPage--;
+              loadNotifications(currentPage);
+            }
+          });
+
+          $('#nextPage').on('click', function (e) {
+            e.preventDefault();
+            currentPage++;
+            loadNotifications(currentPage);
+          });
+
+          $('.sort').on('click', function (e) {
+            e.preventDefault();
+            const field = $(this).data('field');
+            sortOrder = (sortColumn === field && sortOrder === 'ASC') ? 'DESC' : 'ASC';
+            sortColumn = field;
+            loadNotifications();
+          });
+          loadNotifications();
+      });
+
+

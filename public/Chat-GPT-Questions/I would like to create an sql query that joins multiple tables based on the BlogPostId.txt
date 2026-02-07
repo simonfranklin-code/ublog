@@ -1,0 +1,114 @@
+Below is the partial structure of my SQLite DB. I would like to create an sql query that joins multiple tables based on the BlogPostId. For instance I would like
+The count of BlogPostViews, Comments, BlogPostReviews, post_likes, ReviewLikes. Can you help?
+----------------------------------------------------------------------------
+users TABLE
+----------------------------------------------------------------------------
+CREATE TABLE "users" (
+	"id"	INTEGER,
+	"username"	TEXT NOT NULL UNIQUE,
+	"email"	TEXT NOT NULL UNIQUE,
+	"password"	TEXT NOT NULL,
+	"dateCreated"	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	"dateModified"	DATETIME NOT NULL,
+	"role"	TEXT DEFAULT 'user',
+	"avatar"	TEXT,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+-----------------------------------------------------------------------------
+post_likes TABLE
+-----------------------------------------------------------------------------
+CREATE TABLE "post_likes" (
+	"id"	INTEGER,
+	"post_id"	INTEGER NOT NULL,
+	"user_id"	INTEGER NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	UNIQUE("post_id","user_id"),
+	FOREIGN KEY("post_id") REFERENCES "BlogPosts"("id"),
+	FOREIGN KEY("user_id") REFERENCES "users"("id")
+);
+-----------------------------------------------------------------------------
+Comments TABLE
+-----------------------------------------------------------------------------
+CREATE TABLE "Comments" (
+	"CommentId"	INTEGER NOT NULL,
+	"Text"	TEXT NOT NULL,
+	"DateCreated"	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	"DateModified"	DATETIME NOT NULL,
+	"BlogPostId"	INTEGER NOT NULL,
+	"BlogPostSlug"	TEXT,
+	"ParentCommentId"	INTEGER,
+	"Author"	TEXT,
+	"Url"	TEXT,
+	"Email"	TEXT,
+	"DisplayName"	TEXT,
+	"IsOpen"	INTEGER,
+	"UserId"	INTEGER,
+	"Title"	TEXT,
+	"CodeDescription"	TEXT,
+	CONSTRAINT "PK_Comments" PRIMARY KEY("CommentId" AUTOINCREMENT),
+	CONSTRAINT "FK_Comments_BlogPosts_BlogPostId" FOREIGN KEY("BlogPostId") REFERENCES "BlogPosts"("BlogPostId") ON DELETE CASCADE,
+	CONSTRAINT "FK_Comments_users_id" FOREIGN KEY("UserId") REFERENCES "users"("id") ON DELETE CASCADE
+);
+-----------------------------------------------------------------------------
+ReviewLikes TABLE
+-----------------------------------------------------------------------------
+CREATE TABLE "ReviewLikes" (
+	"ReviewLikeId"	INTEGER NOT NULL,
+	"BlogPostReviewId"	INTEGER NOT NULL,
+	"UserId"	INTEGER NOT NULL,
+	UNIQUE("BlogPostReviewId","UserId"),
+	PRIMARY KEY("ReviewLikeId" AUTOINCREMENT),
+	FOREIGN KEY("BlogPostReviewId") REFERENCES "BlogPostReviews"("BlogPostReviewId") ON DELETE CASCADE,
+	FOREIGN KEY("UserId") REFERENCES "users"("id")
+);
+-----------------------------------------------------------------------------
+BlogPostViews TABLE
+-----------------------------------------------------------------------------
+
+CREATE TABLE "BlogPostViews" (
+	"BlogPostViewId"	INTEGER,
+	"BlogPostId"	INTEGER NOT NULL,
+	"UserId"	INTEGER NOT NULL,
+	"ViewDate"	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY("BlogPostViewId" AUTOINCREMENT),
+	FOREIGN KEY("BlogPostId") REFERENCES "BlogPosts"("BlogPostId"),
+	FOREIGN KEY("UserId") REFERENCES "users"("id")
+);
+-----------------------------------------------------------------------------
+BlogPosts TABLE
+-----------------------------------------------------------------------------
+CREATE TABLE "BlogPosts" (
+	"BlogPostId"	INTEGER NOT NULL,
+	"Title"	TEXT NOT NULL,
+	"Content"	TEXT NOT NULL,
+	"CreatedAt"	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	"UpdatedAt"	DATETIME,
+	"BlogId"	INTEGER NOT NULL,
+	"Slug"	TEXT,
+	"UserId"	TEXT,
+	"Author"	TEXT,
+	"MetaKeywords"	TEXT,
+	"MetaDescription"	TEXT,
+	"Footer"	TEXT,
+	"BeforeEndOfBodyScript"	TEXT,
+	PRIMARY KEY("BlogPostId" AUTOINCREMENT),
+	FOREIGN KEY("BlogId") REFERENCES "Blogs"("BlogId") ON DELETE CASCADE,
+	FOREIGN KEY("UserId") REFERENCES "users"("id") ON UPDATE CASCADE
+);
+-----------------------------------------------------------------------------
+BlogPostReviews TABLE
+-----------------------------------------------------------------------------
+CREATE TABLE "BlogPostReviews" (
+	"BlogPostReviewId"	INTEGER NOT NULL,
+	"BlogPostId"	INTEGER NOT NULL,
+	"Slug"	TEXT NOT NULL,
+	"Rating"	INTEGER,
+	"Author"	TEXT NOT NULL,
+	"ReviewText"	TEXT,
+	"ReviewDate"	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	"AuthorEmailAddress"	TEXT NOT NULL,
+	"UserId"	INTEGER NOT NULL,
+	PRIMARY KEY("BlogPostReviewId" AUTOINCREMENT),
+	FOREIGN KEY("BlogPostId") REFERENCES "BlogPosts"("BlogPostId") ON DELETE CASCADE,
+	FOREIGN KEY("UserId") REFERENCES "users"("id")
+);

@@ -1,0 +1,273 @@
+direct-chat.pug
+--------------------------------------------------------------------
+.card.direct-chat.direct-chat-warning
+    .card-header
+        h3.card-title Direct Chat
+        .card-tools
+            span.badge.text-bg-warning(title='3 New Messages')
+                | 3
+            button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                i.bi.bi-plus-lg(data-lte-icon='expand')
+                i.bi.bi-dash-lg(data-lte-icon='collapse')
+            button.btn.btn-tool(type='button' title='Contacts' data-lte-toggle='chat-pane')
+                i.bi.bi-chat-text-fill
+            button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                i.bi.bi-x-lg
+    // /.card-header
+    .card-body
+        // Conversations are loaded here
+        .direct-chat-messages#messages
+
+        // /.direct-chat-messages
+        // Contacts are loaded here
+        .direct-chat-contacts
+            ul.contacts-list
+                li
+                    a(href='#')
+                    img.contacts-list-img(src='/dist/assets/img/user1-128x128.jpg' alt='User Avatar')
+                    .contacts-list-info
+                        span.contacts-list-name
+                        | Count Dracula
+                        small.contacts-list-date.float-end
+                            | 2/28/2023
+                        span.contacts-list-msg
+                        | How have you been? I was...
+                    // /.contacts-list-info
+                // End Contact Item
+                li
+                    a(href='#')
+                    img.contacts-list-img(src='/dist/assets/img/user7-128x128.jpg' alt='User Avatar')
+                    .contacts-list-info
+                        span.contacts-list-name
+                        | Sarah Doe
+                        small.contacts-list-date.float-end
+                            | 2/23/2023
+                        span.contacts-list-msg
+                        | I will be waiting for...
+                    // /.contacts-list-info
+                // End Contact Item
+                li
+                    a(href='#')
+                    img.contacts-list-img(src='/dist/assets/img/user3-128x128.jpg' alt='User Avatar')
+                    .contacts-list-info
+                        span.contacts-list-name
+                        | Nadia Jolie
+                        small.contacts-list-date.float-end
+                            | 2/20/2023
+                        span.contacts-list-msg
+                        | I&apos;ll call you back at...
+                    // /.contacts-list-info
+                // End Contact Item
+                li
+                    a(href='#')
+                    img.contacts-list-img(src='/dist/assets/img/user5-128x128.jpg' alt='User Avatar')
+                    .contacts-list-info
+                        span.contacts-list-name
+                        | Nora S. Vans
+                        small.contacts-list-date.float-end
+                            | 2/10/2023
+                        span.contacts-list-msg
+                        | Where is your new...
+                    // /.contacts-list-info
+                // End Contact Item
+                li
+                    a(href='#')
+                    img.contacts-list-img(src='/dist/assets/img/user6-128x128.jpg' alt='User Avatar')
+                    .contacts-list-info
+                        span.contacts-list-name
+                        | John K.
+                        small.contacts-list-date.float-end
+                            | 1/27/2023
+                        span.contacts-list-msg
+                        | Can I take a look at...
+                    // /.contacts-list-info
+                // End Contact Item
+                li
+                    a(href='#')
+                    img.contacts-list-img(src='/dist/assets/img/user8-128x128.jpg' alt='User Avatar')
+                    .contacts-list-info
+                        span.contacts-list-name
+                        | Kenneth M.
+                        small.contacts-list-date.float-end
+                            | 1/4/2023
+                        span.contacts-list-msg
+                        | Never mind I found...
+                    // /.contacts-list-info
+                // End Contact Item
+                // /.contacts-list
+            // /.direct-chat-pane
+    // /.card-body
+    .card-footer
+        form#chat-form(action='/' method='post')
+            
+            .input-group
+                input.form-control#message-input(type='text' name='message' placeholder='Type Message ...')
+                span.input-group-append
+                    button.btn.btn-warning#send-btn(type='submit')
+                        | Send
+    // /.card-footer
+
+script(src='/js/chat.js')
+------------------------------------------------------------------------------------
+chat.js
+------------------------------------------------------------------------------------
+$(function () {
+    var socket = io();
+    var msgCount = 0;
+    var cls = 'end';
+    // On form submission, send the message
+    $('#chat-form').submit(function (e) {
+        e.preventDefault(); // Prevent form from submitting the traditional way
+        var message = $('#message-input').val();
+        socket.emit('chatMessage', message); // Emit message to the server
+        $('#message-input').val(''); // Clear the input field
+        return false;
+    });
+
+    // Listen for user online event
+    socket.on('user-online', (data) => {
+        //console.log(`${data.username} is online`);
+        // Update your UI to show the user is online
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.userId}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.username} is online
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Listen for user offline event
+    socket.on('user-offline', (data) => {
+        console.log(`${data.username} is offline`);
+        // Update your UI to show the user is offline
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.id}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.username} is offline
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Listen for incoming messages
+    socket.on('chatMessage', function (data) {
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.id}"></i></span> 
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.message} 
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Send a private message
+    $(document).on('click', '.private_btn', function () {
+        
+        var targetUserId = $(this).attr('data-privateId');
+        var message = $('#message-input').val();
+
+        // Emit private message to the server
+        socket.emit('privateMessage', { to: targetUserId, message: message });
+    });
+
+    // Assuming socket is already connected
+    function sendPrivateMessage(toSocketId, message) {
+        socket.emit('privateMessage', { to: toSocketId, message: message });
+    }
+    // Listen for flash messages
+    socket.on('flash', function (data) {
+        // Create a Bootstrap Toast dynamically
+        const toastHTML = `
+                <div class="toast show ${!data.isError ? 'text-bg-primary': 'text-bg-danger'}  border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">Notification</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${data.message}
+                    </div>
+                </div>
+            `;
+       $('#toast-container').append(toastHTML);
+
+        // Initialize and show the toast
+        const toastEl = document.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    });
+
+    // Listen for incoming private messages
+    socket.on('privateMessage', function (data) {
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.from}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.message}
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+
+});

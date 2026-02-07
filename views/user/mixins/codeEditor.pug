@@ -1,0 +1,45 @@
+include editor
+mixin codeEditor(monacoHtmlUrl, _pageName, anchor, htmlContent, baseDirectory, id, schema, params, rendered, css, component )
+  script.
+    //const anchor = "#{anchor}";
+
+  .row
+    .col-md-12.align-items-start
+      #editorTab.nav.nav-tabs.mt-0(role='tablist' aria-orientation="horizontal")
+        button#JSON-tab.nav-link.active(data-bs-toggle='tab' data-bs-target='#JSON-tab-pane' type='button' role='tab' aria-controls='JSON-tab-pane' aria-selected='true') JSON
+        button#html-tab.nav-link(data-bs-toggle='tab' data-bs-target='#html-tab-pane' type='button' role='tab' aria-controls='html-tab-pane' aria-selected='false') Html
+        button#css-less-tab.nav-link(data-bs-toggle='tab' data-bs-target='#css-less-tab-pane' type='button' role='tab' aria-controls='css-less-tab-pane' aria-selected='false') CSS/LESS
+        button#css-tab.nav-link(data-bs-toggle='tab' data-bs-target='#css-tab-pane' type='button' role='tab' aria-controls='css-tab-pane' aria-selected='false') CSS
+        button#render-tab.nav-link(data-bs-toggle='tab' data-bs-target='#render-tab-pane' type='button' role='tab' aria-controls='render-tab-pane' aria-selected='false') Render
+        button#render-html-tab.nav-link(data-bs-toggle='tab' data-bs-target='#render-html-tab-pane' type='button' role='tab' aria-controls='render-html-tab-pane' aria-selected='false') Rendered HTML
+        button#params-tab.nav-link(data-bs-toggle='tab' data-bs-target='#params-tab-pane' type='button' role='tab' aria-controls='params-tab-pane' aria-selected='false') Params JSON
+      #editorTabContent.tab-content(style='width: 100%;')
+        #JSON-tab-pane.tab-pane.fade.active(role='tabpanel' aria-labelledby='JSON-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-JSON.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #html-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='html-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-html.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #css-less-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='css-less-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-css-less.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #css-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='css-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-css.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #render-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='render-tab' tabindex='0' style='width: 100%;')
+          #editableDraftHtmlContent.witsec-code-editor-iframe 
+            != rendered 
+        #render-html-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='render-html-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-render-html.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+        #params-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='params-tab' tabindex='0' style='width: 100%;')
+          iframe#witsec-code-editor-iframe-params.witsec-code-editor-iframe(src='/monaco/editor.html', scrolling='no' style='width: 100%;')
+  //- Offcanvas for mbr-parameters editor
+  div.offcanvas.text-bg-dark.offcanvas-end#paramsCanvas(tabindex='-1')
+    .offcanvas-header
+      h5.offcanvas-title Parameters Editor
+      button.btn-close(type='button', data-bs-dismiss='offcanvas', aria-label='Close')
+    .offcanvas-body#offcanvas-body
+      +editor(id, schema, params, rendered, component)
+      div.mt-3
+        button#saveParams.btn.btn-sm.btn-primary(type='button') Save
+        button.btn.btn-sm.btn-secondary(type='button', data-bs-dismiss='offcanvas') Cancel
+  script(src='https://cdn.jsdelivr.net/npm/less@4.2.0/dist/less.min.js').
+  
+  
+      

@@ -1,0 +1,133 @@
+app.js
+-----------------------------------------------------------------------
+const notificationRoutes = require('./routes/notificationRoutes');
+app.use('/notifications', notificationRoutes);
+-----------------------------------------------------------------------
+notificationRoutes.js
+-----------------------------------------------------------------------
+const express = require('express');
+const router = express.Router();
+const notificationController = require('../controllers/notificationController');
+const { ensureAuthenticated } = require('../middleware/permissionMiddleware');
+
+// Route to get notifications for a user
+router.get('/getNotifications', ensureAuthenticated, notificationController.getNotifications);
+
+// Route to mark a notification as read
+router.post('/markAsRead', ensureAuthenticated, notificationController.markAsRead);
+
+module.exports = router;
+----------------------------------------------------------------------------
+notificationController.js
+------------------------------------------------------------------------------
+const Notification = require('../models/Notification');
+
+exports.getNotifications = async (req, res) => {
+    const UserId = req.user.id;  // Assume req.user contains the authenticated user's information
+
+    try {
+        const notifications = await Notification.getNotifications(UserId);
+        res.json({ success: true, notifications });
+    } catch (err) {
+        Notification.logError(err);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+exports.markAsRead = async (req, res) => {
+    const { NotificationId } = req.body;
+
+    try {
+        const changes = await Notification.markAsRead(NotificationId);
+        if (changes > 0) {
+            res.json({ success: true, message: 'Notification marked as read' });
+        } else {
+            res.status(404).json({ success: false, message: 'Notification not found' });
+        }
+    } catch (err) {
+        Notification.logError(err);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+--------------------------------------------------------------------------------------------
+Notification.js
+--------------------------------------------------------------------------------------------
+const db = require('./db');
+const fs = require('fs');
+
+db.serialize(() => {
+    db.run(`
+            CREATE TABLE IF NOT EXISTS "Notifications" (
+                "NotificationId" INTEGER PRIMARY KEY AUTOINCREMENT,
+                "UserId" INTEGER NOT NULL,
+                "Message" TEXT NOT NULL,
+                "CreatedAt" DATETIME DEFAULT CURRENT_TIMESTAMP,
+                "Read" BOOLEAN DEFAULT FALSE,
+                FOREIGN KEY ("UserId") REFERENCES "users"("id")
+            );
+
+    `);
+});
+
+
+class Notification {
+    static logError(err) {
+        const errorMessage = `${new Date().toISOString()} - Error: ${err.message}\n`;
+        fs.appendFile('error.log', errorMessage, (fsErr) => {
+            if (fsErr) {
+                console.error('Failed to write to log file:', fsErr);
+            }
+        });
+    }
+
+    static createNotification(UserId, Message) {
+        return new Promise((resolve, reject) => {
+            db.run(
+                `INSERT INTO Notifications (UserId, Message)
+                 VALUES (?, ?)`,
+                [UserId, Message],
+                function (err) {
+                    if (err) {
+                        Notification.logError(err);
+                        return reject(err);
+                    }
+                    resolve(this.lastID);  // Return the ID of the newly inserted notification
+                }
+            );
+        });
+    }
+
+    static getNotifications(UserId) {
+        return new Promise((resolve, reject) => {
+            db.all(
+                `SELECT * FROM Notifications WHERE UserId = ? ORDER BY CreatedAt DESC`,
+                [UserId],
+                (err, rows) => {
+                    if (err) {
+                        Notification.logError(err);
+                        return reject(err);
+                    }
+                    resolve(rows);
+                }
+            );
+        });
+    }
+
+    static markAsRead(NotificationId) {
+        return new Promise((resolve, reject) => {
+            db.run(
+                `UPDATE Notifications SET Read = 1 WHERE NotificationId = ?`,
+                [NotificationId],
+                function (err) {
+                    if (err) {
+                        Notification.logError(err);
+                        return reject(err);
+                    }
+                    resolve(this.changes);  // Number of rows updated
+                }
+            );
+        });
+    }
+}
+
+module.exports = Notification;

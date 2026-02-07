@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monaco Editor</title>
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="min/vs/editor/editor.main.css">
+    <meta charset="utf-8">
+</head>
+<body>
+
+    <style>
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            padding: 0px;
+            margin: 0px;
+            border: 0px;
+            overflow: hidden;
+        }
+    </style>
+
+    <div id="container"></div>
+
+    <script>var require = { paths: { 'vs': 'min/vs' } };</script>
+    <script src="min/vs/loader.js"></script>
+    <script src="min/vs/editor/editor.main.nls.js"></script>
+    <script src="min/vs/editor/editor.main.js"></script>
+
+    <script>
+        window.editorReady = false;
+        // Create the editor
+        window.editor = monaco.editor.create(document.getElementById("container"), {
+            language: "php",
+            theme: "vs-dark",
+            tabSize: 2,
+            wordWrap: "off"
+        });
+        
+        window.monaco = monaco;
+        window.editorReady = true;
+
+
+        // Fix the layout after a window resize
+        window.onresize = function () {
+            window.editor.layout();
+        };
+
+        // Open a link
+        window.open = function () {
+            parent.mbrApp.openUrl(arguments[0]);
+            return true;
+        }
+
+    </script>
+
+</body>
+</html>

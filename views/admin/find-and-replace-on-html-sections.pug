@@ -1,0 +1,15 @@
+doctype html
+html
+  head
+    title #{title}
+  body
+    h1 #{title}
+    form(action="/admin/find-and-replace" method="post")
+      div
+        label(for="find") Find:
+        input(type="text" name="find" required)
+      div
+        label(for="replace") Replace with:
+        input(type="text" name="replace" required)
+      div
+        button(type="submit") Submit

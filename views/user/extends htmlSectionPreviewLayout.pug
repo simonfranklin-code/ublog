@@ -1,0 +1,201 @@
+extends htmlSectionPreviewLayout.pug
+include ./mixins/codeEditor.pug
+block baseDirectoryBlock
+  != blog.BaseDirectory
+block titleBlock
+  title #{title}
+block headStylesBlock
+   != blog.HeadStylesBlock
+block headScriptsBlock
+   != blog.HeadScriptsBlock
+
+
+block content
+
+    script.
+        blogSlug  = "#{blog.Slug}";
+        blogPostSlug = "#{blogPost.Slug}";
+        var curr = null;
+        var compIndex, ifrHTML, ifrCSS_LESS, ifrCSS, renderd, ifrRenderedHtml, ifrParams, pageName, pageAnchor;
+        var pageName = !{ JSON.stringify(htmlPage) };
+        var pageAnchor = !{ JSON.stringify(anchor) };
+        var css = !{ JSON.stringify(css) };
+        var renderedHtml = !{ JSON.stringify(rendered) };
+        var params = !{ JSON.stringify(params) };
+
+        htmlSectionId = "#{htmlSectionId}";
+    .card.m-0(draggable='false', style='height: auto; width: auto; transition: 0.15s;')
+        // begin::Header
+        #navbarSupportedContent.card-header
+            #card-tools.card-tools.navbar-dropdown
+                button#edit-html.btn.btn-tool(type='button', data-bs-toggle="popover", data-bs-title='Edit Html Section', data-bs-content='Toggles the contentEditable attribute.' )
+                    i.fas.fa-edit(aria-hidden='true')
+                button#save-html.btn.btn-tool(type='button')
+                    i.fas.fa-save(aria-hidden='true')
+                button#image-html.btn.btn-tool(type='button')
+                    i.fas.fa-image(aria-hidden='true')
+                button#insert-link.btn.btn-tool(type='button')
+                    i.fas.fa-link(aria-hidden='true')
+                button#remove-link.btn.btn-tool(type='button')
+                    i.fas.fa-unlink(aria-hidden='true')
+                button#font-size.btn.btn-tool(type='button')
+                    i.fas.fa-text-height(aria-hidden='true')
+                button#font-family.btn.btn-tool(type='button')
+                    i.fas.fa-font(aria-hidden='true')
+                button#font-color.btn.btn-tool(type='button')
+                    i.fas.fa-palette(aria-hidden='true')
+                button.btn.btn-tool(type='button', data-lte-toggle='fullscreen', style='z-index: 10000;')
+                    i.bi.bi-fullscreen(data-lte-icon='maximize')
+                    i.bi.bi-fullscreen-exit(data-lte-icon='minimize')
+        .card-body
+            ul#editorTab.nav.nav-tabs(role='tablist')
+                li.nav-item(role='presentation')
+                    button#wysiwyg-tab.nav-link.active(data-bs-toggle='tab' data-bs-target='#wysiwyg-tab-pane' type='button' role='tab' aria-controls='wysiwyg-tab-pane' aria-selected='true') Wysiwyg
+                li.nav-item(role='presentation')
+                    button#code-tab.nav-link(data-bs-toggle='tab' data-bs-target='#code-tab-pane' type='button' role='tab' aria-controls='code-tab-pane' aria-selected='false') Code
+                li.nav-item(role='presentation')
+                    button#mobirise-tab.nav-link(data-bs-toggle='tab' data-bs-target='#mobirise-tab-pane' type='button' role='tab' aria-controls='mobirise-tab-pane' aria-selected='false') Mobirise
+            #editorTabContent.tab-content
+                #wysiwyg-tab-pane.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='wysiwyg-tab' tabindex='0')
+                    #editableHtmlContent( contenteditable="false")       
+                        !=rendered
+
+                #code-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='code-tab' tabindex='0')
+                    iframe#viewHtmlSectionEditorFrame.viewHtmlSectionFrame(style='height: 100vh; width:100vw;' frameborder='0' scrolling='no')
+                #mobirise-tab-pane.tab-pane.fade.pt-0.mt-0(role='tabpanel' aria-labelledby='mobirise-tab' tabindex='0')
+                    +codeEditor('/monaco/editor.html', pageName, pageAnchor, htmlContent, blog.BaseDirectory, id, schema, params, rendered, css)
+        .card-footer
+            input#imageUploadInput(type='file' name='imageUploadInput' accept='image/*' style='position:absolute;left-3000px;top:-3000px;')
+    .modal.fade#confirmDeleteModal(tabindex='-1' role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title Confirm Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    p Are you sure you want to delete this HTML section?
+                .modal-footer
+                    button.btn.btn-secondary.btn-sm(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-danger.btn-sm#confirmDeleteBtn(type='button') Delete
+    // Link Insertion Modal
+    .modal.fade#insertLinkModal(tabindex='-1' role='dialog' aria-labelledby='insertLinkModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#insertLinkModalLabel Insert Link
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form#insertLinkForm
+                        .form-group
+                            label(for='linkUrl') URL
+                            input.form-control#linkUrl(type='text' name='linkUrl' required)
+                        .form-group
+                            label(for='linkText') Text
+                            input.form-control#linkText(type='text' name='linkText' readonly)
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-primary#insertLinkBtn(type='button') Insert Link
+    // Font Size Modal
+    .modal.fade(id='fontSizeModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title Font Size
+                        button.close(type='button', data-dismiss='modal', aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    select#fontSizeSelect.form-control
+                        option(value='12px') 12px
+                        option(value='14px') 14px
+                        option(value='16px') 16px
+                        option(value='18px') 18px
+                        option(value='20px') 20px
+                        option(value='24px') 24px
+                .modal-footer
+                    button.btn.btn-primary(type='button', id='applyFontSize') Apply
+                    button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Font Family Modal
+    .modal.fade(id='fontFamilyModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title Font Family
+                    button.close(type='button', data-dismiss='modal', aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    select#fontFamilySelect.form-control
+                        option(value='Arial') Arial
+                        option(value='Courier New') Courier New
+                        option(value='Georgia') Georgia
+                        option(value='Times New Roman') Times New Roman
+                        option(value='Verdana') Verdana
+                .modal-footer
+                    button.btn.btn-primary(type='button', id='applyFontFamily') Apply
+                    button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Font Color Modal
+    .modal.fade(id='fontColorModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                h5.modal-title Font Color
+                    button.close(type='button', data-dismiss='modal', aria-label='Close')
+                    span(aria-hidden='true') &times;
+                .modal-body
+                    input#fontColorInput(type='color', class='form-control')
+                .modal-footer
+                    button.btn.btn-primary(type='button', id='applyFontColor') Apply
+                    button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Find and replace Modal
+    .modal.fade(id='findAndReplaceModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title Find and replace
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                .modal-body
+                    form#findAndReplaceForm
+                        .formgroup.mb-2
+                            label(for="find-text") Find:
+                            input.form-control.form-control-sm#find-text(type="text" name="find-text" required)
+                        .formgroup.mb-2
+                            label(for="replace-text") Replace with:
+                            input.form-control.form-control-sm#replace-text(type="text" name="replace-text")
+                        .formgroup.mb-2
+                            label(for="replace-all") Replace all:
+                            input#replace-all(type="checkbox" name="replace-all")
+          
+                .modal-footer
+                    button.btn.btn-primary.btn-sm#buttonreplace(type="button") Replace
+                    |
+                    button.btn.btn-secondary.btn-sm(type='button', data-bs-dismiss='modal') Close
+    script(src='https://cdn.jsdelivr.net/npm/less@4.2.0/dist/less.min.js')
+    script(src='https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js')
+    script(src='/js/html-editor.js')
+block footer
+    #toast-container.position-fixed.top-0.end-0.p-3( style="z-index: 10000;")    
+
+    
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+    // sortablejs
+    script.
+        const connectedSortables =
+        document.querySelectorAll(".connectedSortable");
+        connectedSortables.forEach((connectedSortable) => {
+        let sortable = new Sortable(connectedSortable, {
+        group: "shared",
+        handle: ".card-header",
+        });
+        });
+        const cardHeaders = document.querySelectorAll(
+        ".connectedSortable .card-header",
+        );
+        cardHeaders.forEach((cardHeader) => {
+        cardHeader.style.cursor = "move";
+        });
+
+    

@@ -1,0 +1,84 @@
+extends layout
+block titleBlock
+  title #{title}
+
+block content 
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+           .col-sm-6
+             h3.mb-0 #{title}
+           .col-sm-6
+             ol.breadcrumb.float-sm-end
+               li.breadcrumb-item
+                 a(href='/users/dashboard') Users
+               li.breadcrumb-item.active(aria-current='page')
+                 | #{title}
+    .row.g-4
+      // begin::Col
+      .col-12.connectedSortable
+        .callout.callout-info
+          | Manage friend, requests, and connections.
+      // end::Col
+
+
+    .row.g-4
+      .col-12.connectedSortable
+        // Add Friend Section
+        .card.card-primary.card-outline.mb-4.mt-4
+          .card-header
+            h4.card-title Add a Friend
+          .card-body
+            #searchUserForm
+              .form-group
+                label(for="search") Search Users
+                input.form-control(type="text" id="search" name="search" placeholder="Enter username or email")
+                button#btnSearchUser.btn.btn-primary.btn-sm.mt-3(type="button") Search
+
+            hr
+
+            h3 Search Results
+            //- This section will be dynamically populated with user search results using JavaScript
+            .row#userSearchResults.text-center.m-1
+
+    .row.g-4
+      .col-12.connectedSortable
+        // Display Pending Friend Requests
+        .card.card-secondary.card-outline.mb-4
+          .card-header
+            h4.card-title Pending Friend Requests
+          .card-body
+            .row#pendingRequests
+
+        // Display Friend List
+        .card.card-secondary.card-outline.mb-4
+          .card-header
+            h4.card-title Your Friends
+          .card-body
+            .row#friends-table.text-center.m-1
+    script(src='/js/sortTable.js').
+    script(src="/js/friendSearch.js").
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous').
+    
+    script.
+        function initSortables() {
+            const connectedSortables = document.querySelectorAll(".connectedSortable");
+            connectedSortables.forEach((connectedSortable) => {
+                let sortable = new Sortable(connectedSortable, {
+                    group: "shared",
+                    handle: ".card-header",
+                });
+            });
+            const cardHeaders = document.querySelectorAll(
+                ".connectedSortable .card-header",
+            );
+            cardHeaders.forEach((cardHeader) => {
+                cardHeader.style.cursor = "move";
+            });
+        }
+        initSortables();
+
+

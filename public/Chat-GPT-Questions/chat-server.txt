@@ -1,0 +1,285 @@
+Can you help me find a bug where the "    
+// Acknowledgment: Update message status to Delivered
+    socket.on('messageDelivered', ({ to, message }) => {
+        updateMessageStatus(to, message, 'Delivered');
+    });" event doesn't fire?
+------------------------------------------------------------------------------------------
+Sever code in app.js
+------------------------------------------------------------------------------------------
+io.on('connection', (socket) => {
+    const user = socket.request.user; // Access authenticated user
+    if (user && user.id) {
+        console.log(`User connected: ${user.username} (${user.id})`);
+
+        // Add user to online users set
+        onlineUsers.add(user.id);
+        // Register a username to a socket ID
+        // Map the user's ID to their socket ID
+        users[user.id] = socket.id;
+        // Notify all clients that the user is online
+        io.emit('user-online', { userId: user.id, username: user.username, avatar: user.avatar });
+
+        // Join user-specific room
+        socket.join(user.id);  // Use the user's ID to join a room
+
+        // Handle receiving a chat message from the client
+        socket.on('chatMessage', (msg) => {
+            if (user) {
+                io.emit('chatMessage', { avatar: user.avatar, username: user.username, message: msg, id: user.id });
+            }
+        });
+
+        // Handle receiving a private message
+        socket.on('privateMessage', ({ to, message }) => {
+            const targetSocketId = users[to]; // Get the recipient's socket ID
+            if (targetSocketId) {
+                // Send the private message to the target user
+                io.to(targetSocketId).emit('privateMessage', {
+                    from: user.id,
+                    avatar: user.avatar,
+                    username: user.username,
+                    message,
+                });
+                // Emit acknowledgment back to the sender
+                socket.emit('messageDelivered', { to, message });
+                console.log(`Private message from ${user.username} to ${to}: ${message}`);
+            } else {
+                // Notify sender that the recipient is offline or unavailable
+                socket.emit('messageFailed', { to, message });
+                console.log(`User ${to} not found or offline.`);
+            }
+        });
+
+        // Handle user disconnecting
+        socket.on('disconnect', () => {
+            console.log(`User disconnected: ${user.username} (${user.id})`);
+
+            // Remove user from online users set
+            onlineUsers.delete(user.id);
+            delete users[user.id];
+            // Notify all clients that the user has gone offline
+            io.emit('user-offline', { userId: user.id, username: user.username, avatar: user.avatar });
+        });
+
+        // Listen for sendMessage event
+        socket.on('sendMessage', async (data) => {
+            const { senderId, receiverId, content } = data;
+            try {
+                const messageId = await Message.createMessage(senderId, receiverId, content);
+                const message = { messageId, senderId, receiverId, content, timestamp: new Date() };
+
+                // Emit the message to the receiver
+                io.to(receiverId).emit('receiveMessage', message);
+            } catch (err) {
+                console.error('Error saving message:', err);
+            }
+        });
+
+        // Handle user joining a specific room
+        socket.on('joinRoom', (userId) => {
+            socket.join(userId); // Join a room named after the userId
+            console.log(`User ${userId} joined room`);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('User disconnected');
+        });
+    }
+});
+------------------------------------------------------------------------------------
+Client code in chat.js
+------------------------------------------------------------------------------------
+$(function () {
+    var socket = io();
+    var msgCount = 0;
+    var cls = 'end';
+    // On form submission, send the message
+    $('#chat-form').submit(function (e) {
+        e.preventDefault(); // Prevent form from submitting the traditional way
+        var message = $('#message-input').val();
+        socket.emit('chatMessage', message); // Emit message to the server
+        $('#message-input').val(''); // Clear the input field
+        return false;
+    });
+
+    // Listen for user online event
+    socket.on('user-online', (data) => {
+        //console.log(`${data.username} is online`);
+        // Update your UI to show the user is online
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.userId}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.username} is online
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Listen for user offline event
+    socket.on('user-offline', (data) => {
+        console.log(`${data.username} is offline`);
+        // Update your UI to show the user is offline
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.id}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.username} is offline
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Listen for incoming messages
+    socket.on('chatMessage', function (data) {
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.id}"></i></span> 
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.message} 
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Send a private message
+    $(document).on('click', '.private_btn', function () {
+        
+        var targetUserId = $(this).attr('data-privateId');
+        var message = $('#message-input').val();
+
+        // Emit private message to the server
+        socket.emit('privateMessage', { to: targetUserId, message: message });
+
+        // Append a pending message
+        appendPendingMessage(targetUserId, message);
+    });
+
+    // Acknowledgment: Update message status to Delivered
+    socket.on('messageDelivered', ({ to, message }) => {
+        updateMessageStatus(to, message, 'Delivered');
+    });
+    // Listen for flash messages
+    socket.on('flash', function (data) {
+        // Create a Bootstrap Toast dynamically
+        const toastHTML = `
+                <div class="toast show ${!data.isError ? 'text-bg-primary': 'text-bg-danger'}  border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">Notification</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${data.message}
+                    </div>
+                </div>
+            `;
+       $('#toast-container').append(toastHTML);
+
+        // Initialize and show the toast
+        const toastEl = document.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    });
+
+    // Listen for incoming private messages
+    socket.on('privateMessage', function (data) {
+        appendMessage(data.username, data.message, data.avatar, data.from);
+    });
+    function appendMessage(username, message, avatar, userId) {
+        msgCount++;
+        cls = msgCount % 2 === 0 ? '' : 'end';
+
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${userId}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <img class="direct-chat-img" src="${avatar}" alt="message user image">
+                <div class="direct-chat-text">${message}</div>
+            </div>`;
+        $('#messages').prepend(msgTemplate);
+    }
+
+    function appendPendingMessage(to, message) {
+        msgCount++;
+        cls = msgCount % 2 === 0 ? '' : 'end';
+
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}" data-pending="true" data-to="${to}" data-message="${message}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">You&nbsp;<i class="bi bi-chat-text private_btn"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <div class="direct-chat-text">${message} <span class="status"> (Pending)</span></div>
+            </div>`;
+        $('#messages').prepend(msgTemplate);
+    }
+
+    function updateMessageStatus(to, message, status) {
+        const pendingMessages = $('.direct-chat-msg[data-pending="true"]');
+        pendingMessages.each(function () {
+            const pendingTo = $(this).data('to');
+            const pendingMessage = $(this).data('message');
+            if (pendingTo === to && pendingMessage === message) {
+                $(this).find('.status').text(` (${status})`);
+                $(this).removeAttr('data-pending'); // Remove pending attribute
+            }
+        });
+    }
+
+    // Acknowledgment: Update message status to Delivered
+    socket.on('messageDelivered', ({ to, message }) => {
+        updateMessageStatus(to, message, 'Delivered');
+    });
+
+    // Acknowledgment: Update message status to Failed
+    socket.on('messageFailed', ({ to, message }) => {
+        updateMessageStatus(to, message, 'Failed: User offline');
+    });
+});
+--------------------------------------------------------------------------------------------------
+

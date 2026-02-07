@@ -1,0 +1,32 @@
+extends layout
+block content
+    .container.mt-5
+      h1 User Profile
+      .card.mb-3
+        .card-body
+          h5.card-title= user.username
+          p.card-text
+            | Email: #{user.email}
+          p.card-text
+            | Joined: #{user.dateCreated}
+
+      h2 Statistics
+      .card
+        .card-body
+          .row
+            .col-md-3
+              .statistic
+                h4 Comments
+                p= stats.commentsCount
+            .col-md-3
+              .statistic
+                h4 Reviews
+                p= stats.reviewsCount
+            .col-md-3
+              .statistic
+                h4 Blog Post Views
+                p= stats.blogPostViewsCount
+            .col-md-3
+              .statistic
+                h4 Likes
+                p= stats.reviewLikesCount

@@ -1,0 +1,146 @@
+I am trying to return the current active tab in jQuery code. I need this so I can save the html to the server.
+I can upload and display an image from the local machine the fist time, however my #save-html code needs the current active tab currentTab to save the code to the database.
+If I switch to the #code-tab-pane and then back to the #wysiwyg-tab-pane and then click the #image-html nothing happens.
+Snippets of my code are below, Please help.
+--------------------------------------------------------------------------------------------------------------------
+Pug code.
+--------------------------------------------------------------------------------------------------------------------
+    .card.m-0(draggable='false', style='height: auto; width: auto; transition: 0.15s;')
+        // begin::Header
+        #navbarSupportedContent.card-header
+            #card-tools.card-tools.navbar-dropdown
+                button#edit-html.btn.btn-tool(type='button')
+                    i.fas.fa-edit(aria-hidden='true')
+                button#save-html.btn.btn-tool(type='button')
+                    i.fas.fa-save(aria-hidden='true')
+                button#image-html.btn.btn-tool(type='button')
+                    i.fas.fa-image(aria-hidden='true')
+                button#insert-link.btn.btn-tool(type='button')
+                    i.fas.fa-link(aria-hidden='true')
+                button#remove-link.btn.btn-tool(type='button')
+                    i.fas.fa-unlink(aria-hidden='true')
+                button#font-size.btn.btn-tool(type='button')
+                    i.fas.fa-text-height(aria-hidden='true')
+                button#font-family.btn.btn-tool(type='button')
+                    i.fas.fa-font(aria-hidden='true')
+                button#font-color.btn.btn-tool(type='button')
+                    i.fas.fa-palette(aria-hidden='true')
+                button.btn.btn-tool(type='button', data-lte-toggle='fullscreen', style='z-index: 10000;')
+                    i.bi.bi-fullscreen(data-lte-icon='maximize')
+                    i.bi.bi-fullscreen-exit(data-lte-icon='minimize')
+        .card-body
+            ul#editorTab.nav.nav-tabs(role='tablist')
+                li.nav-item(role='presentation')
+                    button#wysiwyg-tab.nav-link.active(data-bs-toggle='tab' data-bs-target='#wysiwyg-tab-pane' type='button' role='tab' aria-controls='wysiwyg-tab-pane' aria-selected='true') Wysiwyg
+                li.nav-item(role='presentation')
+                    button#code-tab.nav-link(data-bs-toggle='tab' data-bs-target='#code-tab-pane' type='button' role='tab' aria-controls='code-tab-pane' aria-selected='false') Code
+
+            #editorTabContent.tab-content
+                #wysiwyg-tab-pane.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='wysiwyg-tab' tabindex='0')
+                    #editableHtmlContent( contenteditable="false")       
+                        != htmlContent
+                #code-tab-pane.tab-pane.fade(role='tabpanel' aria-labelledby='code-tab' tabindex='0')
+                    iframe#viewHtmlSectionEditorFrame.viewHtmlSectionFrame(style='height: 100vh; width:100vw;' frameborder='0' scrolling='no')
+        .card-footer
+            input#imageUploadInput(type='file' name='imageUploadInput' accept='image/*')
+    script.
+      let currentTab = null;
+      $('#imageUploadInput').on('change', function () {
+        try {
+
+
+            var url = window.location.pathname;
+            var anchor = url.split("/")['5'];
+
+            const file = this.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                $.ajax({
+                    url: '/admin/htmlSections/uploadImage',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            const imageUrl = response.imageUrl;
+                            const section = $('#' + anchor);
+                            if (section.hasClass('header1')) {
+                                section.attr('style', 'background-image: url("' + imageUrl + '")');
+                            } else {
+                                $('.image-wrapper > img').attr('src', imageUrl);
+                            }
+
+                        } else {
+                            alert('Image upload failed.');
+                        }
+                    },
+                    error: function (err) {
+                        alert('An error occurred while uploading the image. ' + JSON.stringify(err));
+                    }
+                });
+            }
+        } catch (err) {
+            alert(JSON.stringify(err));
+        }
+      });
+
+      
+
+      $('button[data-bs-toggle="tab"]').on('show.bs.tab', function (event) {
+        currentTab = event.target
+        if (currentTab.id === 'code-tab') {
+            let iframeSrc = `/users/htmlSections/editor/` + htmlSectionId;
+            $('#viewHtmlSectionEditorFrame').attr('src', iframeSrc);
+        } else if (currentTab.id === 'wysiwyg-tab') {
+            const iframeWindow = $('#viewHtmlSectionEditorFrame')[0].contentWindow;
+            $('#editableHtmlContent').html(iframeWindow.editor.getValue());
+        }
+
+
+      });
+
+      $('#save-html').on('click', function () {
+        try {
+            const iframeWindow = $('#viewHtmlSectionEditorFrame')[0].contentWindow;
+            const tab = currentTab;
+            const htmlSectionId = $("#HtmlSectionID").val();
+            if (tab.id === 'code-tab') {
+
+                if (typeof iframeWindow.saveCode === 'function') {
+                    window.updatedHtml = iframeWindow.saveCode(htmlSectionId);
+
+                }
+            }
+            else if (tab.id === 'wysiwyg-tab') {
+                window.updatedHtml = $('#editableHtmlContent').html();
+                $.ajax({
+                    url: '/users/htmlSections/update',
+                    method: 'POST',
+                    data: {
+                        HtmlSectionID: htmlSectionId,
+                        Html: window.updatedHtml
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            //alert('Content saved successfully!');
+                        } else {
+                            alert('Failed to save content.');
+                        }
+
+                    },
+                    error: function (err) {
+                        alert(JSON.stringify(err));
+                    }
+                });
+            }
+        } catch (e) {
+            alert(JSON.stringify(e));
+        }
+
+
+
+
+      });	

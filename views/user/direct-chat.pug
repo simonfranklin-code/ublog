@@ -1,0 +1,41 @@
+
+.card.direct-chat.direct-chat-warning.mb-3
+    .card-header
+        h3.card-title Direct Chat
+        .card-tools
+            span.badge.text-bg-warning(title='3 New Messages')
+                | 3
+            button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                i.bi.bi-plus-lg(data-lte-icon='expand')
+                i.bi.bi-dash-lg(data-lte-icon='collapse')
+            button.btn.btn-tool(type='button' title='Contacts' data-lte-toggle='chat-pane')
+                i.bi.bi-chat-text-fill
+            button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                i.bi.bi-x-lg
+    // /.card-header
+    .card-body
+
+        // Conversations are loaded here
+        .direct-chat-messages#messages
+
+        // /.direct-chat-messages
+        // Contacts are loaded here
+        .direct-chat-contacts
+            ul.contacts-list#user-list
+
+                // /.contacts-list
+            // /.direct-chat-pane
+    // /.card-body
+    .card-footer
+        form#chat-form(method='post')
+            .input-group
+                button.input-group-text#send-btn(type="submit")
+                    span(class="bi bi-chat-text")   
+                input.form-control#message-input(type='text' name='message' placeholder='Type Message ...')
+                input.form-control#file-input(type='file' style='display: none;')
+                span.input-group-text(type='button' onclick="$('#file-input').click();")
+                    span(class="material material-attach-file mbr-iconfont mbr-iconfont-btn") 
+
+    // /.card-footer
+script(src='/js/socket.io.js')
+script(src='/js/chat.js')

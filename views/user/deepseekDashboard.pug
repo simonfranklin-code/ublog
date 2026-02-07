@@ -1,0 +1,65 @@
+extends layout
+include ../user/deep-seek-chat.pug
+block content
+    
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h2.mb-0 DeepSeek Api Dashboard
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/users/dashboard') users
+              li.breadcrumb-item.active(aria-current='page')
+                | Dashboard
+          // end::Row
+        // end::Container
+    // end::App Content Header
+
+    // begin::Row
+    .row
+      // Start col
+      .col-md-12.connectedSortable
+        .body-wrapper(style='height: 85vh;')
+          - const u = user ? { id: user.id, username: user.username, email: user.email, password: user.password, dateCreated: user.dateCreated, dateModified: user.dateModified, role: user.role, avatar: user.avatar } : {}
+          +userCard(u)
+    .row.g-4.mb-4
+      // begin::Col
+      .col-md-12.connectedSortable#callout
+        .callout.callout-info#callout-info
+          button( onclick="callDotNet()") Invoke .NET
+
+
+
+      // end::Col
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+    // sortablejs
+    script.
+      const connectedSortables =
+      document.querySelectorAll(".connectedSortable");
+      connectedSortables.forEach((connectedSortable) => {
+      let sortable = new Sortable(connectedSortable, {
+      group: "shared",
+      handle: ".card-header",
+      });
+      });
+      const cardHeaders = document.querySelectorAll(
+      ".connectedSortable .card-header",
+      );
+      cardHeaders.forEach((cardHeader) => {
+      cardHeader.style.cursor = "move";
+      });
+
+
+    script.	  
+        // Example of calling a .NET method from JavaScript
+        function callDotNet() {
+            // Assuming the injected object is named 'JSBridge'
+            if (window.JSBridge) {
+                window.JSBridge.showMessage($('.card-body').html());
+            }
+        }

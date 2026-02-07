@@ -1,0 +1,95 @@
+mixin userCard(u)
+  if u && u.id
+    script.
+      window.USER = !{JSON.stringify(u)};
+
+    .card.chat-card.direct-chat.direct-chat-warning.mb-3(style='height: 100%')
+      .card-header
+        .card-tools
+          span.btn-tool.text-muted#current-session-name Current session: None
+          a.btn.btn-sm.btn-tool(href='javascript:OpenModal("saveChatModal")')
+            i.far.fa-save
+          button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+            i.bi.bi-plus-lg(data-lte-icon='expand')
+            i.bi.bi-dash-lg(data-lte-icon='collapse')
+          button.btn.btn-tool(type='button' title='Contacts' data-lte-toggle='chat-pane')
+            i.bi.bi-chat-text-fill
+          button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+            i.bi.bi-x-lg
+          button.btn.btn-tool#clearChat(type='button')
+            i.bi.bi-dash-lg
+          button.btn.btn-tool(type='button' data-lte-toggle='card-maximize' style='z-index: 10000;')
+            i.bi.bi-arrows-fullscreen(data-lte-icon='maximize' style='display: block;')
+            i.bi.bi-fullscreen-exit(data-lte-icon='minimize' style='display: none;')
+      .card-body.chat-card-body#chat-card-body
+        .input-group.input-group-sm.mb-1
+          span.form-control.form-control-sm Saved Chats
+          select#chat-list.form-control.form-control-sm
+          .button-group.mb-3
+            button.btn.btn-primary.btn-sm#new-chat(type='button') New Chat
+
+        .direct-chat-messages#deep-seek-chat-messages.chat-messages-area
+        .direct-chat-contacts
+          ul.contacts-list#user-list
+      .card-footer
+        form#deep-seek-chat-form(method='post')
+          .input-group
+            button.input-group-text#send-btn(type="submit")
+              span(class="bi bi-chat-text")   
+            input.form-control#deep-seek-message-input(type='text' name='message' placeholder='Type Message ...')
+            input.form-control#file-input(type='file' style='display: none;')
+            span.input-group-text(type='button' onclick="$('#file-input').click();")
+              span.material.material-attach-file.mbr-iconfont.mbr-iconfont-btn
+        //- Save Chat Modal
+      #saveChatModal.modal.fade(tabindex='-1')
+        .modal-dialog.modal-dialog-centered
+          .modal-content
+            .modal-header
+              h5.modal-title Save Chat Session
+              button.btn-close(type='button', data-bs-dismiss='modal')
+            .modal-body
+              form#save-chat-form
+                .mb-3
+                  label.form-label(for='chatName') Chat Name
+                  input.form-control#chatName(type='text' required placeholder='e.g. Research Session 1')
+            .modal-footer
+              button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Cancel
+              button.btn.btn-primary#saveChat(type='button') Save Chat
+      #toast-container.toast-container.position-fixed.top-0.end-0.p-3.zindex-popover
+    
+    script.
+      if (window.USER) {
+        const s = document.createElement('script');
+        s.src = `/js/deep-seek-chat.js?id=${encodeURIComponent(window.USER.id)}&username=${encodeURIComponent(window.USER.username)}&avatar=${encodeURIComponent(window.USER.avatar)}`;
+        document.head.append(s);
+      }
+
+      function showSpinner(elementId) {
+          const parent = document.getElementById(elementId);
+          if (!parent) return;
+
+          parent.classList.add('position-relative');
+
+          const spinner = document.createElement('div');
+          spinner.className = 'spinner-overlay position-absolute top-50 start-50 translate-middle bg-white bg-opacity-75 w-100 h-100 d-flex justify-content-center align-items-center';
+          spinner.style.zIndex = '10';
+          spinner.innerHTML = `
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          `;
+
+          spinner.dataset.spinner = 'true'; // flag for easy removal
+          parent.appendChild(spinner);
+      }
+
+      function hideSpinner(elementId) {
+        const parent = document.getElementById(elementId);
+        if (!parent) return;
+
+        const spinner = parent.querySelector('[data-spinner="true"]');
+        if (spinner) parent.removeChild(spinner);
+      }
+  else
+    script.
+      console.warn("USER data missing or invalid");

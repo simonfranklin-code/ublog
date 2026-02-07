@@ -1,0 +1,443 @@
+chat.js is my client code.
+----------------------------------------------------------------------------------
+This is my code as it is console returns this ICE candidate received from: undefined
+----------------------------------------------------------------------------------
+$(function () {
+    var socket = io();
+    var msgCount = 0;
+    var cls = 'end';
+    // On form submission, send the message
+    $('#chat-form').submit(function (e) {
+        e.preventDefault(); // Prevent form from submitting the traditional way
+        var message = $('#message-input').val();
+        socket.emit('chatMessage', message); // Emit message to the server
+        $('#message-input').val(''); // Clear the input field
+        return false;
+    });
+
+    // Handle file upload
+    $('#file-input').change(function () {
+        const file = this.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Upload the file to the server
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: (response) => {
+                // Emit the file message to the server
+                socket.emit('sendFile', {
+                    username: 'Your Username', // Replace with dynamic username
+                    fileUrl: response.fileUrl,
+                    fileName: file.name,
+                });
+            },
+            error: (err) => {
+                console.error('File upload failed:' + err.responseText, err);
+            },
+        });
+    });
+
+    // Listen for file messages
+    socket.on('fileMessage', (data) => {
+        const fileMessage = `
+            <div class="direct-chat-msg">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-start">${data.username}</span>
+                    <span class="direct-chat-timestamp float-end">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="direct-chat-text">
+                    ${data.username} posted a file to the uploads directory: <a href="${data.fileUrl}" target="_blank" download>${data.fileName}</a>
+                </div>
+            </div>`;
+        $('#messages').prepend(fileMessage);
+    });
+
+    // Listen for user online event
+    socket.on('user-online', (data) => {
+        //console.log(`${data.username} is online`);
+        // Update your UI to show the user is online
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.userId}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.username} is online
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Listen for user offline event
+    socket.on('user-offline', (data) => {
+        console.log(`${data.username} is offline`);
+        // Update your UI to show the user is offline
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.id}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.username} is offline
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Listen for incoming messages
+    socket.on('chatMessage', function (data) {
+        msgCount += 1;
+        if (msgCount % 2 === 0) {
+            cls = '';
+        } else {
+            cls = 'end';
+        }
+
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${data.username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${data.id}"></i></span> 
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <!-- /.direct-chat-infos-->
+                <img class="direct-chat-img" src="${data.avatar}" alt="message user image" draggable="false">
+                <!-- /.direct-chat-img-->
+                <div class="direct-chat-text">
+                    ${data.message} 
+                </div>
+                <!-- /.direct-chat-text-->
+            </div>
+        `
+        $('#messages').prepend(msgTemplate); // Append the message to the chat
+    });
+
+    // Send a private message
+    $(document).on('click', '.private_btn', function () {
+        
+        var targetUserId = $(this).attr('data-privateId');
+        var message = $('#message-input').val();
+
+        // Emit private message to the server
+        socket.emit('privateMessage', { to: targetUserId, message: message });
+
+        // Append a pending message
+        appendPendingMessage(targetUserId, message);
+    });
+
+    // Acknowledgment: Update message status to Delivered
+    socket.on('messageDelivered', ({ to, message }) => {
+        updateMessageStatus(to, message, 'Delivered');
+    });
+    // Listen for flash messages
+    socket.on('flash', function (data) {
+        // Create a Bootstrap Toast dynamically
+        const toastHTML = `
+                <div class="toast show ${!data.isError ? 'text-bg-primary': 'text-bg-danger'}  border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">Notification</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${data.message}
+                    </div>
+                </div>
+            `;
+       $('#toast-container').append(toastHTML);
+
+        // Initialize and show the toast
+        const toastEl = document.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    });
+
+    // Listen for incoming private messages
+    socket.on('privateMessage', function (data) {
+        appendMessage(data.username, data.message, data.avatar, data.from, true);
+    });
+    function appendMessage(username, message, avatar, userId, isPrivate) {
+        msgCount++;
+        cls = msgCount % 2 === 0 ? '' : 'end';
+
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">${username}&nbsp;<i class="bi bi-chat-text private_btn" data-privateId="${userId}"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <img class="direct-chat-img" src="${avatar}" alt="message user image">
+                <div class="direct-chat-text">${isPrivate === true ? "Private message from ": ''}${username}: ${message}</div>
+            </div>`;
+        $('#messages').prepend(msgTemplate);
+    }
+
+    function appendPendingMessage(to, message) {
+        msgCount++;
+        cls = msgCount % 2 === 0 ? '' : 'end';
+
+        var msgTemplate = `
+            <div class="direct-chat-msg ${cls}" data-pending="true" data-to="${to}" data-message="${message}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-end">You&nbsp;<i class="bi bi-chat-text private_btn"></i></span>
+                    <span class="direct-chat-timestamp float-start">${new Date().toISOString()}</span>
+                </div>
+                <div class="direct-chat-text">${message} <span class="status"> (Pending)</span></div>
+            </div>`;
+        $('#messages').prepend(msgTemplate);
+    }
+
+    function updateMessageStatus(to, message, status) {
+        const pendingMessages = $('.direct-chat-msg[data-pending="true"]');
+        pendingMessages.each(function () {
+            const pendingTo = $(this).data('to');
+            const pendingMessage = $(this).data('message');
+            if (pendingTo === parseInt(to) && pendingMessage === message) {
+                $(this).find('.status').text(` (${status})`);
+                $(this).removeAttr('data-pending'); // Remove pending attribute
+            }
+        });
+    }
+
+    // Acknowledgment: Update message status to Delivered
+    socket.on('messageDelivered', ({ to, message }) => {
+        updateMessageStatus(to, message, 'Delivered');
+    });
+
+    // Acknowledgment: Update message status to Failed
+    socket.on('messageFailed', ({ to, message }) => {
+        updateMessageStatus(to, message, 'Failed: User offline');
+    });
+
+    // Update the online user list
+    socket.on('updateUserList', (users) => {
+        const userList = $('#user-list');
+        userList.empty(); // Clear the current list
+        const userIdsInDOM = new Set();
+
+        users.forEach(onlineUser => {
+            // Prevent duplicate entries by tracking already added user IDs
+            if (!userIdsInDOM.has(onlineUser.userId)) {
+                const userItem = `
+                <li>
+                    <a href="#" draggable="false"></a>
+                    <img class="contacts-list-img" src="${onlineUser.avatar}" alt="${onlineUser.username}" draggable="false">
+                    <div class="contacts-list-info">
+                        <span class="contacts-list-name"></span>
+                        ${onlineUser.username}<small class="contacts-list-date float-end">${new Date().toISOString()}</small>
+                        <span class="contacts-list-msg"></span>User ${onlineUser.username} is online... 
+                   </div>
+                </li>`;
+                userList.append(userItem);
+                userIdsInDOM.add(onlineUser.userId);
+            }
+        });
+    });
+
+    let localStream = null;
+    let peerConnection = null;
+
+    const servers = {
+        iceServers: [
+            { urls: 'stun:stun01.sipphone.com' }, // Public STUN server
+        ],
+    };
+
+    // Access media devices
+    async function startMedia() {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            $('#local-video')[0].srcObject = localStream;
+        } catch (error) {
+            console.error('Error accessing media devices:', error);
+        }
+    }
+
+    // Start a call
+    $('#start-call').click(async function () {
+        const targetUserId = $('#call-target').val(); // Target user ID
+
+        peerConnection = new RTCPeerConnection(servers);
+
+        // Add local stream to the peer connection
+        localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
+
+        // Handle ICE candidates
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit('ice-candidate', {
+                    to: targetUserId,
+                    from: event.candidate,
+                });
+            }
+        };
+
+        // Handle remote stream
+        peerConnection.ontrack = (event) => {
+            $('#remote-video')[0].srcObject = event.streams[0];
+        };
+
+        // Create and send offer
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+
+        socket.emit('offer', {
+            to: targetUserId,
+            from: socket.id,
+            offer,
+        });
+    });
+
+    // Handle offer
+    socket.on('offer', async (data) => {
+        peerConnection = new RTCPeerConnection(servers);
+
+        // Add local stream to the peer connection
+        localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
+
+        // Handle ICE candidates
+        peerConnection.onicecandidate = (event) => {
+            console.log('ICE Candidate:', event.candidate);
+            if (event.candidate) {
+                socket.emit('ice-candidate', {
+                    to: data.from,
+                    candidate: event.candidate,
+                });
+            }
+        };
+
+        // Handle remote stream
+        peerConnection.ontrack = (event) => {
+            $('#remote-video')[0].srcObject = event.streams[0];
+        };
+
+        // Set remote description and send answer
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+
+        socket.emit('answer', {
+            to: data.from,
+            from: socket.id,
+            answer,
+        });
+    });
+
+    // Handle answer
+    socket.on('answer', async (data) => {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+    });
+
+    // Handle ICE candidates
+    socket.on('ice-candidate', (data) => {
+        peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    });
+
+    // End call
+    $('#end-call').click(function () {
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
+        $('#remote-video')[0].srcObject = null;
+    });
+
+    // Start media stream on page load
+    startMedia();
+
+});
+--------------------------------------------------------------------------------------------
+direct-chat.pug
+--------------------------------------------------------------------------------------------
+.card.direct-chat.direct-chat-warning
+    .card-header
+        h3.card-title Direct Chat
+        .card-tools
+            span.badge.text-bg-warning(title='3 New Messages')
+                | 3
+            button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                i.bi.bi-plus-lg(data-lte-icon='expand')
+                i.bi.bi-dash-lg(data-lte-icon='collapse')
+            button.btn.btn-tool(type='button' title='Contacts' data-lte-toggle='chat-pane')
+                i.bi.bi-chat-text-fill
+            button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                i.bi.bi-x-lg
+    // /.card-header
+    .card-body
+        .video-container
+            video#local-video(autoplay muted playsinline style='width: 45%; margin-right: 10px;')
+            video#remote-video(autoplay playsinline style='width: 45%;')
+        // Conversations are loaded here
+        .direct-chat-messages#messages
+
+        // /.direct-chat-messages
+        // Contacts are loaded here
+        .direct-chat-contacts
+            ul.contacts-list#user-list
+
+                // /.contacts-list
+            // /.direct-chat-pane
+    // /.card-body
+    .card-footer
+        form#chat-form(action='/' method='post')
+            .input-group
+                span.input-group-text#send-btn(onclick="$('#chat-form').submit();")
+                    span(class="bi bi-chat-text")   
+                input.form-control#message-input(type='text' name='message' placeholder='Type Message ...')
+                input.form-control#file-input(type='file' style='display: none;')
+                span.input-group-text(type='button' onclick="$('#file-input').click();")
+                    span(class="material material-attach-file mbr-iconfont mbr-iconfont-btn") 
+            .input-group
+                input.form-control#call-target(type='text' placeholder='Enter User ID to Call')
+                span.input-group-append
+                    button.btn.btn-secondary(type='button' id='start-call') Start Call
+                    button.btn.btn-danger(type='button' id='end-call') End Call
+    // /.card-footer
+script(src='/js/socket.io.js')
+script(src='/js/chat.js')
+
+--------------------------------------------------------------------------------------------
+app.js is my server code.
+--------------------------------------------------------------------------------------------
+        // Relay signaling data
+        socket.on('offer', (data) => {
+            console.log('Offer received from:', data.from);
+            socket.to(data.to).emit('offer', data);
+        });
+
+        socket.on('answer', (data) => {
+            console.log('Answer received from:', data.from);
+            socket.to(data.to).emit('answer', data);
+        });
+
+        socket.on('ice-candidate', (data) => {
+            console.log('ICE candidate received from:', data.from);
+            socket.to(data.to).emit('ice-candidate', data);
+        });

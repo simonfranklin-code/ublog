@@ -1,0 +1,104 @@
+.modal.fade#confirmDeleteModal(tabindex='-1' role='dialog')
+    .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+                h5.modal-title Confirm Delete
+                button.close(type='button' data-dismiss='modal' aria-label='Close')
+                    span(aria-hidden='true') &times;
+            .modal-body
+                p Are you sure you want to delete this HTML section?
+            .modal-footer
+                button.btn.btn-secondary.btn-sm(type='button' data-dismiss='modal') Cancel
+                button.btn.btn-danger.btn-sm#confirmDeleteBtn(type='button') Delete
+// Link Insertion Modal
+.modal.fade#insertLinkModal(tabindex='-1' role='dialog' aria-labelledby='insertLinkModalLabel' aria-hidden='true')
+    .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+                h5.modal-title#insertLinkModalLabel Insert Link
+                button.close(type='button' data-dismiss='modal' aria-label='Close')
+                    span(aria-hidden='true') &times;
+            .modal-body
+                form#insertLinkForm
+                    .form-group
+                        label(for='linkUrl') URL
+                        input.form-control#linkUrl(type='text' name='linkUrl' required)
+                    .form-group
+                        label(for='linkText') Text
+                        input.form-control#linkText(type='text' name='linkText' readonly)
+            .modal-footer
+                button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                button.btn.btn-primary#insertLinkBtn(type='button') Insert Link
+// Font Size Modal
+.modal.fade(id='fontSizeModal', tabindex='-1', role='dialog')
+    .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+                h5.modal-title Font Size
+                    button.close(type='button', data-dismiss='modal', aria-label='Close')
+                    span(aria-hidden='true') &times;
+            .modal-body
+                select#fontSizeSelect.form-control
+                    option(value='12px') 12px
+                    option(value='14px') 14px
+                    option(value='16px') 16px
+                    option(value='18px') 18px
+                    option(value='20px') 20px
+                    option(value='24px') 24px
+            .modal-footer
+                button.btn.btn-primary(type='button', id='applyFontSize') Apply
+                button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+// Font Family Modal
+.modal.fade(id='fontFamilyModal', tabindex='-1', role='dialog')
+    .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+                h5.modal-title Font Family
+                button.close(type='button', data-dismiss='modal', aria-label='Close')
+                    span(aria-hidden='true') &times;
+            .modal-body
+                select#fontFamilySelect.form-control
+                    option(value='Arial') Arial
+                    option(value='Courier New') Courier New
+                    option(value='Georgia') Georgia
+                    option(value='Times New Roman') Times New Roman
+                    option(value='Verdana') Verdana
+            .modal-footer
+                button.btn.btn-primary(type='button', id='applyFontFamily') Apply
+                button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+// Font Color Modal
+.modal.fade(id='fontColorModal', tabindex='-1', role='dialog')
+    .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+            h5.modal-title Font Color
+                button.close(type='button', data-dismiss='modal', aria-label='Close')
+                span(aria-hidden='true') &times;
+            .modal-body
+                input#fontColorInput(type='color', class='form-control')
+            .modal-footer
+                button.btn.btn-primary(type='button', id='applyFontColor') Apply
+                button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+// Find and replace Modal
+.modal.fade(id='findAndReplaceModal', tabindex='-1', role='dialog')
+    .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+                h5.modal-title Find and replace
+                button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+            .modal-body
+                form#findAndReplaceForm
+                    .formgroup.mb-2
+                        label(for="find-text") Find:
+                        input.form-control.form-control-sm#find-text(type="text" name="find-text" required)
+                    .formgroup.mb-2
+                        label(for="replace-text") Replace with:
+                        input.form-control.form-control-sm#replace-text(type="text" name="replace-text")
+                    .formgroup.mb-2
+                        label(for="replace-all") Replace all:
+                        input#replace-all(type="checkbox" name="replace-all")
+          
+            .modal-footer
+                button.btn.btn-primary.btn-sm#buttonreplace(type="button") Replace
+                |
+                button.btn.btn-secondary.btn-sm(type='button', data-bs-dismiss='modal') Close

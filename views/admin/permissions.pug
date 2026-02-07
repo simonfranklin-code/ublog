@@ -1,0 +1,457 @@
+extends layout
+
+block content
+
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h3.mb-0 #{title}
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/admin/dashboard') Admin
+              li.breadcrumb-item.active(aria-current='page')
+                | #{title}
+          // end::Row
+        // end::Container
+    // end::App Content Header
+    .row.g-4
+      // begin::Col
+      .col-12.connectedSortable
+        .callout.callout-info
+          | To manage permissions use the tabs to navigate to the different sections!  
+      // end::Col
+      // begin::Col
+      .col-md-12.connectedSortable
+        nav
+          #nav-tab.nav.nav-tabs(role='tablist')
+            button#nav-create-permission-tab.nav-link.active(data-bs-toggle='tab' data-bs-target='#nav-create-permission' type='button' role='tab' aria-controls='nav-create-permission' aria-selected='true') Create Permission
+            button#nav-assign-permission-to-role-tab.nav-link(data-bs-toggle='tab' data-bs-target='#nav-assign-permission-to-role' type='button' role='tab' aria-controls='nav-assign-permission-to-role' aria-selected='false') Assign Permission to Role
+            button#nav-filter-permissions-tab.nav-link(data-bs-toggle='tab' data-bs-target='#nav-filter-permissions' type='button' role='tab' aria-controls='#nav-filter-permissions' aria-selected='false') Filter Permissions
+            button#nav-role-permissions-tab.nav-link(data-bs-toggle='tab' data-bs-target='#nav-role-permissions' type='button' role='tab' aria-controls='nav-role-permissions' aria-selected='false') Role Permissions
+        #nav-tabContent.tab-content
+          #nav-create-permission.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='nav-home-tab' tabindex='0')
+            .card.card-success.card-outline
+              // begin::Header
+              .card-header
+                .card-title Create Permission
+              // end::Header
+              // begin::Body
+              .card-body
+                .row.g-4
+                  .col-md-12
+                    .form-group
+                      label(for='tbx_createPermissionNme') Permission Name
+                      input.form-control.form-control-sm(type='text' id='tbx_createPermissionName' required)
+
+
+              // end::Body
+              // begin::Footer
+              .card-footer
+                .btn-group.btn-group-sm(role='group', aria-label='Button group with nested dropdown')
+                  button.btn.btn-primary.btn-sm(type='button' id='btn_createPermission')
+                    i.fas.fa-key
+              // end::Footer
+              
+          #nav-assign-permission-to-role.tab-pane.fade(role='tabpanel' aria-labelledby='nav-profile-tab' tabindex='0')
+            .card.card-success.card-outline
+              // begin::Header
+              .card-header
+                .card-title Assign Permission to Role
+              // end::Header
+              // begin::Body
+              .card-body
+                .row.g-4
+                  .col-md-12
+                    form#assign-permission
+                      .form-group
+                        label(for='role') Role
+                        select#role.form-control.form-control-sm(name='role' required)
+                          each role in roles
+                            option(value=role) #{role}
+                      .form-group
+                        label(for='permissionName') Permission
+                        select#permissionName.form-control.form-control-sm(name='permissionName' required)
+                          each permission in permissionsLookup
+                            option(value=permission.name) #{permission.name}
+              // end::Body
+              // begin::Footer
+              .card-footer
+                .btn-group.btn-group-sm(role='group', aria-label='Button group')
+                  button.btn.btn-primary.btn-sm(type='button' id='assignPermission') Assign
+              // end::Footer
+          #nav-filter-permissions.tab-pane.fade(role='tabpanel' aria-labelledby='nav-filter-permissions-tab' tabindex='0')
+            .row.g-4
+              .col-md-12.connectedSortable
+                .card.card-success.card-outline.mb-4
+                  // begin::Header
+                  .card-header
+                    .card-title Filter Permissions
+                  // end::Header
+                  // begin::Body
+                  .card-body
+                    .row.g-4
+                      .col-md-6
+                        form(action='/admin/permissions/assign' method='POST')
+                          .form-group
+                            label(for='permissionNameFilter') Permission Name
+                            input.form-control.form-control-sm(type='text' name='permissionNameFilter' id='permissionNameFilter')
+                          .form-group
+                            label(for='limit') Permissions limit
+                            select.form-control.form-control-sm(name='limit' id='limit' required)
+                              option(value=5) 5
+                              option(value=10) 10
+                              option(value=15) 15
+                              option(value=20) 20
+                              option(value=25) 25
+                              option(value=50) 50
+                              option(value=75) 75
+                              option(value=100) 100
+                      .col-md-6
+                        .form-group
+                          label(for='permissionsSortField') Sort By
+                          select.form-control.form-control-sm(name='permissionsSortField' id='permissionsSortField')
+                            option(value='id') ID
+                            option(value='name') Name
+                        .form-group
+                          label(for='permissionsSortOrder') Order
+                          select.form-control.form-control-sm(name='permissionsSortOrder' id='permissionsSortOrder')
+                            option(value='ASC') Ascending
+                            option(value='DESC') Descending
+
+
+                  .card-footer
+                    .btn-group.btn-group-sm(role='group', aria-label='Button group')
+                      button.btn.btn-primary.btn-sm(type='button' id='filterPermissionsButton') Filter
+
+            .row.g-4
+              .col-md-12.connectedSortable
+                .card.card-success.card-outline
+                  // begin::Header
+                  .card-header
+                    .card-title Permissions
+                  // end::Header
+                  // begin::Body
+                  .card-body
+                    .row.g-4
+                      .col-md-12
+                        table.table.table-hover.table-striped.rounded
+                          thead
+                            tr
+                              th ID
+                              th Name
+                          tbody#permissionsTableBody
+                          // end::Body
+                      // begin::Footer
+                  .card-footer
+                    nav
+                      ul.pagination
+                        li.page-item
+                          button.page-link(type='button' id='previousPermissionsPage') Previous
+                        li.page-item
+                          span.page-link(id='currentPermissionsPage') 1
+                        li.page-item
+                          button.page-link(type='button' id='nextPermissionsPage') Next
+                  // end::Footer
+          #nav-role-permissions.tab-pane.fade(role='tabpanel' aria-labelledby='nav-role-permissions-tab' tabindex='0')
+            .row.g-4
+              .col-md-6.connectedSortable
+                .card.card-success.card-outline.mb-4
+                  // begin::Header
+                  .card-header
+                    .card-title Role Permissions
+                  // end::Header
+                  // begin::Body
+                  .card-body
+                    .row.g-4
+                      .col-md-12
+                        .form-group
+                          label(for='roleFilter') Role
+                          input.form-control(type='text' name='roleFilter' id='roleFilter')
+                        .form-group
+                          label(for='permissionFilter') Permission
+                          input.form-control(type='text' name='permissionFilter' id='permissionFilter')
+                          // end::Body
+                      // begin::Footer
+                  .card-footer
+                    button.btn.btn-primary(type='button' id='filterRolePermissionsButton') Filter
+                  // end::Footer
+              .col-md-6.connectedSortable
+                .card.card-success.card-outline.mb-4
+                  // begin::Header
+                  .card-header
+
+                  // end::Header
+                  // begin::Body
+                  .card-body
+                    .row.g-4
+                      .col-md-12
+                        .form-group.mb-2
+                          label(for='rolePermissionsSortField') Sort By
+                          select.form-control(name='rolePermissionsSortField' id='rolePermissionsSortField')
+                            option(value='role') Role
+                            option(value='permission') Permission
+                        .form-group.mb-2
+                          label(for='rolePermissionsSortOrder') Order
+                          select.form-control.form-control-sm(name='rolePermissionsSortOrder' id='rolePermissionsSortOrder')
+                            option(value='ASC') Ascending
+                            option(value='DESC') Descending
+                        .form-group.mb-2
+                          label(for='rolePermissionsLimit') Role permissions limit
+                          select.form-control.form-control-sm(name='rolePermissionsLimit' id='rolePermissionsLimit' required)
+                            option(value=5) 5
+                            option(value=10) 10
+                            option(value=15) 15
+                            option(value=20) 20
+                            option(value=25) 25
+                            option(value=50) 50
+                            option(value=75) 75
+                            option(value=100) 100
+                          // end::Body
+                      // begin::Footer
+                  .card-footer
+
+                  // end::Footer
+            .row.g-4
+              .col-md-12.connectedSortable
+                .card.card-success.card-outline
+                  // begin::Header
+                  .card-header
+                    .card-title Permissions Table
+                  // end::Header
+                  // begin::Body
+                  .card-body
+                    .row.g-4
+                      .col-md-12
+                        table.table.table-hover.table-striped.rounded
+                          thead
+                            tr
+                              th Role
+                              th Permission
+                          tbody#rolePermissionsTableBody
+                  // end::Body
+                  // begin::Footer
+                  .card-footer
+                    nav
+                      ul.pagination
+                        li.page-item
+                          button.page-link(type='button' id='previousRolePermissionsPage') Previous
+                        li.page-item
+                          span.page-link(id='currentRolePermissionsPage') 1
+                        li.page-item
+                          button.page-link(type='button' id='nextRolePermissionsPage') Next
+                  // end::Footer
+    #toast-container.position-fixed.top-0.end-0.p-3( style="z-index: 10000;")
+
+      script.
+        $(document).ready(function() {
+          let currentPermissionsPage = 1;
+          let currentRolePermissionsPage = 1;
+          $('#manage-users').addClass('menu-open');
+          $('#manage-permissions-link').addClass('active');
+          function fetchPermissions(page = 1) {
+            console.log('Fetching permissions for page:', page);
+            const name = $('#permissionNameFilter').val();
+            const sortField = $('#permissionsSortField').val();
+            const sortOrder = $('#permissionsSortOrder').val();
+            const limit = $('#limit').val();
+            $.ajax({
+              url: `/admin/permissions/json?page=${page}&limit=${limit}&name=${name}&sortField=${sortField}&sortOrder=${sortOrder}`,
+              method: 'GET',
+              dataType: 'json',
+              success: function(data) {
+                const permissionsTableBody = $('#permissionsTableBody');
+                permissionsTableBody.empty();
+
+                $.each(data.permissions, function(index, permission) {
+                  const row = $('<tr>').html(`
+                    <td>${permission.id}</td>
+                    <td>${permission.name}</td>
+                  `);
+                  permissionsTableBody.append(row);
+                });
+
+                $('#currentPermissionsPage').text('Page ' + data.page + ' of ' + data.totalPages + ' pages');
+                currentPermissionsPage = data.page;
+
+                $('#previousPermissionsPage').prop('disabled', data.page <= 1);
+                $('#nextPermissionsPage').prop('disabled', data.page >= data.totalPages);
+
+                $('#permissionsError').hide();
+              },
+              error: function(xhr, status, error) {
+                console.error('Error fetching permissions:', error);
+                $('#permissionsError').show();
+              }
+            });
+          }
+
+          function fetchRolePermissions(page = 1) {
+            console.log('Fetching role permissions for page:', page);
+            const role = $('#roleFilter').val();
+            const permission = $('#permissionFilter').val();
+            const sortField = $('#rolePermissionsSortField').val();
+            const sortOrder = $('#rolePermissionsSortOrder').val();
+            const limit = $('#rolePermissionsLimit').val()
+            $.ajax({
+              url: `/admin/permissions/role_permissions/json?page=${page}&limit=${limit}&role=${role}&permission=${permission}&sortField=${sortField}&sortOrder=${sortOrder}`,
+              method: 'GET',
+              dataType: 'json',
+              success: function(data) {
+                const rolePermissionsTableBody = $('#rolePermissionsTableBody');
+                rolePermissionsTableBody.empty();
+
+                $.each(data.rolePermissions, function(index, rolePermission) {
+                  const row = $('<tr>').html(`
+                    <td>${rolePermission.role}</td>
+                    <td>${rolePermission.permission}</td>
+                  `);
+                  rolePermissionsTableBody.append(row);
+                });
+
+                $('#currentRolePermissionsPage').text('Page ' + data.page + ' of ' + data.totalPages + ' pages');
+                currentRolePermissionsPage = data.page;
+
+                $('#previousRolePermissionsPage').prop('disabled', data.page <= 1);
+                $('#nextRolePermissionsPage').prop('disabled', data.page >= data.totalPages);
+
+                $('#rolePermissionsError').hide();
+              },
+              error: function(xhr, status, error) {
+                console.error('Error fetching role permissions:', error);
+                $('#rolePermissionsError').show();
+              }
+            });
+          }
+      
+          function createPermission(){
+            console.log('Creating permission');
+            const createPermissionName = $('#tbx_createPermissionName').val();
+            var formData = {'name': createPermissionName };
+
+            $.ajax({
+              url: '/admin/permissions/create',
+              type: 'POST',
+              cache: false,
+              data: formData,
+              success: function(data) {
+                  if(data.isError === false){
+                      $('#success-message').text(data.message);
+                  }else{
+                      $('#error-message').text(data.message);
+                  }
+              },
+              error: function(xhr, status, error) {
+                console.error('Error creating permissions:', error);
+                $('error-message').text('Error creating permission');
+              }
+            });
+
+          }
+
+          function assignPermission(){
+            console.log('Assigning permission');
+            const role = $('#role').val();
+            const permissionName = $('#permissionName').val();
+            var formData = {'role': role, 'permissionName': permissionName };
+
+            $.ajax({
+              url: '/admin/permissions/assign',
+              type: 'POST',
+              cache: false,
+              data: formData,
+              success: function(data) {
+                  if(data.isError === false){
+                      $('.callout').text(data.message);
+                  }else{
+                      $('#error-message').text(data.message);
+                  }
+              },
+              error: function(xhr, status, error) {
+                console.error('Error assigning permission:', error);
+                $('error-message').text('Error assigning permission');
+              }
+            });
+
+          }
+
+
+          $('#assignPermission').on('click', function(e) {
+              e.preventDefault();
+            assignPermission();
+          });
+
+
+          //
+          $('#btn_createPermission').on('click', function() {
+            console.log('Create permissions button clicked');
+            createPermission();
+          });
+
+
+
+          // Event listeners for permissions pagination
+          $('#filterPermissionsButton').on('click', function() {
+            console.log('Filter permissions button clicked');
+            fetchPermissions();
+          });
+          $('#previousPermissionsPage').on('click', function() {
+            console.log('Previous permissions page button clicked');
+            if (currentPermissionsPage > 1) {
+              currentPermissionsPage--;
+              fetchPermissions(currentPermissionsPage);
+            }
+          });
+          $('#nextPermissionsPage').on('click', function() {
+            console.log('Next permissions page button clicked');
+            currentPermissionsPage++;
+            fetchPermissions(currentPermissionsPage);
+          });
+
+          // Event listeners for role permissions pagination
+          $('#filterRolePermissionsButton').on('click', function() {
+            console.log('Filter role permissions button clicked');
+            fetchRolePermissions();
+          });
+          $('#previousRolePermissionsPage').on('click', function() {
+            console.log('Previous role permissions page button clicked');
+            if (currentRolePermissionsPage > 1) {
+              currentRolePermissionsPage--;
+              fetchRolePermissions(currentRolePermissionsPage);
+            }
+          });
+          $('#nextRolePermissionsPage').on('click', function() {
+            console.log('Next role permissions page button clicked');
+            currentRolePermissionsPage++;
+            fetchRolePermissions(currentRolePermissionsPage);
+          });
+
+          // Initial fetch
+          fetchPermissions();
+          fetchRolePermissions();
+        });
+
+
+      script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+      // sortablejs
+      script.
+        const connectedSortables =
+        document.querySelectorAll(".connectedSortable");
+        connectedSortables.forEach((connectedSortable) => {
+        let sortable = new Sortable(connectedSortable, {
+        group: "shared",
+        handle: ".card-header",
+        });
+        });
+        const cardHeaders = document.querySelectorAll(
+        ".connectedSortable .card-header",
+        );
+        cardHeaders.forEach((cardHeader) => {
+        cardHeader.style.cursor = "move";
+        });
+
+      script(src='/js/chat.js')

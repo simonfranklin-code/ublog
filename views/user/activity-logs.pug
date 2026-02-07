@@ -1,0 +1,212 @@
+extends ../user/layout
+block titleBlock
+  title #{title}
+block content
+
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h3.mb-0 #{title}
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/users/dashboard') Users
+              li.breadcrumb-item.active(aria-current='page')
+                | #{title}
+          // end::Row
+        // end::Container
+    // end::App Content Header
+    .row.g-4
+        .col-12.connectedSortable
+            .callout.callout-info
+                | Use the form to filter User Activity Logs.
+        .col-md-12.connectedSortable
+            .card.card-success.card-outline.mb-4
+                // begin::Header
+                .card-header
+                    .card-title Filter Activity Logs
+                // end::Header
+                // begin::Body
+                .card-body
+                    form#filterForm
+                        .row.g-4
+                            .col-md-6
+                                .form-group.mb-2
+                                    label(for='userId') User ID
+                                    input.form-control.form-control-sm(type='number' name='userId' id='userId')
+                                .form-group.mb-2
+                                    label(for='action') Action
+                                    input.form-control.form-control-sm(type='text' name='action' id='action')
+                                .form-group.mb-2
+                                    label(for='entityType') Entity Type
+                                    input.form-control.form-control-sm(type='text' name='entityType' id='entityType')
+                                .form-group.mb-4
+                                    label(for='sortField') Sort By
+                                    select.form-control.form-control-sm(name='sortField' id='sortField')
+                                        option(value='timestamp') Timestamp
+                                        option(value='user_id') User ID
+                                        option(value='action') Action
+                                        option(value='entity_type') Entity Type
+                            .col-md-6
+                                .form-group.mb-2
+                                    label(for='startDate') Start Date
+                                    input.form-control.form-control-sm(type='date' name='startDate' id='startDate')
+                                .form-group.mb-2
+                                    label(for='endDate') End Date
+                                    input.form-control.form-control-sm(type='date' name='endDate' id='endDate')
+                                .form-group.mb-2
+                                    label(for='keyword') Keyword
+                                    input.form-control.form-control-sm(type='text' name='keyword' id='keyword')
+                                .form-group.mb-4
+                                    label(for='sortOrder') Order
+                                    select.form-control.form-control-sm(name='sortOrder' id='sortOrder')
+                                        option(value='ASC') Ascending
+                                        option(value='DESC' selected) Descending
+                        .card-footer
+                            .btn-group.btn-group-sm(role='group', aria-label='Button group')
+                                button.btn.btn-primary.btn-sm(type='button' id='filterButton') Filter
+
+    .row.g-4
+      // begin::Col  
+      .col-md-12.connectedSortable
+        .card.card-success.card-outline.mb-2
+          // begin::Header
+          .card-header
+            .card-title Activity Logs Table
+          // end::Header
+        
+          // begin::Body
+          .card-body
+            .table-responsive
+              table.table.table-striped.table-hover.rounded(style='width:1280px;')
+                thead
+                  tr
+                    th User ID
+                    th Action
+                    th Entity Type
+                    th Entity ID
+                    th Details
+                    th Timestamp
+                tbody#logsTableBody
+          // begin::Footer
+          .card-footer
+              nav
+                ul.pagination
+                  li.page-item
+                    button.page-link(type='button' id='previousPage') Previous
+                  li.page-item
+                    span.page-link(id='currentPage') 1
+                  li.page-item
+                    button.page-link(type='button' id='nextPage') Next
+          // end::Footer        
+
+    script.
+      $(document).ready(function() {
+        let currentPage = 1;
+
+        function fetchLogs(page = 1) {
+        const userId = $('#userId').val();
+        const action = $('#action').val();
+        const entityType = $('#entityType').val();
+        const startDate = $('#startDate').val();
+        const endDate = $('#endDate').val();
+        const keyword = $('#keyword').val();
+        const sortField = $('#sortField').val();
+        const sortOrder = $('#sortOrder').val();
+
+        $.ajax({
+            url: `/admin/activity-logs/json?page=${page}&userId=${userId}&action=${action}&entityType=${entityType}&startDate=${startDate}&endDate=${endDate}&keyword=${keyword}&sortField=${sortField}&sortOrder=${sortOrder}`,
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+            const logsTableBody = $('#logsTableBody');
+            logsTableBody.empty();
+
+            $.each(data.logs, function(index, log) {
+                const row = $('<tr>').html(`
+                <td>${log.user_id}</td>
+                <td>${log.action}</td>
+                <td>${log.entity_type}</td>
+                <td>${log.entity_id}</td>
+                <td class="ellipsis" data-toggle="popover" title="Activity log details" data-content="${log.details}">${log.details}</td>
+                <td>${new Date(log.timestamp).toLocaleString()}</td>
+                `);
+                logsTableBody.append(row);
+            });
+
+            $('#currentPage').text(data.page);
+            currentPage = data.page;
+
+            $('#previousPage').prop('disabled', data.page <= 1);
+            $('#nextPage').prop('disabled', data.page >= data.totalPages);
+
+            $('[data-toggle="popover"]').popover({
+                trigger: 'hover',
+                placement: 'left',
+                container: 'body'
+            });
+
+            $('#logError').hide();
+            },
+            error: function(xhr, status, error) {
+            console.error('Error fetching logs:', error);
+            $('#logError').show();
+            }
+        });
+        }
+
+        $('#filterButton').on('click', function() {
+        fetchLogs();
+        });
+
+        $('#previousPage').on('click', function() {
+        if (currentPage > 1) {
+            fetchLogs(currentPage - 1);
+        }
+        });
+
+        $('#nextPage').on('click', function() {
+        fetchLogs(currentPage + 1);
+        });
+
+        fetchLogs();
+
+        $('#collapseUsers').addClass('show');
+        $('#activity-logs').addClass('active');
+        });
+
+        function showPopover(id, content) {
+            try {
+            var options = { container: 'body', placement: 'top', trigger: 'hover', content: content };
+            var el = document.getElementById(id);
+            var popover = new bootstrap.Popover(el, options);
+            popover.toggleEnabled();
+            popover.toggle();
+            } catch (err) {
+            alert(JSON.stringify(err));
+            }
+        }
+
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+    // sortablejs
+    script.
+        const connectedSortables =
+        document.querySelectorAll(".connectedSortable");
+        connectedSortables.forEach((connectedSortable) => {
+        let sortable = new Sortable(connectedSortable, {
+        group: "shared",
+        handle: ".card-header",
+        });
+        });
+        const cardHeaders = document.querySelectorAll(
+        ".connectedSortable .card-header",
+        );
+        cardHeaders.forEach((cardHeader) => {
+        cardHeader.style.cursor = "move";
+        });
+
+    script(src='/js/chat.js')

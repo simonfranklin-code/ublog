@@ -1,0 +1,907 @@
+extends layout
+block titleBlock
+  title #{title}
+block content
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h3.mb-0 #{title}
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/users/dashboard') Dashboard
+              li.breadcrumb-item.active(aria-current='page')
+                | #{title}
+          // end::Row
+        // end::Container
+    // end::App Content Header
+    .row.g-4
+      // begin::Col
+      .col-12.connectedSortable
+        .callout.callout-info
+          | Use the filter form to filter Html Sections. To view and edit Html Sections use the Actions column.
+      // end::Col
+      // begin::Col
+      .col-md-12.connectedSortable
+        // begin::Filters
+        .card.card-success.card-outline.mb-4
+          // begin::Header
+          .card-header
+            .card-title Filter HTML Sections
+          // end::Header
+          // begin::Form
+          form#filterForm
+            // begin::Body
+            .card-body
+              .row.g-4
+                .col-6
+                  .form-group.mb-2
+                    label(for='blogId') Blog
+                    select.form-control.form-control-sm#blogId(name='blogId')
+                      option(value='') Select Blog
+                      each blog in blogs
+                        option(value=blog.BlogId)= blog.Title
+                  .form-group.mb-2
+                    label(for='blogPostIdFilter') Blog Post
+                    select.form-control.form-control-sm#blogPostIdFilter( name='blogPostId')
+                .col-6 
+                  .form-group.mb-2
+                    label(for='anchor') Anchor
+                    input.form-control.form-control-sm#anchorFilter(name='anchor' placeholder='Anchor')
+                  .form-group.mb-2
+                    label(for='limit') Sections limit
+                    select.form-control.form-control-sm(name='limit' id='limit' required='required')
+                      option(value='') Select Limit
+                      option(value=1) 1
+                      option(value=2) 2
+                      option(value=3) 3
+                      option(value=5) 5
+                      option(value=10) 10
+                      option(value=15) 15
+                      option(value=20) 20
+                      option(value=25) 25
+                      option(value=50) 50
+                      option(value=75) 75
+                      option(value=100) 100                        
+            // end::Body
+            // begin::Footer
+            .card-footer
+              .btn-group.btn-group-sm(role='group', aria-label='Button group with nested dropdown')
+                button.btn.btn-primary.btn-sm#filterButton
+                  i.fas.fa-filter
+                button.btn.btn-primary.btn-sm#newHtmlSectionBtn
+                  i.far.fa-file-alt
+                button.btn.btn-primary.btn-sm#findAdReplaceBtn
+                  i.fas.fa-search
+            // end::Footer
+          // end::Form
+        // end::Quick Example
+
+    .row.g-4
+      .col-md-12.connectedSortable
+        // begin::Blog Post Table
+        .card.card-success.card-outline.mb-2
+          // begin::Header
+          .card-header
+            .card-title Html Sections Table
+          // end::Header
+          // begin::Body
+          .card-body
+            .table-responsive
+              table.table.table-striped.table-hover#htmlSectionsTable(style='width: 1024px;')
+                thead
+                  tr
+                    th
+                      a(href='#' class='sort' data-field='BlogPostId') Id
+                    th
+                      a(href='#' class='sort' data-field='Anchor') Anchor
+                    th
+                      a(href='#' class='sort' data-field='ViewIndex') View Index
+                    th
+                      a(href='#' class='sort' data-field='DateCreated') Date Created
+                    th
+                      a(href='#' class='sort' data-field='Slug') Slug
+                    th
+                      a(href='#' class='sort' data-field='Body') Body
+                    th Actions
+
+                tbody#htmlSectionsTableBody
+          // begin::Footer
+          .card-footer.pb-0
+            nav.mb-0
+              ul.pagination
+                li.page-item
+                  button.page-link(type='button' id='previousPage') Previous
+                li.page-item
+                  span.page-link(id='currentPage') 1
+                li.page-item
+                  button.page-link(type='button' id='nextPage') Next
+          // end::Footer
+        // end::Blog Post Table
+    #toast-container.position-fixed.top-0.end-0.p-3( style="z-index: 10000;")  
+
+
+    // Modals
+    // Create/Edit Modal
+    .modal.fade#htmlSectionModal( data-backdrop="static" data-keyboard="false" tabindex='-1' role='dialog')
+      .modal-dialog.modal-lg(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title#htmlSectionModalTitle (New / Edit) HTML Section
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+              
+          .modal-body(id="editHtmlSectionBody")
+            form#htmlSectionForm
+              input(type='hidden' id='htmlSectionId' name='id')
+              .formgroup.mb-2
+                label(for='blogPostId') Blog Post
+                select.form-control.form-control-sm#addBlogPostId( name='blogPostId')
+              .form-group.mb-2
+                label(for='htmlContent') HTML
+                textarea.form-control.form-control-sm#htmlContent(name='html' required='required')
+              .form-group.mb-2
+                label(for='viewIndex') View Index
+                input.form-control.form-control-sm#viewIndex(name='viewIndex' type='number' required='required')
+              .form-group.mb-2
+                label(for='anchor') Anchor
+                input.form-control.form-control-sm#anchor(name='anchor' required='required')
+              .form-group.mb-2
+                label(for='slug') Slug
+                input.form-control.form-control-sm#slug(name='slug' required='required')
+              .form-group.mb-2
+                label(for='page') Page
+                input.form-control.form-control-sm#page(name='page')  
+              .form-group.mb-2
+                label(for='header') Header
+                input.form-control.form-control-sm#header(name='header') 
+              .form-group.mb-2
+                label(for='body') Body
+                input.form-control.form-control-sm#body(name='body')  
+              .form-group.mb-2
+                label(for='component') Component
+                input.form-control.form-control-sm#component(name='component')  
+              .form-group.mb-2
+                label(for='css') CSS
+                input.form-control.form-control-sm#css(name='css')  
+              .form-group.mb-2
+                label(for='paramsJson') ParamsJson
+                input.form-control.form-control-sm#paramsJson(name='paramsJson')  
+          .modal-footer
+            button.btn.btn-primary.btn-sm#saveHtmlSection(type='button') Save 
+            |
+            button.btn.btn-secondary.btn-sm(type='button' data-bs-dismiss='modal') Close
+
+    // View Modal
+    .modal.fade#viewHtmlSectionModal( data-backdrop="static" data-keyboard="false" tabindex='-1' role='dialog')
+      .modal-dialog.modal-xl(role='document')
+        .modal-content
+          .modal-header
+
+            .card-tools
+
+              button.btn.btn-tool(type='button', data-lte-toggle='fullscreen', style='z-index: 10000;')
+                i.bi.bi-fullscreen(data-lte-icon='maximize')
+
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close') 
+            
+          .modal-body(id="viewHtmlSectionBody" style='height:auto; width:100%;')
+            iframe#viewHtmlSectionFrame.viewHtmlSectionFrame(style='height:800px; width:100%;' frameborder='0' scrolling='no')
+            button.btn.btn-secondary.btn-sm(type='button' data-bs-dismiss='modal') Close
+
+    // Delete Confirmation Modal
+    .modal.fade#confirmDeleteModal(tabindex='-1' role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title Confirm Delete
+            button.close(type='button' data-dismiss='modal' aria-label='Close')
+              span(aria-hidden='true') &times;
+          .modal-body
+            p Are you sure you want to delete this HTML section?
+          .modal-footer
+            button.btn.btn-secondary.btn-sm(type='button' data-dismiss='modal') Cancel
+            button.btn.btn-danger.btn-sm#confirmDeleteBtn(type='button') Delete
+    // Link Insertion Modal
+    .modal.fade#insertLinkModal(tabindex='-1' role='dialog' aria-labelledby='insertLinkModalLabel' aria-hidden='true')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title#insertLinkModalLabel Insert Link
+            button.close(type='button' data-dismiss='modal' aria-label='Close')
+              span(aria-hidden='true') &times;
+          .modal-body
+            form#insertLinkForm
+              .form-group
+                label(for='linkUrl') URL
+                input.form-control#linkUrl(type='text' name='linkUrl' required='required')
+              .form-group
+                label(for='linkText') Text
+                input.form-control#linkText(type='text' name='linkText' readonly)
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+            button.btn.btn-primary#insertLinkBtn(type='button') Insert Link
+    // Font Size Modal
+    .modal.fade(id='fontSizeModal', tabindex='-1', role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title Font Size
+              button.close(type='button', data-dismiss='modal', aria-label='Close')
+                span(aria-hidden='true') &times;
+          .modal-body
+            select#fontSizeSelect.form-control
+              option(value='12px') 12px
+              option(value='14px') 14px
+              option(value='16px') 16px
+              option(value='18px') 18px
+              option(value='20px') 20px
+              option(value='24px') 24px
+          .modal-footer
+            button.btn.btn-primary(type='button', id='applyFontSize') Apply
+            button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Font Family Modal
+    .modal.fade(id='fontFamilyModal', tabindex='-1', role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title Font Family
+              button.close(type='button', data-dismiss='modal', aria-label='Close')
+                span(aria-hidden='true') &times;
+          .modal-body
+            select#fontFamilySelect.form-control
+              option(value='Arial') Arial
+              option(value='Courier New') Courier New
+              option(value='Georgia') Georgia
+              option(value='Times New Roman') Times New Roman
+              option(value='Verdana') Verdana
+          .modal-footer
+            button.btn.btn-primary(type='button', id='applyFontFamily') Apply
+            button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Font Color Modal
+    .modal.fade(id='fontColorModal', tabindex='-1', role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title Font Color
+              button.close(type='button', data-dismiss='modal', aria-label='Close')
+                span(aria-hidden='true') &times;
+          .modal-body
+            input#fontColorInput(type='color', class='form-control')
+          .modal-footer
+            button.btn.btn-primary(type='button', id='applyFontColor') Apply
+            button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+    // Find and replace Modal
+    .modal.fade(id='findAndReplaceModal', tabindex='-1', role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title Find and replace
+            button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+          .modal-body
+            form#findAndReplaceForm
+              .formgroup.mb-2
+                label(for="find-text") Find:
+                input.form-control.form-control-sm#find-text(type="text" name="find-text" required='required')
+              .formgroup.mb-2
+                label(for="replace-text") Replace with:
+                input.form-control.form-control-sm#replace-text(type="text" name="replace-text")
+              .formgroup.mb-2
+                label(for="replace-all") Replace all:
+                input#replace-all(type="checkbox" name="replace-all")
+          
+          .modal-footer
+            button.btn.btn-primary.btn-sm#buttonreplace(type="button") Replace
+            |
+            button.btn.btn-secondary.btn-sm(type='button', data-bs-dismiss='modal') Close
+    // Find Modal
+    .modal.fade(id='findModal', tabindex='-1', role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5.modal-title Find in this blog:
+            button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+          .modal-body
+            form#findAndReplaceForm
+              .formgroup.mb-2
+                label(for="find-text") Find:
+                input.form-control.form-control-sm#find-text(type="text" name="find-text" required='required')     
+          .modal-footer
+            button.btn.btn-primary.btn-sm#buttonreplace(type="button") Find
+            |
+            button.btn.btn-secondary.btn-sm(type='button', data-bs-dismiss='modal') Close
+    #toast-container.position-fixed.top-0.end-0.p-3( style="z-index: 10000;")    
+
+    script.
+       
+      $(document).ready(function () {
+        var socket = io();
+        let currentPage = 1;
+        let sortField = 'DateCreated';
+        let sortOrder = 'DESC';
+        let currentHtmlSectionId = 0;
+        let currentHtmlSectionAnchor = '';
+        let selectedText = '';
+        let htmlSections = null;
+        let selectedBlogPostIndex;
+        let blogSlug = '';
+        let blogPostSlug = '';            
+
+        socket.on('flash', function (data) {
+            // Create a Bootstrap Toast dynamically
+            const toastHTML = `
+                    <div class="toast show ${!data.isError ? 'text-bg-primary': 'text-bg-danger'}  border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header">
+                            <strong class="me-auto">Notification</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${data.message}
+                        </div>
+                    </div>
+                `;
+           $('#toast-container').append(toastHTML);
+
+            // Initialize and show the toast
+            const toastEl = document.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+
+        function fetchHtmlSections() {
+            const anchor = $('#anchorFilter').val();
+            const blogPostId = $('#blogPostIdFilter').val();
+            if (blogPostId) {
+                selectedBlogPostIndex = $('#blogPostIdFilter').prop('selectedIndex');
+            } else {
+                selectedBlogPostIndex = 0;
+            }
+            const limit = $('#limit').val();
+            if (!limit) {
+                $('#limit').val(25);
+            }
+            const blogId = $('#blogId').val();
+            if (!limit) {
+                alert('Please select a limit.');
+                return;
+            }
+            if (!blogId) {
+                alert('Please select a blog.');
+                return;
+            }
+
+            $.ajax({
+                url: '/users/htmlSections/api',
+                data: { page: currentPage, limit, sortField, sortOrder, anchor, blogPostId },
+                success: function (data) {
+                    blogSlug = data._BlogSlug;
+                    blogPostSlug = data._BlogPostSlug;
+                    const tbody = $('#htmlSectionsTableBody');
+                    tbody.empty();
+
+                    $('#blogPostIdFilter').empty();
+                    data.blogPosts.forEach(blogPost => {
+                        let option = `<option value="${blogPost.BlogPostId}" name="${blogPost.Title}">${blogPost.Title}</option>`;
+                        $('#blogPostIdFilter').append(option);
+                    });
+                    $('#blogPostIdFilter').prop('selectedIndex', selectedBlogPostIndex);
+                    
+                    $('#addBlogPostId').empty();
+                    data.blogPosts.forEach(blogPost => {
+                        let option = `<option value="${blogPost.BlogPostId}" name="${blogPost.Title}">${blogPost.Title}</option>`;
+                        $('#addBlogPostId').append(option);
+                    });
+                    $('#addBlogPostId').prop('selectedIndex', selectedBlogPostIndex);
+
+
+                    htmlSections = data.htmlSections;
+                    
+                    data.htmlSections.forEach(section => {
+                        tbody.append(`
+                            <tr>
+                              <td>${section.HtmlSectionID}</td>
+                              <td class="admin-blogs-ellipsis" data-bs-toggle="popover" data-bs-title="HtmlSection Anchor details" data-bs-content="${section.Anchor}">${section.Anchor}</td>
+                              <td>${section.ViewIndex}</td>
+                              <td>${section.DateCreated}</td>
+                              <td class="admin-blogs-ellipsis" data-bs-toggle="popover" data-bs-title="HtmlSection Slug details" data-bs-content="${section.Slug}">${section.Slug}</td>
+                              <td class="admin-blogs-ellipsis" data-bs-toggle="popover" data-bs-title="HtmlSection Body details" data-bs-content="${section.Body}">${section.Body}</td>
+                              <td>
+                                
+                                <i class="fas fa-file-import mbr-iconfont mbr-iconfont-btn import-btn" data-anchor="${section.Anchor}" data-slug="${section.Slug}"></i>
+                                <i class="fas fa-eye mbr-iconfont mbr-iconfont-btn view-btn" data-blogSlug="${blogSlug}" data-blogPostSlug="${blogPostSlug}" data-anchor="${section.Anchor}" data-id="${section.HtmlSectionID}"></i>
+                                <i class="fas fa-edit mbr-iconfont mbr-iconfont-btn edit-btn" data-anchor="${section.Anchor}" data-id="${section.HtmlSectionID}"></i>
+                                <i class="far fa-times-circle mbr-iconfont mbr-iconfont-btn delete-btn" data-anchor="${section.Anchor}" data-id="${section.HtmlSectionID}"></i>
+                              </td>
+                            </tr>
+                        `);
+                    });
+                    $('#currentPage').text('Page ' + currentPage + ' of ' + data.totalPages + ' pages');
+                    
+
+                    $('#previousPage').prop('disabled', currentPage <= 1);
+                    $('#nextPage').prop('disabled', currentPage >= data.totalPages);
+
+                    $('[data-bs-toggle="popover"]').popover({
+                      trigger: 'hover',
+                      placement: 'left',
+                      container: 'body'
+                    });
+                }
+            });
+        }
+
+        // Attach the change event listener to the select element
+        
+       $('#blogId').on('change', function() {
+            const selectedBlogId = $(this).val();
+            if (selectedBlogId) {
+                $.ajax({
+                    url: `/users/htmlSections/getBlogPosts/${selectedBlogId}`,
+                    method: 'GET',
+                    success: function(data) {
+                        $('#blogPostIdFilter').empty();
+                        data.forEach(blogPost => {
+                            $('#blogPostIdFilter').append(`<option value="${blogPost.BlogPostId}">${blogPost.Title}</option>`);
+                        });
+                        $('#filterButton').click();
+                    },
+                    error: function(err) {
+                        console.error('Error fetching blog posts:', err);
+                    }
+                });
+            } else {
+                $('#blogPostIdFilter').empty();
+            }
+        });
+        
+        $('#blogPostIdFilter').on('change', function() {
+            var selectedIndex = $(this).prop('selectedIndex');
+            selectedBlogPostIndex = selectedIndex;
+            $('#filterButton').click();
+        });
+
+        $('#buttonreplace').on('click', function (e) {
+            $('#findAndReplaceForm').submit();
+        });
+
+        $('#saveHtmlSection').on('click', function (e) {
+            $('#htmlSectionForm').submit();
+        });
+
+       
+        $('#filterButton').on('click', function (e) {
+            e.preventDefault();
+            currentPage = 1;
+            fetchHtmlSections();
+        });
+
+        $('#previousPage').on('click', function (e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                fetchHtmlSections();
+            }
+        });
+
+        $('#nextPage').on('click', function (e) {
+            e.preventDefault();
+            currentPage++;
+            fetchHtmlSections();
+        });
+
+        $('.sort').on('click', function (e) {
+            e.preventDefault();
+            const field = $(this).data('field');
+            sortOrder = (sortField === field && sortOrder === 'ASC') ? 'DESC' : 'ASC';
+            sortField = field;
+            fetchHtmlSections();
+        });
+
+        $('#newHtmlSectionBtn').on('click', function (e) {
+            e.preventDefault();
+            $('#htmlSectionModalTitle').text('New HTML Section');
+            $('#htmlSectionForm')[0].reset();
+            $('#htmlSectionId').val('');
+            $('#htmlSectionModal').modal('show');
+        });
+
+        $(document).on('click', '.edit-btn', function () {
+            const htmlSectionId = $(this).data('id');
+            $.get(`/users/htmlSections/${htmlSectionId}`, function (section) {
+                $('#htmlSectionModalTitle').text('Edit HTML Section');
+                $('#htmlContent').val(section.Html);
+                $('#viewIndex').val(section.ViewIndex);
+                $('#anchor').val(section.Anchor);
+                $('#slug').val(section.Slug);
+                $('#page').val(section.Page);
+                $('#header').val(section.Header);
+                $('#body').val(section.Body);
+                $('#component').val(section.Component);
+                $('#css').val(section.Css);
+                $('#paramsJson').val(section.ParamsJson);
+                $('#htmlSectionId').val(section.HtmlSectionID);
+                $('#htmlSectionModal').modal('show');
+            });
+        });
+
+        $(document).on('click', '.view-btn', function () {
+
+            currentHtmlSectionAnchor = $(this).data('anchor');
+            const htmlSectionId = $(this).data('id');
+            currentHtmlSectionId = htmlSectionId;
+            let iframeSrc = `/users/htmlSections/${blogSlug}/${blogPostSlug}/${currentHtmlSectionAnchor}`;
+            
+
+            $('#viewHtmlSectionFrame').attr('src', iframeSrc);
+            $('#viewHtmlSectionModal').modal('show');
+            
+        });
+
+        $(document).on('click', '.import-btn', function () {
+            const slug = $(this).data('slug');
+            const anchor = $(this).data('anchor');
+            $.get(`/users/htmlSections/importSingleHtmlSectionById/${slug}/${anchor}`, function (section) {
+
+                $('#editableHtmlContent').html(section[0]);
+                $('#viewHtmlSectionModal').modal('show');
+            });
+        });
+
+        $('#htmlSectionForm').on('submit', function (e) {
+            e.preventDefault();
+            const htmlSectionId = $('#htmlSectionId').val();
+            const url = htmlSectionId ? `/users/htmlSections/edit/${htmlSectionId}` : '/users/htmlSections/create';
+            $.post(url, $(this).serialize(), function (response) {
+                if (response.success) {
+                    $('#htmlSectionModal').modal('hide');
+                    fetchHtmlSections();
+                }
+            });
+        });
+   
+        $('#saveHtmlSectionForm').on('submit', function (e) {
+            e.preventDefault();
+            const saveHtmlSectionId = $('#saveHtmlSectionId').val();
+            $('#saveHtmlSectionHtml').val($('#htmlSectionHtml').html());
+
+            const url = saveHtmlSectionId ? `/users/htmlSections/edit/${saveHtmlSectionId}` : '/users/htmlSections/create';
+            $.post(url, $(this).serialize(), function (response) {
+                if (response.success) {
+                    $('#viewHtmlSectionModal').modal('hide');
+                    fetchHtmlSections();
+                }
+            });
+        });
+        
+        $('#edit-html').on('click', function () {
+
+            const contentDiv = $('#editableHtmlContent');
+            const isEditable = contentDiv.prop('contenteditable') === 'true';
+            contentDiv.prop('contenteditable', !isEditable);
+            $('#save-html').prop('disabled', isEditable);
+            //- $(this).text(isEditable ? 'Edit' : 'Cancel');
+
+        });
+
+
+        $('#save-html').on('click', function() {
+            const updatedHtml = $('#editableHtmlContent').html();
+            const htmlSectionId = currentHtmlSectionId;
+
+            $.ajax({
+                url: '/users/htmlSections/update',
+                method: 'POST',
+                data: {
+                    HtmlSectionID: htmlSectionId,
+                    Html: updatedHtml
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('Content saved successfully!');
+                    } else {
+                        alert('Failed to save content.');
+                    }
+                    $('#viewHtmlSectionModal').modal('hide');
+                },
+                error: function(err) {
+                    alert(JSON.stringify(err));
+                }
+            });
+        });
+        
+        $('#findAdReplaceBtn').on('click', function(e) {
+            e.preventDefault();
+            $('#findAndReplaceModal').modal('show');
+        });
+
+
+        $('#findAndReplaceForm').on('submit', function (e) {
+            e.preventDefault();
+            const find = $('#find-text').val();
+            const replace = $('#replace-text').val();
+            let blogPostId = null;
+
+            if ($('#replace-all').is(':checked')) {
+                blogPostId = null;
+            } else {
+                blogPostId = $('#blogPostIdFilter').val();
+            }
+
+
+            $.ajax({
+                url: '/users/htmlSections/findAndReplace',
+                method: 'POST',
+                data: {
+                    find: find,
+                    replace: replace,
+                    blogPostId: blogPostId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#findAndReplaceModal').modal('hide');
+                        alert(response.message)
+                    } else {
+                        alert('Find And Replace Failed.');
+                    }
+                },
+                error: function(err) {
+                    alert(JSON.stringify(err));
+                }
+            });
+        });
+
+
+        $('#importHtmlSectionBtn').on('click', function () {
+
+            const htmlSectionsFromDb = htmlSections;
+
+            $.ajax({
+                url: '/users/htmlSections/importSingleHtmlSectionById/solid-foundation-knowledge-is-power-in-digital-marketing/2',
+                method: 'GET',
+                
+                success: function(htmlSectionsFromFile) {
+                    
+                    if (htmlSectionsFromDb !== 'undefined' && htmlSectionsFromDb.length > 0) {
+                        for (let i = 0; i < htmlSectionsFromFile.length; i++) {
+                            const htmlSectionId = htmlSectionsFromDb[i].HtmlSectionID;
+                            const dbAnchor = htmlSectionsFromDb[i].Anchor;
+                            const [htmlContent, anchor] = htmlSectionsFromFile[i];
+                            const blogPostId = $('#blogPostIdFilter').val();
+                            if (dbAnchor === anchor) {
+
+                                $.ajax({
+                                    url: '/users/htmlSections/updateBySectionId',
+                                    method: 'POST',
+                                    data: {
+                                        blogPostId,
+                                        htmlSectionId, 
+                                        htmlContent
+                                    },
+                                    success: function(data) {
+                                        console.log(JSON.stringify(data));
+                                    },
+                                    error: function(err) {
+                                        console.log(JSON.stringify(err));
+                                    }
+                                });
+                            }
+                        }
+
+                    }
+                    ///alert(JSON.stringify(data));
+                },
+                error: function(err) {
+                    alert(JSON.stringify(err));
+                }
+            });
+        });
+
+        $('#image-html').on('click', function () {
+            $('#imageUploadInput').click();
+        });
+
+       $('.image-wrapper > img').on('click', function () {
+            $('#imageUploadInput').click();
+       });
+
+
+       $('#imageUploadInput').on('change', function () {
+         const file = this.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                $.ajax({
+                    url: '/users/htmlSections/uploadImage',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            const imageUrl = response.imageUrl;
+                            const section = $('#' + currentHtmlSectionAnchor);
+                            if(section.hasClass('header1')){
+                                section.attr('style','background-image: url("'+ imageUrl + '")');
+                            }else{
+                                $('.image-wrapper > img').attr('src', imageUrl);
+                            }
+                            
+                        } else {
+                            alert('Image upload failed.');
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while uploading the image.');
+                    }
+                });
+            }
+        });
+
+        $(document).on('click', '.delete-btn', function () {
+            const htmlSectionId = $(this).data('id');
+            $('#confirmDeleteBtn').data('id', htmlSectionId);
+            $('#confirmDeleteModal').modal('show');
+        });
+
+        $('#confirmDeleteBtn').on('click', function () {
+            const htmlSectionId = $(this).data('id');
+            $.post(`/users/htmlSections/delete/${htmlSectionId}`, function (response) {
+                if (response.success) {
+                    $('#confirmDeleteModal').modal('hide');
+                    fetchHtmlSections();
+                }
+            });
+        });
+
+
+        
+
+        // Function to get the selected text
+        function getSelectionText() {
+            let text = '';
+            if (window.getSelection) {
+                text = window.getSelection().toString();
+            } else if (document.selection && document.selection.type != 'Control') {
+                text = document.selection.createRange().text;
+            }
+            return text;
+        }
+
+        // Event handler for the Insert Link button
+        $('#insert-link').on('click', function () {
+            selectedText = getSelectionText();
+            if (selectedText.length > 0) {
+                $('#linkText').val(selectedText);
+                $('#insertLinkModal').modal('show');
+            } else {
+                alert('Please select the text you want to hyperlink.');
+            }
+        });
+
+        // Event handler for the Insert Link button in the modal
+        $('#insertLinkBtn').on('click', function () {
+            const linkUrl = $('#linkUrl').val();
+            const linkText = $('#linkText').val();
+
+            if (linkUrl && linkText) {
+                const anchorTag = `<a href="${linkUrl}" target="_blank">${linkText}</a>`;
+                const contentDiv = $('#editableHtmlContent');
+                const currentHtml = contentDiv.html();
+                const newHtml = currentHtml.replace(linkText, anchorTag);
+                contentDiv.html(newHtml);
+                $('#insertLinkModal').modal('hide');
+            } else {
+                alert('Please enter the URL.');
+            }
+        });
+
+        // Event handler for the Remove Link button
+        $('#remove-link').on('click', function () {
+            // Get the selected link
+            const selectedElement = window.getSelection().anchorNode.parentNode;
+    
+            if (selectedElement.tagName === 'A') {
+                // Remove the link while preserving the text
+                const linkText = selectedElement.innerText;
+                $(selectedElement).replaceWith(linkText);
+            } else {
+                alert('Please select a link to remove.');
+            }
+        });
+
+        // Function to get the selected text node
+        function getSelectedTextNode() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                return range.commonAncestorContainer.nodeType === 3 ? range.commonAncestorContainer : range.commonAncestorContainer.firstChild;
+            }
+            return null;
+        }
+
+        // Event handler for the Font Size button
+        $('#font-size').on('click', function () {
+            selectedText = getSelectedTextNode();
+            if (selectedText) {
+                $('#fontSizeModal').modal('show');
+            } else {
+                alert('Please select the text you want to change.');
+            }
+        });
+
+        // Event handler for the Apply button in the Font Size modal
+        $('#applyFontSize').on('click', function () {
+            const fontSize = $('#fontSizeSelect').val();
+            if (selectedText) {
+                $(selectedText).css('font-size', fontSize);
+                $('#fontSizeModal').modal('hide');
+            }
+        });
+
+        // Event handler for the Font Family button
+        $('#font-family').on('click', function () {
+            selectedText = getSelectedTextNode();
+            if (selectedText) {
+                $('#fontFamilyModal').modal('show');
+            } else {
+                alert('Please select the text you want to change.');
+            }
+        });
+
+        // Event handler for the Apply button in the Font Family modal
+        $('#applyFontFamily').on('click', function () {
+            const fontFamily = $('#fontFamilySelect').val();
+            if (selectedText) {
+                $(selectedText).css('font-family', fontFamily);
+                $('#fontFamilyModal').modal('hide');
+            }
+        });
+
+        // Event handler for the Font Color button
+        $('#font-color').on('click', function () {
+            selectedText = getSelectedTextNode();
+            if (selectedText) {
+                $('#fontColorModal').modal('show');
+            } else {
+                alert('Please select the text you want to change.');
+            }
+        });
+
+        // Event handler for the Apply button in the Font Color modal
+        $('#applyFontColor').on('click', function () {
+            const fontColor = $('#fontColorInput').val();
+            if (selectedText) {
+                $(selectedText).css('color', fontColor);
+                $('#fontColorModal').modal('hide');
+            }
+        });
+        fetchHtmlSections();
+      });
+
+    script(src='/js/socket.io.js').
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+    
+    // sortablejs
+    script.
+      const connectedSortables =
+      document.querySelectorAll(".connectedSortable");
+      connectedSortables.forEach((connectedSortable) => {
+        let sortable = new Sortable(connectedSortable, {
+          group: "shared",
+          handle: ".card-header",
+        });
+      });
+      const cardHeaders = document.querySelectorAll(
+        ".connectedSortable .card-header",
+      );
+      cardHeaders.forEach((cardHeader) => {
+        cardHeader.style.cursor = "move";
+      });

@@ -1,0 +1,232 @@
+Can you help me find out why my browser redirects to the error page? I have placed comments in the code at the point where the server redirects.
+-------------------------------------------------------------------------------------------------
+DeepSeekApi model.
+-------------------------------------------------------------------------------------------------
+const db = require('./db');
+const deepseek_chat_db = require('./deepseek-chat');
+const fs = require('fs');
+const { OpenAI } = require('openai');
+
+const deepseekApiKey = 'your ApiKey';
+const openai = new OpenAI({
+    baseURL: 'https://api.deepseek.com',
+    apiKey: deepseekApiKey
+});
+
+class DeepSeekApi {
+
+
+
+
+    static async createCompletion(message, session_id, user_id) {
+        const systemPrompt = `
+            The user will provide some exam text. Please parse the "question" and "answer" and output them in JSON format. 
+
+            EXAMPLE INPUT: 
+            Which is the highest mountain in the world? Mount Everest.
+
+            EXAMPLE JSON OUTPUT:
+            {
+                "question": "Which is the highest mountain in the world?",
+                "answer": "Mount Everest"
+            }
+            `;
+
+        try {
+            // Store user message
+            await deepseek_chat_db.run(
+                'INSERT INTO messages (session_id, user_id, role, content) VALUES (?, ?, ?, ?)',
+                [session_id, user_id, 'user', message]
+            );
+
+
+            const response = await openai.chat.completions.create({
+                model: "deepseek-chat",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: message }
+                ],
+                response_format: { type: 'json_object' },
+                temperature: 0.7
+            });
+
+            const result = JSON.parse(response.choices[0].message.content);
+            // Store assistant message
+            await deepseek_chat_db.run(
+                'INSERT INTO messages (session_id, user_id, role, content) VALUES (?, ?, ?, ?)',
+                [session_id, user_id, 'assistant', result.answer]
+            );
+            return result;
+
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+
+    static getDeepseekChatHistory(session_id) {
+        try {
+
+            const query = `SELECT * FROM messages WHERE session_id = ? ORDER BY timestamp ASC`;
+            return new Promise((resolve, reject) => {
+                deepseek_chat_db.all(query, [session_id], (err, messages) => {
+                    if (err) return reject(err);
+                    resolve(messages);
+                });
+            });
+
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({ error: 'An error occurred' });
+        }
+    }
+
+    static logError(err) {
+        const errorMessage = `${new Date().toISOString()} - Error: ${err.message}\n`;
+        fs.appendFile('error.log', errorMessage, (fsErr) => {
+            if (fsErr) {
+                console.error('Failed to write to log file:', fsErr);
+            }
+        });
+    }
+}
+
+module.exports = DeepSeekApi;
+
+--------------------------------------------------------------------------------------------------------
+Socket.IO in app.js
+--------------------------------------------------------------------------------------------------------
+// Handle Socket.IO connections
+io.on('connection', async (socket) => {
+    const user = socket.request.user; // Access authenticated user
+    console.log('User connected:', socket.id);
+    // Emit the updated user list to all clients
+    if (user && user.id) {
+        if (onlineUsers.has(user.id)) {
+            console.log(`User ${user.username} (${user.id}) already connected.`);
+            return;
+        }
+
+
+        console.log(`User connected: ${user.username} (${user.id})`);
+
+        // Register a username to a socket ID
+        users[user.id] = socket.id;
+
+        // Add the user to the map
+        onlineUsers.set(user.id, {
+            username: user.username,
+            avatar: user.avatar,
+            socketId: socket.id
+        });
+
+        // Emit the updated user list to all clients
+        const userList = Array.from(onlineUsers.entries()).map(([userId, details]) => ({
+            userId,
+            username: details.username,
+            avatar: details.avatar,
+            socketId: details.socketId
+        }));
+        io.emit('updateUserList', userList);
+
+
+        // Notify all clients that the user is online
+        io.emit('user-online', { userId: user.id, username: user.username, avatar: user.avatar, socketId: socket.id });
+
+        // Join user-specific room
+        socket.join(user.id);  // Use the user's ID to join a room
+
+        // Handle receiving a chat message from the client.
+	// This is is where the code breaks
+        socket.on('deep-seek-chatMessage',  async function (data) {
+            if (user) {
+		// when the code hits his point the browser redirects to an error page whith a 404 not found message.
+                const message = await DeepSeekApi.createCompletion(data.message, data.sessionId, user.id);
+
+                io.emit('deep-seek-chatMessage', { avatar: user.avatar, username: user.username, message: message.answer, id: user.id, sessionId: data.sessionId, socketid: socket.id });
+            }
+        });
+
+        // Handle receiving a chat message from the client
+        socket.on('chatMessage', (msg) => {
+            if (user) {
+                io.emit('chatMessage', { avatar: user.avatar, username: user.username, message: msg, id: user.id });
+            }
+        });
+
+        // Handle receiving a private message
+        socket.on('privateMessage', ({ to, message }) => {
+            const targetSocketId = users[to]; // Get the recipient's socket ID
+            if (targetSocketId) {
+                // Send the private message to the target user
+                io.to(targetSocketId).emit('privateMessage', {
+                    from: user.id,
+                    avatar: user.avatar,
+                    username: user.username,
+                    socketid: targetSocketId,
+                    message,
+                });
+                // Emit acknowledgment back to the sender
+                socket.emit('messageDelivered', { to, message });
+                console.log(`Private message from ${user.username} to ${to}: ${message}`);
+            } else {
+                // Notify sender that the recipient is offline or unavailable
+                socket.emit('messageFailed', { to, message });
+                console.log(`User ${to} not found or offline.`);
+            }
+        });
+
+        // Handle user disconnecting
+        socket.on('disconnect', () => {
+            console.log(`User disconnected: ${user.username} (${user.id})`);
+
+            // Remove user from online users set
+            onlineUsers.delete(user.id);
+            delete users[user.id];
+            // Notify all clients that the user has gone offline
+            io.emit('user-offline', { userId: user.id, username: user.username, avatar: user.avatar });
+            // Emit the updated user list to all clients
+            const userList = Array.from(onlineUsers.entries()).map(([userId, details]) => ({
+                userId,
+                username: details.username,
+                avatar: details.avatar
+            }));
+            io.emit('updateUserList', userList);
+        });
+
+
+        // Handle user joining a specific room
+        socket.on('joinRoom', (userId) => {
+            socket.join(userId); // Join a room named after the userId
+            console.log(`User ${userId} joined room`);
+        });
+
+        socket.on('sendFile', (data) => {
+            // Broadcast file link to all users
+            io.emit('fileMessage', {
+                username: data.username,
+                fileUrl: data.fileUrl,
+                fileName: data.fileName,
+            });
+        });
+
+        // Relay signaling data
+        socket.on('offer', (data) => {
+            console.log('Offer received from:', data.from);
+            socket.to(data.to).emit('offer', data);
+        });
+
+        socket.on('answer', (data) => {
+            console.log('Answer received from:', data.from);
+            socket.to(data.to).emit('answer', data);
+        });
+
+        socket.on('ice-candidate', (data) => {
+            console.log('ICE candidate received from:', data.from);
+            console.log('ICE candidate details:', data.candidate);
+
+            // Relay the ICE candidate to the intended recipient
+            socket.to(data.to).emit('ice-candidate', data);
+        });
+    }
+});

@@ -1,0 +1,153 @@
+extends layout
+block titleBlock
+  title #{title}
+block content
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+           .col-sm-6
+             h3.mb-0 #{title}
+           .col-sm-6
+             ol.breadcrumb.float-sm-end
+               li.breadcrumb-item
+                 a(href='/users/dashboard') Dashboard
+               li.breadcrumb-item.active(aria-current='page')
+                 | #{title}
+    .row
+      .col-md-12
+        // The time line
+        .timeline
+          // timeline time label
+          .time-label
+            span.text-bg-danger 10 Feb. 2023
+          // /.timeline-label
+          // timeline item
+          div
+            i.timeline-icon.bi.bi-envelope.text-bg-primary
+            .timeline-item
+              span.time
+                i.bi.bi-clock-fill
+                |  12:05
+              h3.timeline-header
+                a(href='#') Support Team
+                |  sent you an email
+              .timeline-body
+                | Etsy doostang zoodles disqus groupon greplin oooj voxy
+                | zoodles, weebly ning heekya handango imeem plugg dopplr
+                | jibjab, movity jajah plickers sifteo edmodo ifttt
+                | zimbra. Babblely odeo kaboodle quora plaxo ideeli hulu
+                | weebly balihoo...
+              .timeline-footer
+                a.btn.btn-primary.btn-sm Read more
+                |  
+                a.btn.btn-danger.btn-sm Delete
+          // END timeline item
+          // timeline item
+          div
+            i.timeline-icon.bi.bi-person.text-bg-success
+            .timeline-item
+              span.time
+                i.bi.bi-clock-fill
+                |  5 mins ago
+              h3.timeline-header.no-border
+                a(href='#') Sarah Young
+                |  accepted your friend request
+          // END timeline item
+          // timeline item
+          div
+            i.timeline-icon.bi.bi-chat-text-fill.text-bg-warning
+            .timeline-item
+              span.time
+                i.bi.bi-clock-fill
+                |  27 mins ago
+              h3.timeline-header
+                a(href='#') Jay White
+                |  commented on your post
+              .timeline-body
+                | Take me to your leader! Switzerland is small and
+                | neutral! We are more like Germany, ambitious and
+                | misunderstood!
+              .timeline-footer
+                a.btn.btn-warning.btn-sm View comment
+          // END timeline item
+          // timeline time label
+          .time-label
+            span.text-bg-success 3 Jan. 2023
+          // /.timeline-label
+          // timeline item
+          div
+            i.timeline-icon.bi.bi-camera.text-bg-primary
+            .timeline-item
+              span.time
+                i.bi.bi-clock-fill
+                |  2 days ago
+              h3.timeline-header
+                a(href='#') Mina Lee
+                |  uploaded new photos
+              .timeline-body
+                img(src='../../../dist/assets/img/user1-128x128.jpg', alt='...')
+                |  
+                img(src='../../../dist/assets/img/user1-128x128.jpg', alt='...')
+                |  
+                img(src='../../../dist/assets/img/user1-128x128.jpg', alt='...')
+                |  
+                img(src='../../../dist/assets/img/user1-128x128.jpg', alt='...')
+          // END timeline item
+          // timeline item
+          div
+            i.timeline-icon.bi.bi-camera-film.text-bg-info
+            .timeline-item
+              span.time
+                i.bi.bi-clock-fill
+                |  5 days ago
+              h3.timeline-header
+                a(href='#') Mr. Doe
+                |  shared a video
+              .timeline-body
+                .ratio.ratio-16x9
+                  iframe(src='https://www.youtube.com/embed/tMWkeBIohBs', allowfullscreen='')
+              .timeline-footer
+                a.btn.btn-sm.text-bg-warning(href='#')
+                  | See comments
+          // END timeline item
+          div
+            i.timeline-icon.bi.bi-clock-fill.text-bg-secondary
+      // /.col
+    // /.row
+    // begin::Row
+    .row
+        .col-sm-6
+        h3.mb-0 Timeline
+        .col-sm-6
+        ol.breadcrumb.float-sm-end
+            li.breadcrumb-item
+            a(href='#') Home
+            li.breadcrumb-item.active(aria-current='page') Timeline
+        each event in timeline
+            // timeline item
+            div
+                i.timeline-icon.bi.bi-chat-text-fill.text-bg-warning
+                .timeline-item
+                    span.time
+                    i.bi.bi-clock-fill
+                    |  27 mins ago
+                    h3.timeline-header
+                        a(href='#') Jay White
+                        |  commented on your post
+                    .timeline-body
+                    | Take me to your leader! Switzerland is small and
+                    | neutral! We are more like Germany, ambitious and
+                    | misunderstood!
+                    .timeline-footer
+                a.btn.btn-warning.btn-sm View comment
+            // END timeline item
+    // end::Row
+
+
+
+
+
+

@@ -1,0 +1,54 @@
+I have a $('#imageUploadInput').click(); The first time I click on $('#image-html') it works, i'm able to change the image and save. If I move to the code tab and back then the $('#imageUploadInput').on('change', function () {}); event dosn't fire. Can you help?
+-------------------------------------------------------------------------------------------------------------------------
+javascript file.
+-------------------------------------------------------------------------------------------------------------------------
+    $('#image-html').on('click', function () {
+        $('#imageUploadInput').click();
+    });
+
+    $('.image-wrapper > img').on('click', function () {
+        $('#imageUploadInput').click();
+    });
+
+
+    $('#imageUploadInput').on('change', function () {
+        try {
+
+
+            var url = window.location.pathname;
+            var anchor = url.split("/")['5'];
+
+            const file = this.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                $.ajax({
+                    url: '/admin/htmlSections/uploadImage',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            const imageUrl = response.imageUrl;
+                            const section = $('#' + anchor);
+                            if (section.hasClass('header1')) {
+                                section.attr('style', 'background-image: url("' + imageUrl + '")');
+                            } else {
+                                $('.image-wrapper > img').attr('src', imageUrl);
+                            }
+
+                        } else {
+                            alert('Image upload failed.');
+                        }
+                    },
+                    error: function (err) {
+                        alert('An error occurred while uploading the image. ' + JSON.stringify(err));
+                    }
+                });
+            }
+        } catch (err) {
+            alert(JSON.stringify(err));
+        }
+    });

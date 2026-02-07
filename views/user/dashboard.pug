@@ -1,0 +1,396 @@
+extends layout
+block content
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h3.mb-0 uBlog CMS Manager Dashboard
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/users/dashboard') users
+              li.breadcrumb-item.active(aria-current='page')
+                | Dashboard
+          // end::Row
+        // end::Container
+    // end::App Content Header
+    .row.g-4.mb-4
+      // begin::Col
+      .col-md-12.connectedSortable#callout
+        .callout.callout-info#callout-info
+          if success_msg
+            p(style="color: green") #{success_msg}
+          if error_msg
+            p(style="color: red") #{error_msg}
+          if error
+            p(style="color: red") #{error}
+          if user
+            p
+              | Logged in as #{user.username}
+              | 
+              a(href='/users/logout') Logout
+          else
+            p
+              a(href='/users/login') Login
+              | 
+              a(href='/users/register') Register
+
+      // end::Col
+    // begin::Row
+    .row
+      // Start col
+      .col-md-8.connectedSortable
+        // DIRECT CHAT
+        include ../user/direct-chat.pug
+
+        // USERS LIST
+        .card
+          .card-header
+            h3.card-title Latest Members
+            .card-tools
+                span.badge.text-bg-danger
+                | 8 New Members
+                button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                i.bi.bi-plus-lg(data-lte-icon='expand')
+                i.bi.bi-dash-lg(data-lte-icon='collapse')
+                button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                i.bi.bi-x-lg
+            // /.card-header
+          .card-body.p-0
+            .row.text-center.m-1
+              .col-3.p-2
+                img.img-fluid.rounded-circle(src='/dist/assets/img/user1-128x128.jpg' alt='User Image')
+                a.btn.fw-bold.fs-7.text-secondary.text-truncate.w-100.p-0(href='#')
+                | Alexander Pierce
+                .fs-8 Today
+              .col-3.p-2
+                  img.img-fluid.rounded-circle(src='/dist/assets/img/user1-128x128.jpg' alt='User Image')
+                  a.btn.fw-bold.fs-7.text-secondary.text-truncate.w-100.p-0(href='#')
+                  | Norman
+                  .fs-8 Yesterday
+              .col-3.p-2
+                  img.img-fluid.rounded-circle(src='/dist/assets/img/user7-128x128.jpg' alt='User Image')
+                  a.btn.fw-bold.fs-7.text-secondary.text-truncate.w-100.p-0(href='#')
+                  | Jane
+                  .fs-8 12 Jan
+              .col-3.p-2
+                  img.img-fluid.rounded-circle(src='/dist/assets/img/user6-128x128.jpg' alt='User Image')
+                  a.btn.fw-bold.fs-7.text-secondary.text-truncate.w-100.p-0(href='#')
+                  | John
+                  .fs-8 12 Jan
+              .col-3.p-2
+                  img.img-fluid.rounded-circle(src='/dist/assets/img/user2-160x160.jpg' alt='User Image')
+                  a.btn.fw-bold.fs-7.text-secondary.text-truncate.w-100.p-0(href='#')
+                  | Alexander
+                  .fs-8 13 Jan
+              .col-3.p-2
+                  img.img-fluid.rounded-circle(src='/dist/assets/img/user5-128x128.jpg' alt='User Image')
+                  a.btn.fw-bold.fs-7.text-secondary.text-truncate.w-100.p-0(href='#')
+                  | Sarah
+                  .fs-8 14 Jan
+              .col-3.p-2
+                  img.img-fluid.rounded-circle(src='/dist/assets/img/user4-128x128.jpg' alt='User Image')
+                  a.btn.fw-bold.fs-7.text-secondary.text-truncate.w-100.p-0(href='#')
+                  | Nora
+                  .fs-8 15 Jan
+              .col-3.p-2
+                  img.img-fluid.rounded-circle(src='/dist/assets/img/user3-128x128.jpg' alt='User Image')
+                  a.btn.fw-bold.fs-7.text-secondary.text-truncate.w-100.p-0(href='#')
+                  | Nadia
+                  .fs-8 15 Jan
+            // /.users-list
+            // /.card-body
+            .card-footer.text-center
+              a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href='javascript:') View All Users
+            // /.card-footer
+        // /.card
+        // begin::Row
+        .row.g-4.mb-4
+          .col-md-6.connectedSortable
+
+          // /.col
+          .col-md-6.connectedSortable
+
+
+          // /.col
+        // end::Row
+        // begin::Latest Order Widget
+        .card
+          .card-header
+            h3.card-title Latest Orders
+            .card-tools
+              button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                i.bi.bi-plus-lg(data-lte-icon='expand')
+                i.bi.bi-dash-lg(data-lte-icon='collapse')
+              button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                i.bi.bi-x-lg
+          // /.card-header
+          .card-body.p-0
+            .table-responsive
+              table.table.m-0
+                thead
+                  tr
+                    th Order ID
+                    th Item
+                    th Status
+                    th Popularity
+                tbody
+                  tr
+                    td
+                      a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href='pages/examples/invoice.html') OR9842
+                    td Call of Duty IV
+                    td
+                      span.badge.text-bg-success
+                        | Shipped
+                    td
+                      #table-sparkline-1
+                  tr
+                    td
+                      a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href='pages/examples/invoice.html') OR1848
+                    td Samsung Smart TV
+                    td
+                      span.badge.text-bg-warning Pending
+                    td
+                      #table-sparkline-2
+                  tr
+                    td
+                      a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href='pages/examples/invoice.html') OR7429
+                    td iPhone 6 Plus
+                    td
+                      span.badge.text-bg-danger
+                        | Delivered
+                    td
+                      #table-sparkline-3
+                  tr
+                    td
+                      a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href='pages/examples/invoice.html') OR7429
+                    td Samsung Smart TV
+                    td
+                      span.badge.text-bg-info Processing
+                    td
+                      #table-sparkline-4
+                  tr
+                    td
+                      a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href='pages/examples/invoice.html') OR1848
+                    td Samsung Smart TV
+                    td
+                      span.badge.text-bg-warning Pending
+                    td
+                      #table-sparkline-5
+                  tr
+                    td
+                      a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href='pages/examples/invoice.html') OR7429
+                    td iPhone 6 Plus
+                    td
+                      span.badge.text-bg-danger
+                        | Delivered
+                    td
+                      #table-sparkline-6
+                  tr
+                    td
+                      a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover(href='pages/examples/invoice.html') OR9842
+                    td Call of Duty IV
+                    td
+                      span.badge.text-bg-success Shipped
+                    td
+                      #table-sparkline-7
+            // /.table-responsive
+          // /.card-body
+          .card-footer.clearfix
+            a.btn.btn-sm.btn-primary.float-start(href='javascript:void(0)')
+              | Place New Order
+            a.btn.btn-sm.btn-secondary.float-end(href='javascript:void(0)')
+              | View All Orders
+          // /.card-footer
+        // /.card
+      // /.col
+      .col-md-4.connectedSortable
+        .card.mb-3
+          .card-header
+            h3.card-title Video Chat
+              .card-tools
+                span.badge.text-bg-danger
+                  | 8 Members online
+                button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                  i.bi.bi-plus-lg(data-lte-icon='expand')
+                  i.bi.bi-dash-lg(data-lte-icon='collapse')
+                button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                  i.bi.bi-x-lg
+            // /.card-header
+          .card-body.ml-0.pl-0.pr-4
+            .video-container
+              .row
+                .col-12
+                  video#local-video(autoplay playsinline)
+            .video-container
+              .row
+                .col-12
+                  video#remote-video(autoplay playsinline)
+          // /.card-body
+          .card-footer.text-center 
+            a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover.media_btn Start Media 
+            | &nbsp;
+            a.link-primary.link-offset-2.link-underline-opacity-25.link-underline-opacity-100-hover.end-call_btn End call
+          // /.card-footer
+        // /.card
+        // Info Boxes Style 2
+        .info-box.mb-3.text-bg-warning
+          span.info-box-icon
+            i.bi.bi-tag-fill
+          .info-box-content
+            span.info-box-text Inventory
+            span.info-box-number 5,200
+          // /.info-box-content
+        // /.info-box
+        .info-box.mb-3.text-bg-success
+          span.info-box-icon
+            i.bi.bi-heart-fill
+          .info-box-content
+            span.info-box-text Mentions
+            span.info-box-number 92,050
+          // /.info-box-content
+        // /.info-box
+        .info-box.mb-3.text-bg-danger
+          span.info-box-icon
+            i.bi.bi-cloud-download
+          .info-box-content
+            span.info-box-text Downloads
+            span.info-box-number 114,381
+          // /.info-box-content
+        // /.info-box
+        .info-box.mb-3.text-bg-info
+          span.info-box-icon
+            i.bi.bi-chat-fill
+          .info-box-content
+            span.info-box-text Direct Messages
+            span.info-box-number 163,921
+          // /.info-box-content
+        // /.info-box
+        .card.mb-4
+          .card-header
+            h3.card-title Browser Usage
+            .card-tools
+              button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                i.bi.bi-plus-lg(data-lte-icon='expand')
+                i.bi.bi-dash-lg(data-lte-icon='collapse')
+              button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                i.bi.bi-x-lg
+          // /.card-header
+          .card-body
+            // begin::Row
+            .row
+              .col-12
+                #pie-chart
+              // /.col
+            // end::Row
+          // /.card-body
+          .card-footer.p-0
+            ul.nav.nav-pills.flex-column
+              li.nav-item
+                a.nav-link(href='#')
+                  | United States of America
+                  span.float-end.text-danger
+                    i.bi.bi-arrow-down.fs-7
+                    |                                                     12%
+              li.nav-item
+                a.nav-link(href='#')
+                  | India
+                  span.float-end.text-success
+                    i.bi.bi-arrow-up.fs-7
+                    |  4%
+              li.nav-item
+                a.nav-link(href='#')
+                  | China
+                  span.float-end.text-info
+                    i.bi.bi-arrow-left.fs-7
+                    |  0%
+          // /.footer
+        // /.card
+        // PRODUCT LIST
+        .card
+          .card-header
+            h3.card-title Recently Added Products
+            .card-tools
+              button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                i.bi.bi-plus-lg(data-lte-icon='expand')
+                i.bi.bi-dash-lg(data-lte-icon='collapse')
+              button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                i.bi.bi-x-lg
+          // /.card-header
+          .card-body.p-0
+            .px-2
+              .d-flex.border-top.py-2.px-1
+                .col-2
+                  img.img-size-50(src='/dist/assets/img/default-150x150.png' alt='Product Image')
+                .col-10
+                  a.fw-bold(href='javascript:void(0)')
+                    | Samsung TV
+                    span.badge.text-bg-warning.float-end
+                      | $1800
+                  .text-truncate
+                    | Samsung 32&quot; 1080p 60Hz LED Smart HDTV.
+              // /.item
+              .d-flex.border-top.py-2.px-1
+                .col-2
+                  img.img-size-50(src='/dist/assets/img/default-150x150.png' alt='Product Image')
+                .col-10
+                  a.fw-bold(href='javascript:void(0)')
+                    | Bicycle
+                    span.badge.text-bg-info.float-end
+                      | $700
+                  .text-truncate
+                    | 26&quot; Mongoose Dolomite Men&apos;s 7-speed, Navy Blue.
+              // /.item
+              .d-flex.border-top.py-2.px-1
+                .col-2
+                  img.img-size-50(src='/dist/assets/img/default-150x150.png' alt='Product Image')
+                .col-10
+                  a.fw-bold(href='javascript:void(0)')
+                    | Xbox One
+                    span.badge.text-bg-danger.float-end
+                      | $350
+                  .text-truncate
+                    | Xbox One Console Bundle with Halo Master Chief
+                    | Collection.
+              // /.item
+              .d-flex.border-top.py-2.px-1
+                .col-2
+                  img.img-size-50(src='/dist/assets/img/default-150x150.png' alt='Product Image')
+                .col-10
+                  a.fw-bold(href='javascript:void(0)')
+                    | PlayStation 4
+                    span.badge.text-bg-success.float-end
+                      | $399
+                  .text-truncate
+                    | PlayStation 4 500GB Console (PS4)
+              // /.item
+          // /.card-body
+          .card-footer.text-center
+            a.uppercase(href='javascript:void(0)')
+              | View All Products
+          // /.card-footer
+        // /.card
+      // /.col
+    // end::Row
+
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+    // sortablejs
+    script.
+      const connectedSortables =
+      document.querySelectorAll(".connectedSortable");
+      connectedSortables.forEach((connectedSortable) => {
+      let sortable = new Sortable(connectedSortable, {
+      group: "shared",
+      handle: ".card-header",
+      });
+      });
+      const cardHeaders = document.querySelectorAll(
+      ".connectedSortable .card-header",
+      );
+      cardHeaders.forEach((cardHeader) => {
+      cardHeader.style.cursor = "move";
+      });
+    

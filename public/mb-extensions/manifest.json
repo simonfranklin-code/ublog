@@ -1,0 +1,8 @@
+{
+  "name": "Bootstrap Modal",
+  "category": "Custom Blocks",
+  "thumbnail": "thumbnail.png",
+  "html": "block.html",
+  "css": "block.css",
+  "js": "block.js"
+}

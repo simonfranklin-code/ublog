@@ -1,0 +1,16 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Below is the exports.deepseekDashboard function that renders the main pug file sending the req.user.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+exports.deepseekDashboard = async (req, res) => {
+    res.render('user/deepseekDashboard', { user: req.user });
+}
+----------------------------------------------------------------------------------
+Blelow is a snippet of the included pug file deepseekDashboard 
+----------------------------------------------------------------------------------
+    // begin::Row
+    .row
+      // Start col
+      .col-md-12.connectedSortable
+        - const u = { username: user.username, userid: user.id, avatar: user.avatar }
+        +userCard(u)
+----------------------------------------------------------------------------------

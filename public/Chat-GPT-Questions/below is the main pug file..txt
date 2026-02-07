@@ -1,0 +1,114 @@
+----------------------------------------------------------------------------------------------
+below is the main pug file.
+----------------------------------------------------------------------------------------------
+// deepseekDashboard.pug
+extends layout
+block content
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h3.mb-0 DeepSeek Api Dashboard
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/users/dashboard') users
+              li.breadcrumb-item.active(aria-current='page')
+                | Dashboard
+          // end::Row
+        // end::Container
+    // end::App Content Header
+    .row.g-4.mb-4
+      // begin::Col
+      .col-md-12.connectedSortable#callout
+        .callout.callout-info#callout-info
+
+          if user
+            p
+              | Logged in as #{user.username}
+              | 
+              a(href='/users/logout') Logout
+          else
+            p
+              a(href='/users/login') Login
+              | 
+              a(href='/users/register') Register
+
+      // end::Col
+    // begin::Row
+    .row
+      // Start col
+      .col-md-12.connectedSortable
+        include ../user/deep-seek-chat.pug
+        block content
+            - const u = { username: user.username, userid: userid, avatar: user.avatar }
+            +userCard(u)
+
+    script(src='https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js' integrity='sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=' crossorigin='anonymous')
+    // sortablejs
+    script.
+      const connectedSortables =
+      document.querySelectorAll(".connectedSortable");
+      connectedSortables.forEach((connectedSortable) => {
+      let sortable = new Sortable(connectedSortable, {
+      group: "shared",
+      handle: ".card-header",
+      });
+      });
+      const cardHeaders = document.querySelectorAll(
+      ".connectedSortable .card-header",
+      );
+      cardHeaders.forEach((cardHeader) => {
+      cardHeader.style.cursor = "move";
+      });
+------------------------------------------------------------------------------------------------------------
+Below is the include file.
+------------------------------------------------------------------------------------------------------------
+// ../user/deep-seek-chat.pug
+mixin userCard(u)
+    script.
+          window.USER = !{JSON.stringify(u)};    
+
+    .card.direct-chat.direct-chat-warning.mb-3
+        .card-header
+            h3.card-title DeepSeek Chat
+            .card-tools
+                span.badge.text-bg-warning(title='3 New Messages')
+                    | 3
+                button.btn.btn-tool(type='button' data-lte-toggle='card-collapse')
+                    i.bi.bi-plus-lg(data-lte-icon='expand')
+                    i.bi.bi-dash-lg(data-lte-icon='collapse')
+                button.btn.btn-tool(type='button' title='Contacts' data-lte-toggle='chat-pane')
+                    i.bi.bi-chat-text-fill
+                button.btn.btn-tool(type='button' data-lte-toggle='card-remove')
+                    i.bi.bi-x-lg
+        // /.card-header
+        .card-body
+
+            // Conversations are loaded here
+            .direct-chat-messages#deep-seek-chat-messages
+
+            // /.direct-chat-messages
+            // Contacts are loaded here
+            .direct-chat-contacts
+                ul.contacts-list#user-list
+
+                    // /.contacts-list
+                // /.direct-chat-pane
+        // /.card-body
+        .card-footer
+            form#deep-seek-chat-form(method='post')
+                .input-group
+                    button.input-group-text#send-btn(type="submit")
+                        span(class="bi bi-chat-text")   
+                    input.form-control#deep-seek-message-input(type='text' name='message' placeholder='Type Message ...')
+                    input.form-control#file-input(type='file' style='display: none;')
+                    span.input-group-text(type='button' onclick="$('#file-input').click();")
+                        span(class="material material-attach-file mbr-iconfont mbr-iconfont-btn") 
+
+        // /.card-footer
+    script(src='/js/socket.io.js')
+    script(src=`/js/deep-seek-chat.js?userId=${window.USER.id}&username=${window.USER.username}&avatar=${window.USER.avatar}`)

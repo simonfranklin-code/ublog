@@ -1,0 +1,13 @@
+h1 Comments
+    ul
+      each comment in comments
+        li
+          p= comment.Text
+          p Date Created: #{comment.DateCreated}
+          p Author: #{comment.Author}
+          p Display Name: #{comment.DisplayName}
+          if comment.Url
+            p
+              a(href=comment.Url) Website
+          if comment.Email
+            p Email: #{comment.Email}

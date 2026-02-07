@@ -1,0 +1,272 @@
+Before we go on to cleaning up my existing code I have found a major problem with the code at 
+const $fs = $input.closest("fieldset[type='background']"); which is looking for a fieldset, my controls are built with pug on the server, code below. This mixin gets it's data from editor(id, schema, params, rendered, component). These parameters are created from the code below. What I want to do is shift the Controls creation code to work on the client using JQuery. That way I keep my code on the client. Please create the client side code using JavaScript, JQuery, Html, CSS, Bootstrap 5.
+
+----------------------------------------------------------------------------------------------
+defaultParams.js
+----------------------------------------------------------------------------------------------
+const { parseMbrParameters } = require('./parser');
+
+/**
+ * Build a default params object from a Mobirise component's <mbr-parameters>
+ * @param {string} customHTML - the Mobirise _customHTML string
+ * @returns {object} params - key/value map of parameter defaults
+ */
+function extractDefaultParams(customHTML) {
+    const { controls } = parseMbrParameters(customHTML);
+    const params = {};
+
+    controls.forEach(ctrl => {
+        if (ctrl.kind === 'checkbox') {
+            params[ctrl.name] = ctrl.attrs.checked || false;
+        }
+
+        else if (ctrl.kind === 'range') {
+            const val = ctrl.value || ctrl.attrs.min || 0;
+            params[ctrl.name] = Number(val);
+        }
+
+        else if (ctrl.kind === 'color' || ctrl.kind === 'image' || ctrl.kind === 'video') {
+            if (ctrl.kind === 'color') {
+                params[ctrl.name] = ctrl.color;
+            } else {
+                params[ctrl.name] = ctrl.value || '';
+            }
+
+        }
+
+        else if (ctrl.kind === 'background') {
+            // Find selected option (or default to first)
+            let selected = ctrl.options.find(o => o.attrs.selected) || ctrl.options[0];
+            params[ctrl.name] = {
+                type: selected.kind,
+                value: selected.value,
+                parallax: ctrl.attrs.parallax || false
+            };
+        }
+
+        else if (ctrl.kind === 'select') {
+            // Default to the first option or the explicitly selected one
+            const selected = ctrl.options.find(o => o.selected) || ctrl.options[0];
+            params[ctrl.name] = selected ? selected.value : null;
+        }
+    });
+
+    return params;
+}
+
+module.exports = { extractDefaultParams };
+----------------------------------------------------------------------------------------
+parser.js
+----------------------------------------------------------------------------------------
+// lib/parser.js
+const cheerio = require('cheerio');
+
+function attrBool(val) {
+    if (val === '' || val === true || val === 'true' || val === 'checked') return true;
+    if (val === 'false' || val === undefined) return false;
+    return !!val;
+}
+
+function parseMbrParameters(customHTML) {
+    const $ = cheerio.load(customHTML, { xmlMode: false, decodeEntities: true });
+    const $params = $('mbr-parameters');
+    const controls = [];
+    if ($params.length === 0) return { controls, meta: { found: false } };
+
+    $params.children().each((_, el) => {
+        const tag = el.tagName?.toLowerCase();
+        const $el = $(el);
+        if (tag === 'header') {
+            controls.push({ kind: 'header', title: $el.text().trim(), attrs: { condition: $el.attr('condition') || null } });
+            return;
+        }
+        if (tag === 'input') {
+            const type = ($el.attr('type') || 'text').toLowerCase();
+            controls.push({
+                kind: type,
+                name: $el.attr('name') || null,
+                title: $el.attr('title') || null,
+                value: $el.attr('value') ?? null,
+                attrs: {
+                    condition: $el.attr('condition') || null,
+                    min: $el.attr('min') || null,
+                    max: $el.attr('max') || null,
+                    step: $el.attr('step') || null,
+                    inline: attrBool($el.attr('inline')),
+                    selected: attrBool($el.attr('selected')),
+                    checked: attrBool($el.attr('checked')),
+                },
+            });
+            return;
+        }
+        if (tag === 'select') {
+            const options = [];
+            $el.children('option').each((__, opt) => {
+                const $opt = $(opt);
+                options.push({
+                    label: $opt.text().trim(),
+                    value: $opt.attr('value') ?? $opt.text().trim(),
+                    selected: attrBool($opt.attr('selected')),
+                });
+            });
+            controls.push({
+                kind: 'select',
+                name: $el.attr('name') || null,
+                title: $el.attr('title') || null,
+                value:
+                    options.find((o) => o.selected)?.value ??
+                    options[0]?.value ??
+                    null,
+                options,
+            });
+            return;
+        }
+
+        if (tag === 'fieldset') {
+            const fType = ($el.attr('type') || '').toLowerCase();
+            const name = $el.attr('name') || null;
+            const parallax = attrBool($el.attr('parallax'));
+            const children = [];
+            $el.children('input').each((__, child) => {
+                const $c = $(child);
+                children.push({
+                    kind: ($c.attr('type') || 'text').toLowerCase(),
+                    name: $c.attr('name') || null,
+                    title: $c.attr('title') || null,
+                    value: $c.attr('value') ?? null,
+                    attrs: { selected: attrBool($c.attr('selected')), condition: $c.attr('condition') || null },
+                });
+            });
+            controls.push({ kind: fType || 'fieldset', name, title: name, attrs: { parallax }, options: children });
+        }
+    });
+
+    return { controls, meta: { found: true, count: controls.length } };
+}
+
+module.exports = { parseMbrParameters };
+
+----------------------------------------------------------------------------------------
+Pug file
+----------------------------------------------------------------------------------------
+mixin editor(id, schema, params, rendered, component) 
+
+  .row
+    .col-md-12
+      h5.mb-3 Controls
+        if !schema || !schema.controls || schema.controls.length === 0
+          p.text-muted No controls defined in schema.
+        else
+          form#controls(data-id=id)
+            each ctrl, i in schema.controls
+              if ctrl.kind === 'header'
+                h6.mt-3.text-secondary(data-condition=ctrl.attrs.condition)= ctrl.title
+
+              else if ctrl.kind === 'checkbox'
+                .form-check.mb-2(data-condition=ctrl.attrs.condition)
+                  input.form-check-input.param-input(
+                    type='checkbox',
+                    name=ctrl.name,
+                    id=`f-${i}`,
+                    checked=(params[ctrl.name] || ctrl.attrs.checked)
+                  )
+                  label.form-check-label(for=`f-${i}`)= ctrl.title
+
+              else if ctrl.kind === 'range'
+                .mb-3(data-condition=ctrl.attrs.condition)
+                  label.form-label(for=`f-${i}`)= ctrl.title
+                  input.form-range.param-input(
+                    type='range',
+                    name=ctrl.name,
+                    id=`f-${i}`,
+                    min=ctrl.attrs.min,
+                    max=ctrl.attrs.max,
+                    step=ctrl.attrs.step,
+                    value=(params[ctrl.name] ? params[ctrl.name] : ctrl.value)
+                  )
+                  .small.text-muted
+                    | Min #{ctrl.attrs.min}, Max #{ctrl.attrs.max}, Step #{ctrl.attrs.step}
+
+              else if ctrl.kind === 'color'
+                .mb-3(data-condition=ctrl.attrs.condition)
+                  label.form-label(for=`f-${i}`)= ctrl.title
+                  input.form-control.form-control-color.param-input(
+                    type='color',
+                    name=ctrl.name,
+                    id=`f-${i}`,
+                    value=(params[ctrl.name] ? ctrl.value : '')
+                  )
+              else if ctrl.kind === 'select'
+                .mb-3(data-condition=ctrl.attrs && ctrl.attrs.condition)
+                  label.form-label(for=`f-${i}`)= ctrl.title
+                  select.form-select.param-input(name=ctrl.name, id=`f-${i}`)
+                    each opt in ctrl.options
+                      option(
+                        value=opt.value,
+                        selected=(params[ctrl.name] ? params[ctrl.name] == opt.value : opt.selected)
+                      )= opt.label
+              else if ctrl.kind === 'image' || ctrl.kind === 'video'
+                .mb-3(data-condition=ctrl.attrs.condition)
+                  label.form-label(for=`f-${i}`)= ctrl.title
+                  input.form-control.param-input(
+                    type='text',
+                    placeholder=ctrl.kind === 'image' ? 'Image URL' : 'Video URL',
+                    name=(ctrl.name || `${ctrl.kind}Value-${i}`),
+                    id=`f-${i}`,
+                    value=ctrl.value
+                  )
+
+              else if ctrl.kind === 'background'
+                .mb-3(data-condition=ctrl.attrs.condition)
+                  label.form-label Background
+                  .btn-group.mb-2(role='group')
+                    - const types = ['image','color','video']
+                    each t in types
+                      input.btn-check.param-input(
+                        type='radio',
+                        name='bg.type',
+                        id=`bg-${t}`,
+                        value=t,
+                        checked=(params.bg && params.bg.type===t)
+                      )
+                      label.btn.btn-outline-secondary(for=`bg-${t}`)= t
+
+                  each opt, j in ctrl.options
+                    if opt.kind === 'image'
+                      .mb-2.bg-sub
+                        label.form-label(for=`bg-img-${j}`)= opt.title
+                        input.form-control.param-input(
+                          type='text',
+                          id=`bg-img-${j}`,
+                          name='bg.image',
+                          value=(params.bg && params.bg.type==='image' ? (params.bg.value || opt.value) : opt.value)
+                        )
+
+                    if opt.kind === 'color'
+                      .mb-2.bg-sub
+                        label.form-label(for=`bg-col-${j}`)= opt.title
+                        input.form-control.form-control-color.param-input(
+                          type='color',
+                          id=`bg-col-${j}`,
+                          name='bg.color',
+                          value=(params.bg && params.bg.type==='color' ? (params.bg.value || opt.value) : opt.value)
+                        )
+
+                    if opt.kind === 'video'
+                      .mb-2.bg-sub
+                        label.form-label(for=`bg-vid-${j}`)= opt.title
+                        input.form-control.param-input(
+                          type='text',
+                          id=`bg-vid-${j}`,
+                          name='bg.video',
+                          value=(params.bg && params.bg.type==='video' ? (params.bg.value || opt.value) : opt.value)
+                        )
+
+                  .form-check.mt-2
+                    input.form-check-input.param-input(
+                    type='checkbox',
+                    id='bg-parallax',
+                    name='bg.parallax',
+                    checked=(params.bg && params.bg.parallax || false)
+                    )
+                    label.form-check-label(for='bg-parallax') Parallax

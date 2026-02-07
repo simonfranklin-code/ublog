@@ -1,0 +1,99 @@
+doctype html
+html(lang='en')
+
+	head
+		block baseDirectoryBlock
+ 
+		meta(charset='UTF-8')
+		meta(http-equiv='X-UA-Compatible' content='IE=edge')
+		meta(name='viewport' content='width=device-width, initial-scale=1, minimum-scale=1')
+		link(rel='shortcut icon' href='assets/images/0d0cde80-aa01-4a83-9246-2b6d2bb0ccd5-128x128.png' type='image/x-icon')
+		block titleBlock 
+		block metaDescriptionBlock
+		block metaKewordsBlock
+		link(rel='stylesheet' href='/css/adminlte.css')
+		block headStylesBlock
+		block headScriptsBlock
+		script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js', integrity='sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p', crossorigin='anonymous').
+		script(src="https://kit.fontawesome.com/4defe9e4da.js" crossorigin="anonymous").
+		link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css', integrity='sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=', crossorigin='anonymous')
+		// end::Fonts
+		// begin::Third Party Plugin(OverlayScrollbars)
+		link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/styles/overlayscrollbars.min.css', integrity='sha256-dSokZseQNT08wYEWiz5iLI8QPlKxG+TswNRD8k35cpg=', crossorigin='anonymous')
+		// end::Third Party Plugin(OverlayScrollbars)
+		// begin::Third Party Plugin(Bootstrap Icons)
+		link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css', integrity='sha256-Qsx5lrStHZyR9REqhUF8iQt73X06c8LGIUPzpOhwRrI=', crossorigin='anonymous')
+		// end::Third Party Plugin(Bootstrap Icons)
+		link(rel='stylesheet' href='/stylesheets/main.css')
+		script(src='https://code.jquery.com/jquery-3.7.1.min.js').
+		
+		
+	body(style='background-color: #212529;')
+		script(src='/js/plugins/renderer.jquery.reactive.js').
+		block blogHeader
+		block content
+		block footer
+
+		script(src='assets/parallax/jarallax.js').
+		script(src='assets/smoothscroll/smooth-scroll.js').
+		script(src='assets/ytplayer/index.js').
+		script(src='assets/dropdown/js/navbar-dropdown.js').
+		script(src='/js/adminlte.js').
+
+		script(src='assets/witsec-search/search.js?v=1').
+		script(type='text/plain' data-src='assets/theme/js/script.js').
+
+		script.
+			$(window).on("load", function () {
+				$("#modal-add-comment").on("hidden.bs.modal", function () {
+					var html = $("#modal-add-comment_body").html();
+					$("#modal-add-comment_body").empty();
+					$("#modal-add-comment_body").append(html);
+				})
+				if (typeof OpenModal === 'undefined') {
+					OpenModal = function (modalName) {
+						if (typeof jQuery === "function") {
+							if ($('#' + modalName).length)
+								$('#' + modalName).modal('show');
+							else
+								alert("Sorry, but there is no modal for " + modalName);
+						} else {
+							let mdw = new bootstrap.Modal(document.getElementById(modalName), {});
+							mdw.show();
+						}
+					}
+				}
+
+				$('[data-bs-toggle="popover"]').popover({
+					trigger: 'hover',
+					placement: 'right',
+					container: 'body'
+				});
+			});
+		script.
+			function modalSetCookie(cname, cvalue, exdays) {
+				var d = new Date();
+				d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+				var expires = "expires=" + d.toUTCString();
+				document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+			}
+			function modalGetCookie(cname) {
+				var name = cname + "=";
+				var decodedCookie = decodeURIComponent(document.cookie);
+				var ca = decodedCookie.split(';');
+				for (var i = 0; i < ca.length; i++) {
+					var c = ca[i];
+					while (c.charAt(0) == ' ') {
+						c = c.substring(1);
+					}
+					if (c.indexOf(name) == 0) {
+						return c.substring(name.length, c.length);
+					}
+				}
+				return "";
+			}
+
+
+		script(src='/js/site.js').
+		script(src='/js/socket.io.js')
+		script(src='/js/html-editor.js')

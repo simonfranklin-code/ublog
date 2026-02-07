@@ -1,0 +1,17 @@
+doctype html
+html
+  head
+    title #{title}
+  body
+    h1 #{title}
+    table
+      thead
+        tr
+          th ID
+          th Html
+      tbody
+        each row in rows
+          tr
+            td #{row.HtmlSectionID}
+            td #{row.Html}
+    a(href="/") Back to Form

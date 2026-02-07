@@ -1,0 +1,515 @@
+doctype html
+html(lang='en' style='height: 100%;')
+  // begin::Head
+  head
+    meta(http-equiv='Content-Type', content='text/html; charset=utf-8')
+    block titleBlock
+    // begin::Primary Meta Tags
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(name='title', content='Color Mode | AdminLTE 4')
+    meta(name='author', content='ColorlibHQ')
+    meta(name='description', content='AdminLTE is a Free Bootstrap 5 Admin Dashboard, 30 example pages using Vanilla JS.')
+    meta(name='keywords', content='bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard')
+    // end::Primary Meta Tags
+    // begin::Fonts
+    link(href='/vendor/fontawesome-free/css/all.min.css', rel='stylesheet', type='text/css')
+    link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css', integrity='sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=', crossorigin='anonymous')
+    // end::Fonts
+    // begin::Third Party Plugin(OverlayScrollbars)
+    link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/styles/overlayscrollbars.min.css', integrity='sha256-dSokZseQNT08wYEWiz5iLI8QPlKxG+TswNRD8k35cpg=', crossorigin='anonymous')
+    // end::Third Party Plugin(OverlayScrollbars)
+    // begin::Third Party Plugin(Bootstrap Icons)
+    link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css', integrity='sha256-Qsx5lrStHZyR9REqhUF8iQt73X06c8LGIUPzpOhwRrI=', crossorigin='anonymous')
+    // end::Third Party Plugin(Bootstrap Icons)
+    // begin::Required Plugin(AdminLTE)
+    link(rel='stylesheet', href='/css/adminlte.css')
+    link(rel='stylesheet', href='/css/bs-additional.css')
+    script(src='/vendor/jquery/jquery.min.js').
+    script(src='/js/socket.io.js').
+    script(src='https://cdn.jsdelivr.net/npm/less@4.2.0/dist/less.min.js').
+  // end::Head
+  // begin::Body
+  body.layout-fixed-complete.sidebar-expand-lg.bg-body-tertiary.sidebar-open.app-loaded
+    // begin::App Wrapper
+    .app-wrapper
+      // begin::Header
+      nav.app-header.navbar.navbar-expand.bg-body
+        // begin::Container
+        .container-fluid
+          // begin::Start Navbar Links
+          ul.navbar-nav
+            li.nav-item
+              a.nav-link(data-lte-toggle='sidebar', href='#', role='button')
+                i.bi.bi-list
+            li.nav-item.d-none.d-md-block
+              a.nav-link(href='#') Home
+            li.nav-item.d-none.d-md-block
+              a.nav-link(href='#') Contact
+            li.nav-item.d-none.d-md-block
+                ul.navbar-nav.ms-auto
+                    li.nav-item.dropdown
+                        button#bd-theme.btn.btn-link.nav-link.py-2.px-0.px-lg-2.dropdown-toggle.d-flex.align-items-center(type='button' aria-expanded='false' data-bs-toggle='dropdown' data-bs-display='static')
+                            span.theme-icon-active
+                                i.my-1
+                            span#bd-theme-text.d-lg-none.ms-2 Toggle theme
+                        ul.dropdown-menu.dropdown-menu-end(aria-labelledby='bd-theme-text' style='--bs-dropdown-min-width: 8rem;')
+                            li
+                                button.dropdown-item.d-flex.align-items-center.active(type='button' data-bs-theme-value='light' aria-pressed='false')
+                                    i.bi.bi-sun-fill.me-2
+                                    |                                                         Light
+                                    i.bi.bi-check-lg.ms-auto.d-none
+                            li
+                                button.dropdown-item.d-flex.align-items-center(type='button' data-bs-theme-value='dark' aria-pressed='false')
+                                    i.bi.bi-moon-fill.me-2
+                                    |                                                         Dark
+                                    i.bi.bi-check-lg.ms-auto.d-none
+                            li
+                                button.dropdown-item.d-flex.align-items-center(type='button' data-bs-theme-value='auto' aria-pressed='true')
+                                    i.bi.bi-circle-fill-half-stroke.me-2
+                                    |                                                         Auto
+                                    i.bi.bi-check-lg.ms-auto.d-none
+          // end::Start Navbar Links
+          // begin::End Navbar Links
+          ul.navbar-nav.ms-auto
+            // begin::Navbar Search
+            li.nav-item
+              a.nav-link(data-widget='navbar-search', href='javascript:OpenModal("findModal")', role='button')
+                i.bi.bi-search
+            // end::Navbar Search
+            // begin::Messages Dropdown Menu
+            li.nav-item.dropdown
+              a.nav-link(data-bs-toggle='dropdown', href='#')
+                i.bi.bi-chat-text
+                |  
+                span.navbar-badge.badge.text-bg-danger 3
+              .dropdown-menu.dropdown-menu-lg.dropdown-menu-end
+                a.dropdown-item(href='#')
+                  // begin::Message
+                  .d-flex
+                    .flex-shrink-0
+                      img.img-size-50.rounded-circle.me-3(src='/dist/assets/img/user1-128x128.jpg', alt='User Avatar')
+                    .flex-grow-1
+                      h3.dropdown-item-title
+                        | Brad Diesel
+                        span.float-end.fs-7.text-danger
+                          i.bi.bi-star-fill
+                      p.fs-7 Call me whenever you can...
+                      p.fs-7.text-secondary
+                        i.bi.bi-clock-fill.me-1
+                        |  4 Hours Ago
+                  // end::Message
+                .dropdown-divider
+                |  
+                a.dropdown-item(href='#')
+                  // begin::Message
+                  .d-flex
+                    .flex-shrink-0
+                      img.img-size-50.rounded-circle.me-3(src='/dist/assets/img/user8-128x128.jpg', alt='User Avatar')
+                    .flex-grow-1
+                      h3.dropdown-item-title
+                        | John Pierce
+                        span.float-end.fs-7.text-secondary
+                          i.bi.bi-star-fill
+                      p.fs-7 I got your message bro
+                      p.fs-7.text-secondary
+                        i.bi.bi-clock-fill.me-1
+                        |  4 Hours Ago
+                  // end::Message
+                .dropdown-divider
+                |  
+                a.dropdown-item(href='#')
+                  // begin::Message
+                  .d-flex
+                    .flex-shrink-0
+                      img.img-size-50.rounded-circle.me-3(src='/dist/assets/img/user3-128x128.jpg', alt='User Avatar')
+                    .flex-grow-1
+                      h3.dropdown-item-title
+                        | Nora Silvester
+                        span.float-end.fs-7.text-warning
+                          i.bi.bi-star-fill
+                      p.fs-7 The subject goes here
+                      p.fs-7.text-secondary
+                        i.bi.bi-clock-fill.me-1
+                        |  4 Hours Ago
+                  // end::Message
+                .dropdown-divider
+                |  
+                a.dropdown-item.dropdown-footer(href='#') See All Messages
+            // end::Messages Dropdown Menu
+            // begin::Notifications Dropdown Menu
+            li.nav-item.dropdown
+              a.nav-link(data-bs-toggle='dropdown', href='#')
+                i.bi.bi-bell-fill
+                |  
+                span.navbar-badge.badge.text-bg-warning 15
+              .dropdown-menu.dropdown-menu-lg.dropdown-menu-end
+                span.dropdown-item.dropdown-header 15 Notifications
+                .dropdown-divider
+                |  
+                a.dropdown-item(href='#')
+                  i.bi.bi-envelope.me-2
+                  |  4 new messages
+                  span.float-end.text-secondary.fs-7 3 mins
+                .dropdown-divider
+                |  
+                a.dropdown-item(href='#')
+                  i.bi.bi-people-fill.me-2
+                  |  8 friend requests
+                  span.float-end.text-secondary.fs-7 12 hours
+                .dropdown-divider
+                |  
+                a.dropdown-item(href='#')
+                  i.bi.bi-file-earmark-fill.me-2
+                  |  3 new reports
+                  span.float-end.text-secondary.fs-7 2 days
+                .dropdown-divider
+                |  
+                a.dropdown-item.dropdown-footer(href='#')
+                  | See All Notifications
+            // end::Notifications Dropdown Menu
+            // begin::Fullscreen Toggle
+            li.nav-item
+              a.nav-link(href='#', data-lte-toggle='fullscreen')
+                i.bi.bi-arrows-fullscreen(data-lte-icon='maximize')
+                |  
+                i.bi.bi-fullscreen-exit(data-lte-icon='minimize', style='display: none;')
+            // end::Fullscreen Toggle
+            // begin::User Menu Dropdown
+            if user
+                // begin::User Menu Dropdown
+                li.nav-item.dropdown.user-menu
+                  a.nav-link.dropdown-toggle(href='#', data-bs-toggle='dropdown')
+                
+                    img.user-image.rounded-circle.shadow(src=`${user.avatar}`, alt='User Image')
+                    |  
+                    span.d-none.d-md-inline #{user.username}
+                  ul.dropdown-menu.dropdown-menu-lg.dropdown-menu-end
+                    // begin::User Image
+                    li.user-header.text-bg-primary.text-center
+                      .row
+                        .col-12.pt-2
+                          img.rounded-circle.shadow(style='margin: 0 auto;text-align: center; height:64px;width: 64px;' src=`${user.avatar}`, alt='User Image')
+                      .row  
+                        .col-12.pt-2
+                          p
+                            | #{user.username} - Web Developer
+                            | Member since #{user.dateCreated}
+                    // end::User Image
+                    // begin::Menu Body
+                    li.user-body
+                      // begin::Row
+                      .row
+                        .col-4.text-center
+                          a(href='#') Followers
+                        .col-4.text-center
+                          a(href='#') Sales
+                        .col-4.text-center
+                          a(href='#') Friends
+                      // end::Row
+                    // end::Menu Body
+                    // begin::Menu Footer
+                    li.user-footer
+                      if user.role === 'admin'
+                        | 
+                        a.btn.btn-default.btn-flat(href='/users/dashboard') Dashboard
+                      else
+                        a.btn.btn-default.btn-flat(href='/users/dashboard') Dashboard
+                        |  
+                      a.btn.btn-default.btn-flat.float-end(href='/users/logout') Sign out
+                    // end::Menu Footer
+                // end::User Menu Dropdown
+          // end::End Navbar Links
+        // end::Container
+      // end::Header
+      // begin::Sidebar
+      aside.app-sidebar.bg-body-secondary.shadow(data-bs-theme='dark')
+        // begin::Sidebar Brand
+        .sidebar-brand
+          // begin::Brand Link
+          a.brand-link(href='../index.html')
+            // begin::Brand Image
+            img.brand-image.opacity-75.shadow(src='/dist/assets/img/AdminLTELogo.png', alt='AdminLTE Logo')
+            // end::Brand Image
+            // begin::Brand Text
+            span.brand-text.fw-light uBlog Manager
+            // end::Brand Text
+          // end::Brand Link
+        // end::Sidebar Brand
+        // begin::Sidebar Wrapper
+        .sidebar-wrapper
+          nav.mt-2
+            // begin::Sidebar Menu
+            ul.nav.sidebar-menu.flex-column(data-lte-toggle='treeview', role='menu', data-accordion='false')
+              if user.role === 'admin'
+                li.nav-header USER DATA
+                li#manage-users.nav-item
+                  a.nav-link(href='#')
+                    i.fas.fa-user
+                    p
+                      | Users
+                      i.nav-arrow.bi.bi-chevron-right
+                  ul.nav.nav-treeview
+                    li.nav-item
+                      a#manage-users-link.nav-link(href='/users/users')
+                        i.nav-icon.bi.bi-circle
+                        p Manage users
+                    li#manage-permissions.nav-item
+                      a#manage-permissions-link.nav-link(href='/users/permissions')
+                        i.nav-icon.bi.bi-circle
+                        p Manage permissions
+                    li#view-activity-logs.nav-item
+                      a#view-activity-logs-link.nav-link(href='/users/activity-logs')
+                        i.nav-icon.bi.bi-circle
+                        p View Activity Logs
+
+              li.nav-header BLOGS DATA
+
+              li.nav-item
+                a.nav-link(href='#')
+                  i.fas.fa-blog
+                  p
+                    | Blogs
+                    i.nav-arrow.bi.bi-chevron-right
+                ul.nav.nav-treeview
+                  li.nav-item
+                    a.nav-link(href='/users/blogs')
+                      i.nav-icon.bi.bi-circle
+                      p Manage Blogs
+                  li.nav-item
+                    a.nav-link(href='/users/blogPosts')
+                      i.nav-icon.bi.bi-circle
+                      p Manage Blog Posts
+                  li.nav-item
+                    a.nav-link(href='/users/htmlSections')
+                      i.nav-icon.bi.bi-circle
+                      p Manage HtmlSections
+              li.nav-header SOCIAL MEDIA DATA
+              li.nav-item
+                a.nav-link(href='#')
+                  i.fas.fa-user-friends
+                  p
+                    | Social
+                    i.nav-arrow.bi.bi-chevron-right
+                ul.nav.nav-treeview
+                  li.nav-item
+                    a.nav-link(href='/friends/friendsDashboard')
+                      i.nav-icon.bi.bi-circle
+                      p Manage Friends
+                  li.nav-item
+                    a.nav-link(href='/followers/followersDashboard')
+                      i.nav-icon.bi.bi-circle
+                      p Manage Followers
+                  li.nav-item
+                    a.nav-link(href='/notifications/displayNotifications')
+                      i.nav-icon.bi.bi-circle
+                      p Manage Notifications
+                
+                li.nav-header API DATA
+                li.nav-item
+                  a.nav-link(href='#')
+                    i.fas.fa-api
+                    p
+                      | Api
+                      i.nav-arrow.bi.bi-chevron-right
+                  ul.nav.nav-treeview
+                    li.nav-item
+                      a.nav-link(href='/api/deepseekDashboard')
+                        i.nav-icon.bi.bi-circle
+                        p Deepseek Dashboard
+
+            // end::Sidebar Menu
+        // end::Sidebar Wrapper
+      // end::Sidebar
+      // begin::App Main
+      main.app-main
+
+        // begin::App Content
+        .app-content(style='height: 100%;')
+          // begin::Container
+          .container-fluid
+            block content
+
+
+          // end::Container
+        // end::App Content
+      // end::App Main
+      // Logout Modal
+      #logoutModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='exampleModalLabel', aria-hidden='true')
+        .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+            h5#exampleModalLabel.modal-title Ready to Leave?
+            button.close(type='button', data-dismiss='modal', aria-label='Close')
+                span(aria-hidden='true') &times;
+            .modal-body Select &quot;Logout&quot; below if you are ready to end your current session.
+            .modal-footer
+            button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+            a.btn.btn-primary(href='/users/logout') Logout
+        // Find Modal
+      .modal.fade(id='findModal', tabindex='-1', role='dialog')
+        .modal-dialog(role='document')
+          .modal-content
+            .modal-header
+              h5.modal-title Find in this blog:
+              button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+            .modal-body
+              form#findAndReplaceForm
+                .formgroup.mb-2
+                  label(for="find-text") Find:
+                  input.form-control.form-control-sm#find-text(type="text" name="find-text" required="required" placeholder="Enter text to find")     
+            .modal-footer
+              button.btn.btn-primary.btn-sm#buttonFind(type="button") Find
+              |
+              button.btn.btn-secondary.btn-sm(type='button', data-bs-dismiss='modal') Close
+      // begin::Footer
+      footer.app-footer
+        // begin::To the end
+        .float-end.d-none.d-sm-inline Anything you want
+        // end::To the end
+        // begin::Copyright
+        strong
+          | Copyright &copy; 2025&nbsp;
+          | uBlog
+          | All rights reserved.
+        // end::Copyright
+      // end::Footer
+    // end::App Wrapper
+
+
+    // begin::Third Party Plugin(OverlayScrollbars)
+    script(src='https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/browser/overlayscrollbars.browser.es6.min.js', integrity='sha256-H2VM7BKda+v2Z4+DRy69uknwxjyDRhszjXFhsL4gD3w=', crossorigin='anonymous')
+    // end::Third Party Plugin(OverlayScrollbars)
+    // begin::Required Plugin(popperjs for Bootstrap 5)
+    script(src='https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js', integrity='sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I=', crossorigin='anonymous')
+    // end::Required Plugin(popperjs for Bootstrap 5)
+    // begin::Required Plugin(Bootstrap 5)
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js', integrity='sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8=', crossorigin='anonymous')
+    // end::Required Plugin(Bootstrap 5)
+    // begin::Required Plugin(AdminLTE)
+    script(src='/js/adminlte.js')
+    
+    // end::Required Plugin(AdminLTE)
+    script(src='/vendor/jquery/jquery.min.js').
+
+    // begin::OverlayScrollbars Configure
+    script.
+        const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
+        const Default = {
+            scrollbarTheme: "os-theme-light",
+            scrollbarAutoHide: "leave",
+            scrollbarClickScroll: true,
+        };
+        document.addEventListener("DOMContentLoaded", function () {
+            const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+            if (
+                sidebarWrapper &&
+                typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== "undefined"
+            ) {
+                OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+                    scrollbars: {
+                        theme: Default.scrollbarTheme,
+                        autoHide: Default.scrollbarAutoHide,
+                        clickScroll: Default.scrollbarClickScroll,
+                    },
+                });
+            }
+        });
+    // end::OverlayScrollbars Configure
+    script.
+        // Color Mode Toggler
+        (() => {
+            "use strict";
+            const storedTheme = localStorage.getItem("theme");
+            const getPreferredTheme = () => {
+                if (storedTheme) {
+                    return storedTheme;
+                }
+                return window.matchMedia("(prefers-color-scheme: dark)").matches ?
+                    "dark" :
+                    "light";
+            };
+            const setTheme = function (theme) {
+                if (
+                    theme === "auto" &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches
+                ) {
+                    document.documentElement.setAttribute("data-bs-theme", "dark");
+                } else {
+                    document.documentElement.setAttribute("data-bs-theme", theme);
+                }
+            };
+            setTheme(getPreferredTheme());
+            const showActiveTheme = (theme, focus = false) => {
+                const themeSwitcher = document.querySelector("#bd-theme");
+                if (!themeSwitcher) {
+                    return;
+                }
+                const themeSwitcherText = document.querySelector("#bd-theme-text");
+                const activeThemeIcon = document.querySelector(
+                    ".theme-icon-active i"
+                );
+                const btnToActive = document.querySelector(
+                    `[data-bs-theme-value="${theme}"]`
+                );
+                const svgOfActiveBtn = btnToActive
+                    .querySelector("i")
+                    .getAttribute("class");
+                for (const element of document.querySelectorAll(
+                    "[data-bs-theme-value]"
+                )) {
+                    element.classList.remove("active");
+                    element.setAttribute("aria-pressed", "false");
+                }
+                btnToActive.classList.add("active");
+                btnToActive.setAttribute("aria-pressed", "true");
+                activeThemeIcon.setAttribute("class", svgOfActiveBtn);
+                const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`;
+                themeSwitcher.setAttribute("aria-label", themeSwitcherLabel);
+                if (focus) {
+                    themeSwitcher.focus();
+                }
+            };
+            window
+                .matchMedia("(prefers-color-scheme: dark)")
+                .addEventListener("change", () => {
+                    if (storedTheme !== "light" || storedTheme !== "dark") {
+                        setTheme(getPreferredTheme());
+                    }
+                });
+            window.addEventListener("DOMContentLoaded", () => {
+                showActiveTheme(getPreferredTheme());
+                for (const toggle of document.querySelectorAll(
+                    "[data-bs-theme-value]"
+                )) {
+                    toggle.addEventListener("click", () => {
+                        const theme = toggle.getAttribute("data-bs-theme-value");
+                        localStorage.setItem("theme", theme);
+                        setTheme(theme);
+                        showActiveTheme(theme, true);
+                    });
+                }
+            });
+        })();
+    // end::Script
+    script.
+        $(window).on("load", function () {
+
+
+            if (typeof OpenModal === 'undefined') {
+                OpenModal = function (modalName) {
+                    if (typeof jQuery === "function") {
+                        if ($('#' + modalName).length)
+                            $('#' + modalName).modal('show');
+                        else
+                            alert("Sorry, but there is no modal for " + modalName);
+                    } else {
+                        let mdw = new bootstrap.Modal(document.getElementById(modalName), {});
+                        mdw.show();
+                    }
+                }
+            }
+
+
+        });
+
+  // end::Body
