@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // ---------------------------------------------
 // WYSIWYG CONTROLLER
 // ---------------------------------------------
@@ -41,8 +42,13 @@ const WysiwygController = (function () {
             $editable.attr("contenteditable", "true");
             $editable.addClass("wysiwyg-active");
 
+            // 🔥 Initialize Live Sync here
+            const component = $("#controls").data("component");
+            LiveTextSyncPlugin.init("#editableDraftHtmlContent", component);
+
             console.log("WYSIWYG: Editing started");
         },
+
 
         /**
          * Disable editing mode
@@ -60,6 +66,7 @@ const WysiwygController = (function () {
         /**
          * Return edited HTML (sanitized for Mobirise)
          */
+
         getEditedHTML() {
             if (!$editable) return "";
 
@@ -220,23 +227,31 @@ const LiveTextSyncPlugin = (function () {
     function resolveEditableEl(node) {
         if (!node) return null;
 
+        // Text node → element
         if (node.nodeType === Node.TEXT_NODE) {
             node = node.parentElement;
         }
+
         if (!node) return null;
 
-        // 1️⃣ Explicit selector (preferred)
+        // 1️⃣ First priority: explicit selector
         const explicit = node.closest("[data-app-selector]");
         if (explicit) return explicit;
 
-        // 2️⃣ Infer from Mobirise semantic classes
-        for (const rule of CLASS_SELECTOR_MAP) {
-            const el = node.closest(rule.match);
-            if (el) {
-                // Inject selector so future edits are fast
-                el.dataset.appSelector = rule.selector;
-                return el;
-            }
+        // 2️⃣ Fallback classes (auto-detect editable elements)
+        const fallbackClasses = [
+            ".mbr-section-title",
+            ".mbr-section-subtitle",
+            ".mbr-text",
+            ".mbr-item-title",
+            ".mbr-item-subtitle",
+            ".mbr-section-btn .btn",
+            ".btn"
+        ];
+
+        for (const selector of fallbackClasses) {
+            const found = node.closest(selector);
+            if (found) return found;
         }
 
         return null;
@@ -266,6 +281,17 @@ const LiveTextSyncPlugin = (function () {
 
     return { start, stop };
 })();
+
+let pixabayQuery = "";
+let pixabayPage = 1;
+let pixabayHasMore = true;
+let pixabayLoading = false;
+
+let pixabayRequest = null;              // current AJAX request
+const pixabayCache = new Map();         // cache per query+page
+const pixabayLoadedPages = new Set();   // prevent duplicate loads
+
+
 
 /**
  * Build a default params object from a Mobirise component's <mbr-parameters>
@@ -425,6 +451,27 @@ function parseMbrParameters(customHTML) {
 
     return { controls, meta: { found: true, count: controls.length } };
 }
+function renderImages(hits, append = true) {
+
+    const $r = $("#pixabayResults");
+
+    hits.forEach(hit => {
+
+        const img = new Image();
+        img.src = hit.webformatURL;
+        img.className = "selectable-img";
+        img.dataset.url = hit.largeImageURL;
+
+        img.onload = function () {
+            $(img).addClass("loaded");
+        };
+
+        const $item = $("<div class='masonry-item'>").append(img);
+
+        if (append) $r.append($item);
+        else $r.prepend($item);
+    });
+}
 
 async function setReferences() {
     //// Set references for quick access
@@ -440,22 +487,422 @@ async function setReferences() {
 
 $(document).ready(async function () {
     let reactiveParamsHandle = null; // holds Proxy returned by the jQuery reactive plugin
-    let currentHtmlSectionId = 0;
-    let currentHtmlSectionAnchor = '';
+    //let currentHtmlSectionId = 0;
+    //let currentHtmlSectionAnchor = '';
     let selectedText = '';
     let htmlSections = null;
-    let selectedBlogPostIndex;
+    //let selectedBlogPostIndex;
     let currentTab = $('#editorTab .nav-link.active')[0];
     let $compEl = null;
 
     WysiwygController.init("#editableDraftHtmlContent");
     await setReferences();
 
+    let imageTargetInput = null;
+
+    $(document).on("click", ".open-image-modal", function () {
+        imageTargetInput = $(this).data("target-input");
+        new bootstrap.Modal("#imagePickerModal").show();
+    });
+
+
+
+    $(document).on("change", "#localImageInput", function () {
+        console.log("Local image selected");
+
+        const file = this.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        $.ajax({
+            url: "/users/htmlSections/uploadImage",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success(res) {
+                if (!res?.imageUrl) return alert("Upload failed");
+                applyImageUrl(res.imageUrl);
+            }
+        });
+    });
+
+    function createBottomSpinner() {
+        return $(`
+        <div id="pixabayBottomSpinner" class="text-center py-3">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    `);
+    }
+
+
+    document.addEventListener("scroll", e => {
+        console.log("Scrolling:", e.target);
+        if (e.target.id === 'imagePickerModal') {
+            if (pixabayLoading || !pixabayHasMore) return;
+
+            const el = e.target;
+            console.log("Scroll:",
+                "top:", el.scrollTop,
+                "height:", el.clientHeight,
+                "scrollHeight:", el.scrollHeight
+            );
+            const nearBottom =
+                el.scrollTop + el.clientHeight >= el.scrollHeight - 150;
+
+            if (nearBottom) {
+                console.log("Loading next page...");
+                loadPixabayPage(false);
+            }
+        }
+    }, true);
+
+    $(document).on("input", "#pixabaySearch", debounce(function () {
+
+        const q = this.value.trim();
+        if (!q) return;
+
+        pixabayQuery = q;
+        pixabayPage = 1;
+        pixabayHasMore = true;
+        pixabayLoadedPages.clear();
+
+        const $r = $("#pixabayResults").empty();
+
+        // ✅ Add skeletons
+        for (let i = 0; i < 12; i++) {
+            $r.append(`<div class="skeleton" style="height:${200 + Math.random() * 150}px"></div>`);
+        }
+
+        loadPixabayPage(true);
+
+    }, 400));
+
+
+
+
+    //function loadPixabayPage(isFirstLoad = false) {
+
+    //    if (pixabayLoading || !pixabayHasMore) return;
+
+    //    pixabayLoading = true;
+
+    //    $.getJSON("https://pixabay.com/api/", {
+    //        key: "54600336-c7a5ddf6ff8b42202cfacc7f6",
+    //        q: pixabayQuery,
+    //        image_type: "photo",
+    //        per_page: 20,
+    //        page: pixabayPage
+    //    }, res => {
+
+    //        const $r = $("#pixabayResults");
+
+    //        if (isFirstLoad) {
+    //            $r.empty(); // remove skeletons
+    //        }
+
+    //        if (!res.hits.length) {
+    //            pixabayHasMore = false;
+    //            return;
+    //        }
+
+    //        res.hits.forEach(hit => {
+
+    //            const img = new Image();
+    //            img.src = hit.webformatURL;
+    //            img.className = "selectable-img";
+    //            img.dataset.url = hit.largeImageURL;
+
+    //            img.onload = function () {
+    //                $(img).addClass("loaded");
+    //            };
+
+    //            $r.append(
+    //                $("<div class='masonry-item'>").append(img)
+    //            );
+    //        });
+
+    //        pixabayPage++;
+    //        pixabayLoading = false;
+
+    //    }).fail(() => {
+    //        pixabayLoading = false;
+    //    });
+    //}
+    //function loadPixabayPage(reset = false) {
+
+    //    if (pixabayLoading) return;
+
+    //    pixabayLoading = true;
+
+    //    const $r = $("#pixabayResults");
+
+    //    if (!reset) {
+    //        // ✅ Add spinner at bottom
+    //        $r.append(createBottomSpinner());
+    //    }
+
+    //    $.getJSON("https://pixabay.com/api/", {
+    //        key: "54600336-c7a5ddf6ff8b42202cfacc7f6",
+    //        q: pixabayQuery,
+    //        image_type: "photo",
+    //        per_page: 20,
+    //        page: pixabayPage
+    //    }, res => {
+
+    //        // ✅ Remove bottom spinner
+    //        $("#pixabayBottomSpinner").remove();
+
+    //        if (!res.hits.length) {
+    //            pixabayHasMore = false;
+    //            pixabayLoading = false;
+    //            return;
+    //        }
+
+    //        res.hits.forEach(hit => {
+
+    //            const img = new Image();
+    //            img.src = hit.webformatURL;
+    //            img.className = "selectable-img";
+    //            img.dataset.url = hit.largeImageURL;
+
+    //            img.onload = function () {
+    //                $(img).addClass("loaded");
+    //            };
+
+    //            $r.append(
+    //                $("<div class='masonry-item'>").append(img)
+    //            );
+    //        });
+
+    //        pixabayPage++;
+    //        pixabayLoading = false;
+
+    //    }).fail(() => {
+    //        $("#pixabayBottomSpinner").remove();
+    //        pixabayLoading = false;
+    //    });
+    //}
+
+    //function loadPixabayPage(reset = false) {
+
+    //    if (pixabayLoading) return;
+    //    pixabayLoading = true;
+
+    //    const $r = $("#pixabayResults");
+
+    //    // ✅ Show bottom spinner only for infinite scroll
+    //    if (!reset) {
+    //        $r.append(createBottomSpinner());
+    //    }
+
+    //    $.getJSON("https://pixabay.com/api/", {
+    //        key: "54600336-c7a5ddf6ff8b42202cfacc7f6",
+    //        q: pixabayQuery,
+    //        image_type: "photo",
+    //        per_page: 20,
+    //        page: pixabayPage
+    //    }, res => {
+
+    //        // ✅ REMOVE SKELETONS on initial load
+    //        if (reset) {
+    //            $r.find(".skeleton").remove();
+    //        }
+
+    //        // ✅ Remove bottom spinner
+    //        $("#pixabayBottomSpinner").remove();
+
+    //        if (!res.hits.length) {
+    //            pixabayHasMore = false;
+    //            pixabayLoading = false;
+    //            return;
+    //        }
+
+    //        res.hits.forEach(hit => {
+
+    //            const img = new Image();
+    //            img.src = hit.webformatURL;
+    //            img.className = "selectable-img";
+    //            img.dataset.url = hit.largeImageURL;
+
+    //            img.onload = function () {
+    //                $(img).addClass("loaded");
+    //            };
+
+    //            $r.append(
+    //                $("<div class='masonry-item'>").append(img)
+    //            );
+    //        });
+
+    //        pixabayPage++;
+    //        pixabayLoading = false;
+
+    //    }).fail(() => {
+    //        $("#pixabayBottomSpinner").remove();
+    //        pixabayLoading = false;
+    //    });
+    //}
+    function loadPixabayPage(reset = false) {
+
+        if (!pixabayQuery || pixabayLoading || !pixabayHasMore) return;
+
+        const cacheKey = `${pixabayQuery}_${pixabayPage}`;
+
+        // ✅ Prevent duplicate page loads
+        if (pixabayLoadedPages.has(cacheKey)) return;
+
+        pixabayLoading = true;
+
+        const $r = $("#pixabayResults");
+
+        // ✅ Add spinner only for infinite scroll
+        if (!reset) {
+            $r.append(createBottomSpinner());
+        }
+
+        // ✅ Serve from cache if available
+        if (pixabayCache.has(cacheKey)) {
+
+            const cachedHits = pixabayCache.get(cacheKey);
+
+            if (reset) removeSkeletons();
+
+            $("#pixabayBottomSpinner").remove();
+
+            renderImages(cachedHits);
+
+            pixabayLoadedPages.add(cacheKey);
+            pixabayPage++;
+            pixabayLoading = false;
+
+            return;
+        }
+
+        // ✅ Abort previous request
+        if (pixabayRequest) {
+            pixabayRequest.abort();
+        }
+
+        pixabayRequest = $.ajax({
+            url: "https://pixabay.com/api/",
+            data: {
+                key: "54600336-c7a5ddf6ff8b42202cfacc7f6",
+                q: pixabayQuery,
+                image_type: "photo",
+                per_page: 20,
+                page: pixabayPage
+            },
+            dataType: "json"
+        });
+
+        pixabayRequest.done(res => {
+
+            $("#pixabayBottomSpinner").remove();
+
+            if (!res.hits.length) {
+                pixabayHasMore = false;
+                pixabayLoading = false;
+                return;
+            }
+
+            pixabayCache.set(cacheKey, res.hits);
+            pixabayLoadedPages.add(cacheKey);
+
+            if (reset) removeSkeletons();
+
+            renderImages(res.hits);
+
+            pixabayPage++;
+            pixabayLoading = false;
+
+        }).fail((xhr, status) => {
+
+            if (status !== "abort") {
+                console.error("Pixabay error:", status);
+            }
+
+            $("#pixabayBottomSpinner").remove();
+            pixabayLoading = false;
+        });
+    }
+    function removeSkeletons() {
+        const $skeletons = $(".skeleton");
+
+        $skeletons.addClass("fade-out");
+
+        setTimeout(() => {
+            $skeletons.remove();
+        }, 300);
+    }
+
+    function loadSiteGallery() {
+        $.getJSON("/admin/images/list", function (images) {
+            const $g = $("#siteGallery").empty();
+            images.forEach(url => {
+                $g.append(`
+                <div class="col-3">
+                    <img src="${url}" class="img-fluid selectable-img">
+                </div>
+            `);
+            });
+        });
+    }
+
+    $(document).on("shown.bs.tab", '[data-bs-target="#img-gallery"]', loadSiteGallery);
+
+
+
+    $(document).on("click", ".selectable-img", function () {
+        const externalUrl = $(this).data("url") || this.src;
+
+        $.ajax({
+            url: "/editor/importExternalImage",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                url: externalUrl
+            }),
+            success(res) {
+                if (!res?.localUrl) {
+                    alert("Image import failed");
+                    return;
+                }
+
+                // Use LOCAL image path
+                applyImageUrl(res.localUrl);
+            },
+            error() {
+                alert("Failed to import image");
+            }
+        });
+    });
+
+
+    function applyImageUrl(url) {
+        const $input = $("#" + imageTargetInput);
+        $input.val(url).trigger("change");
+
+        bootstrap.Modal.getInstance(
+            document.getElementById("imagePickerModal")
+        ).hide();
+    }
+
+    function debounce(fn, ms) {
+        let t;
+        return function () {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, arguments), ms);
+        };
+    }
+
+
     // Set editor columns to max height available
     $(window).resize(function () {
-        $(".witsec-code-editor-iframe").height(window.innerHeight - 140);	// 140 is the height of the header
+        $(".witsec-code-editor-iframe").height(window.innerHeight);	// 140 is the height of the header
     });
-    $(".witsec-code-editor-iframe").height(window.innerHeight - 140);	// 140 is the height of the header
+    $(".witsec-code-editor-iframe").height(window.innerHeight);	// 140 is the height of the header
 
     async function initComponent() {
         var url = `/editor/getComponentFromHtmlSection/` + htmlSectionId;
@@ -476,10 +923,10 @@ $(document).ready(async function () {
                 const { _schema, _params } = extractDefaultParams(curr._customHTML);
                 schema = _schema;
                 params = _params;
-                
+
 
                 renderControls(schema, params);
-                
+
             },
             error: function (err) {
                 console.error('Error fetching blog posts:', err);
@@ -568,10 +1015,10 @@ $(document).ready(async function () {
     });
 
     $('#upload').on('click', function (e) {
-        
+
     });
 
-    
+
     $('#edit-html').on('click', function () {
         //const contentDiv = $('#editableHtmlContent');
         //const isEditable = contentDiv.attr('contenteditable') === 'true';
@@ -583,15 +1030,16 @@ $(document).ready(async function () {
 
     $('#save-html').on('click', async function () {
         try {
-            
+
             const $form = $("#controls");
             const $compObj = $form.data("component");
             const $compEl = $form.data("componentEl");
             if (!$compObj) return;
 
-            // Sync HTML from preview
-            //$compObj._customHTML = $compEl[0].outerHTML;
-            $compObj._customHTML = ifrHTML.editor.getValue();
+            if ($compEl && $compEl.length) {
+                $compObj._customHTML = ifrHTML.editor.getValue();
+            }
+            //
             const payload = {
                 component: $compObj,
                 HtmlSectionId: htmlSectionId || null
@@ -702,7 +1150,7 @@ $(document).ready(async function () {
 
     $('#image-html').on('click', triggerImageUpload);
 
-    $('.image-wrapper > img').on('click', triggerImageUpload);
+    $(document).on('click', '.image-wrapper > img', triggerImageUpload);
     function triggerImageUpload() {
         const $input = $('#imageUploadInput');
         $('#imageUploadInput').on('change', imageUpload);
@@ -715,7 +1163,7 @@ $(document).ready(async function () {
         await setEditorLanguages(curr, params);
     });
 
-    $('#refresh').on('click', async function() { 
+    $('#refresh').on('click', async function () {
 
         await renderUI();
         await setEditorLanguages(curr, params);
@@ -909,45 +1357,46 @@ $(document).ready(async function () {
     $('#open-params-editor').on('click', function () {
         openParamsEditor();
     });
-    // Function to translate JSON to CSS
-    function json2css(json) {
-        var css = "";
-        var prevdepth = 0;
 
-        function eachRecursive(obj, depth = 0) {
-            for (var k in obj) {
-                // Indentation
-                var spaces = " ".repeat(depth * 2);
+    //// Function to translate JSON to CSS
+    //function json2css(json) {
+    //    var css = "";
+    //    var prevdepth = 0;
 
-                // If we're getting another hash, dive deeper
-                if (typeof obj[k] == "object" && obj[k] !== null) {
-                    // Let's not have a white line as first line
-                    css += (css ? "\n" : "");
+    //    function eachRecursive(obj, depth = 0) {
+    //        for (var k in obj) {
+    //            // Indentation
+    //            var spaces = " ".repeat(depth * 2);
 
-                    // Open brackets
-                    css += spaces + k + " {\n";
+    //            // If we're getting another hash, dive deeper
+    //            if (typeof obj[k] == "object" && obj[k] !== null) {
+    //                // Let's not have a white line as first line
+    //                css += (css ? "\n" : "");
 
-                    // Dive deeper
-                    eachRecursive(obj[k], depth + 1);
-                } else {
-                    // Write the css
-                    css += spaces + k + ": " + obj[k] + ";\n";
-                }
+    //                // Open brackets
+    //                css += spaces + k + " {\n";
 
-                // If current depth is less than previous depth, we've exited a hash, so let's place a closing bracket
-                if (depth < prevdepth || JSON.stringify(obj[k]) == "{}") {
-                    css += spaces + "}\n";
-                }
-                prevdepth = depth;
-            }
-        }
+    //                // Dive deeper
+    //                eachRecursive(obj[k], depth + 1);
+    //            } else {
+    //                // Write the css
+    //                css += spaces + k + ": " + obj[k] + ";\n";
+    //            }
 
-        // Go!
-        eachRecursive(json);
+    //            // If current depth is less than previous depth, we've exited a hash, so let's place a closing bracket
+    //            if (depth < prevdepth || JSON.stringify(obj[k]) == "{}") {
+    //                css += spaces + "}\n";
+    //            }
+    //            prevdepth = depth;
+    //        }
+    //    }
 
-        // Return beautiful css :)
-        return css.trim();
-    }
+    //    // Go!
+    //    eachRecursive(json);
+
+    //    // Return beautiful css :)
+    //    return css.trim();
+    //}
 
     function openParamsEditor() {
 
@@ -1064,8 +1513,8 @@ $(document).ready(async function () {
                     if (params.bg.type === "video") params.bg.value = value;
 
                     $fieldset.find(`input[type="video"]`)
-                    .attr("value", value)
-                    .attr("selected", '');
+                        .attr("value", value)
+                        .attr("selected", '');
                     break;
 
                 case "parallax":
@@ -1464,17 +1913,28 @@ $(document).ready(async function () {
                             : opt.value;
 
                     if (opt.kind === "image") {
+                        const inputId = `bg-image-${i}-${j}`;
+
                         html += `
-                        <div class="mb-2 bg-sub bg-image">
-                            <label class="form-label" for="bg-image-${j}">${opt.title || "Image"}</label>
-                            <input class="form-control param-input"
-                                type="text"
-                                id="bg-image-${j}"
-                                name="${ctrl.name}.image"
-                                value="${optVal}"
-                            >
-                        </div>`;
+                            <div class="mb-2 bg-sub bg-image">
+                                <label class="form-label">${opt.title || "Image"}</label>
+
+                                <div class="input-group">
+                                    <input class="form-control param-input image-url-input"
+                                        type="text"
+                                        id="${inputId}"
+                                        name="${ctrl.name}.image"
+                                        value="${optVal || ""}"
+                                    >
+                                    <button class="btn btn-sm btn-outline-secondary open-image-modal"
+                                        type="button"
+                                        data-target-input="${inputId}">
+                                        Browse…
+                                    </button>
+                                </div>
+                            </div>`;
                     }
+
 
                     if (opt.kind === "color") {
                         html += `
@@ -1518,9 +1978,81 @@ $(document).ready(async function () {
                 </div> <!-- end bg-fields -->
             </div>`;
             }
+            let imagePicker = `
+                    <div class="modal fade" id="imagePickerModal" tabindex="-1">
+                      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                        <div class="modal-content">
 
+                          <div class="modal-header">
+                            <h5 class="modal-title">Select Image</h5>
+                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+
+                          <div class="modal-body">
+
+                            <ul class="nav nav-tabs mb-3" role="tablist">
+                              <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#img-local">Local</button>
+                              </li>
+                              <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#img-gallery">Gallery</button>
+                              </li>
+                              <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#img-pixabay">Pixabay</button>
+                              </li>
+                            </ul>
+
+                            <div class="tab-content">
+
+                              <!-- LOCAL UPLOAD -->
+                              <div class="tab-pane fade show active" id="img-local">
+                                <input type="file" id="localImageInput" accept="image/*" class="form-control mb-3">
+                                <div id="localPreview"></div>
+                              </div>
+
+                              <!-- SITE GALLERY -->
+                              <div class="tab-pane fade" id="img-gallery">
+                                <div id="siteGallery" class="row g-3"></div>
+                              </div>
+
+                              <!-- PIXABAY -->
+                              <div class="tab-pane fade" id="img-pixabay">
+                                <input type="text" id="pixabaySearch" class="form-control mb-2" placeholder="Search Pixabay">
+                                <div id="pixabayResults" class="masonry-grid" style=""></div>
+
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+            `;
             // ---- append to form ----
             $controls.append(html);
+
+            // Append image picker modal once
+            if (!$("#imagePickerModal").length) {
+                $("body").append(imagePicker);
+            }
+        });
+
+        $(document).on("shown.bs.modal", "#imagePickerModal", function () {
+
+            const $scrollContainer = $(this).find(".modal-body");
+
+            $scrollContainer.off("scroll.pixabay").on("scroll.pixabay", function () {
+
+                if (pixabayLoading || !pixabayHasMore) return;
+
+                const el = this;
+
+                if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+                    loadPixabayPage(false);
+                }
+            });
+
         });
 
         // After rendering, hide the wrong background sub-controls
