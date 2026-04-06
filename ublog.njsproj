@@ -35,10 +35,20 @@
     <Content Include="controllers\modalController.js" />
     <Content Include="models\MobiriseProject - Copy.js" />
     <Content Include="nw-start.js" />
+    <Content Include="public\js\plugins\liveTextSyncPlugin.js" />
+    <Content Include="public\js\temp-pad.js" />
     <Content Include="public\js\templates\editor.js" />
     <Content Include="public\js\plugins\renderer.jquery.reactive.js" />
     <Content Include="public\monaco\min\vs\language\php\php.js" />
     <Content Include="public\digital-marketing-dreams\temp2.html" />
+    <Content Include="public\temp\js.js" />
+    <Content Include="public\temp\ModalDialog.html">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="public\temp\Page1.html">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="public\temp\project.mobirise" />
     <Content Include="public\temp\temp.json" />
     <Content Include="scripts\package-nw.cjs" />
     <Content Include="app.js" />
