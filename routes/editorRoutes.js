@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // routes/editor.js
 const express = require('express');
 const router = express.Router();
@@ -19,5 +20,7 @@ router.post('/edit/:pageName/:anchor', EditorController.editSave);
 
 // API: List all components (JSON)
 router.get('/list', EditorController.listAll);
+
+router.post('/importExternalImage', EditorController.importExternalImage);
 
 module.exports = router;

@@ -1,0 +1,309 @@
+(node:7704) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:56
+        let params = extractDefaultParams(customHtml);
+            ^
+
+SyntaxError: Identifier 'params' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1692:18)
+    at Module._compile (node:internal/modules/cjs/loader:1735:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userBlogPostController.js:4:21)
+
+Node.js v24.12.0
+C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:56
+        let params = extractDefaultParams(customHtml);
+            ^
+
+SyntaxError: Identifier 'params' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1692:18)
+    at Module._compile (node:internal/modules/cjs/loader:1735:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userBlogPostController.js:4:21)
+
+Node.js v24.12.0
+C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:56
+        let params = extractDefaultParams(customHtml);
+            ^
+
+SyntaxError: Identifier 'params' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1692:18)
+    at Module._compile (node:internal/modules/cjs/loader:1735:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userBlogPostController.js:4:21)
+
+Node.js v24.12.0
+C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:56
+        let params = extractDefaultParams(customHtml);
+            ^
+
+SyntaxError: Identifier 'params' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1692:18)
+    at Module._compile (node:internal/modules/cjs/loader:1735:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userBlogPostController.js:4:21)
+
+Node.js v24.12.0
+C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:56
+        let params = extractDefaultParams(customHtml);
+            ^
+
+SyntaxError: Identifier 'params' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1692:18)
+    at Module._compile (node:internal/modules/cjs/loader:1735:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userBlogPostController.js:4:21)
+
+Node.js v24.12.0
+C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:56
+        let params = extractDefaultParams(customHtml);
+            ^
+
+SyntaxError: Identifier 'params' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1692:18)
+    at Module._compile (node:internal/modules/cjs/loader:1735:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userBlogPostController.js:4:21)
+
+Node.js v24.12.0
+(node:4768) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Error updating HtmlSection witsec-modal-window-block-2vo TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2vp TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2vq TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2vr TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2vs TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2vt TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+(node:4308) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Error updating HtmlSection witsec-modal-window-block-327 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-329 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-32x TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+(node:4840) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Error updating HtmlSection witsec-modal-window-block-312 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+[2026-01-13T08:51:06.595Z] [PID: 4840] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Tue Jan 13 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+C:\Users\Simon\source\repos\ublog\ublog\node_modules\cheerio\dist\commonjs\load.js:48
+            throw new Error('cheerio.load() expects a string');
+                  ^
+
+Error: cheerio.load() expects a string
+    at Object.load (C:\Users\Simon\source\repos\ublog\ublog\node_modules\cheerio\dist\commonjs\load.js:48:19)
+    at parseMbrParameters (C:\Users\Simon\source\repos\ublog\ublog\lib\parser.js:11:23)
+    at Statement.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:347:26)
+
+Node.js v24.12.0
+C:\Users\Simon\source\repos\ublog\ublog\node_modules\cheerio\dist\commonjs\load.js:48
+            throw new Error('cheerio.load() expects a string');
+                  ^
+
+Error: cheerio.load() expects a string
+    at Object.load (C:\Users\Simon\source\repos\ublog\ublog\node_modules\cheerio\dist\commonjs\load.js:48:19)
+    at parseMbrParameters (C:\Users\Simon\source\repos\ublog\ublog\lib\parser.js:11:23)
+    at Statement.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:347:26)
+
+Node.js v24.12.0
+[2026-01-20T07:33:13.448Z] [PID: 4176] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Tue Jan 20 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+(node:4752) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[2026-01-22T10:41:06.674Z] [PID: 4752] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Thu Jan 22 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+C:\Users\Simon\source\repos\ublog\ublog\node_modules\cheerio\dist\commonjs\load.js:48
+            throw new Error('cheerio.load() expects a string');
+                  ^
+
+Error: cheerio.load() expects a string
+    at Object.load (C:\Users\Simon\source\repos\ublog\ublog\node_modules\cheerio\dist\commonjs\load.js:48:19)
+    at parseMbrParameters (C:\Users\Simon\source\repos\ublog\ublog\lib\parser.js:11:23)
+    at Statement.<anonymous> (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:347:26)
+
+Node.js v24.12.0
+(node:2056) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[2026-01-24T08:46:13.784Z] [PID: 2056] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sat Jan 24 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-01-25T07:58:29.597Z] [PID: 2056] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun Jan 25 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-01-26T09:25:04.682Z] [PID: 2056] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Mon Jan 26 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-01-27T09:48:27.204Z] [PID: 2056] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Tue Jan 27 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-01-28T09:30:05.144Z] [PID: 2056] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Wed Jan 28 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-01-29T07:55:09.731Z] [PID: 2056] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Thu Jan 29 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+(node:4420) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Error fetching the file: https://simonfranklin-code.github.io/introduction-to-seo-and-digital-marketing.html: Error: ENOENT: no such file or directory, open 'C:\Users\Simon\source\repos\ublog\ublog\https:\simonfranklin-code.github.io\introduction-to-seo-and-digital-marketing.html'
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.readFile (node:internal/fs/promises:1279:14)
+    at async HtmlSection.fetchHTML (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:194:26)
+    at async HtmlSection.importSingleHtmlSection (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:348:26)
+    at async exports.importSingleHtmlSectionById (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:239:30) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Simon\\source\\repos\\ublog\\ublog\\https:\\simonfranklin-code.github.io\\introduction-to-seo-and-digital-marketing.html'
+}
+Error in main function Error: ENOENT: no such file or directory, open 'C:\Users\Simon\source\repos\ublog\ublog\https:\simonfranklin-code.github.io\introduction-to-seo-and-digital-marketing.html'
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.readFile (node:internal/fs/promises:1279:14)
+    at async HtmlSection.fetchHTML (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:194:26)
+    at async HtmlSection.importSingleHtmlSection (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:348:26)
+    at async exports.importSingleHtmlSectionById (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:239:30) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Simon\\source\\repos\\ublog\\ublog\\https:\\simonfranklin-code.github.io\\introduction-to-seo-and-digital-marketing.html'
+}
+Error fetching the file: https://simonfranklin-code.github.io/introduction-to-seo-and-digital-marketing.html: Error: ENOENT: no such file or directory, open 'C:\Users\Simon\source\repos\ublog\ublog\https:\simonfranklin-code.github.io\introduction-to-seo-and-digital-marketing.html'
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.readFile (node:internal/fs/promises:1279:14)
+    at async HtmlSection.fetchHTML (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:194:26)
+    at async HtmlSection.importSingleHtmlSection (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:348:26)
+    at async exports.importSingleHtmlSectionById (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:239:30) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Simon\\source\\repos\\ublog\\ublog\\https:\\simonfranklin-code.github.io\\introduction-to-seo-and-digital-marketing.html'
+}
+Error in main function Error: ENOENT: no such file or directory, open 'C:\Users\Simon\source\repos\ublog\ublog\https:\simonfranklin-code.github.io\introduction-to-seo-and-digital-marketing.html'
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.readFile (node:internal/fs/promises:1279:14)
+    at async HtmlSection.fetchHTML (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:194:26)
+    at async HtmlSection.importSingleHtmlSection (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:348:26)
+    at async exports.importSingleHtmlSectionById (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:239:30) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Simon\\source\\repos\\ublog\\ublog\\https:\\simonfranklin-code.github.io\\introduction-to-seo-and-digital-marketing.html'
+}
+Error fetching the file: https://simonfranklin-code.github.io/introduction-to-seo-and-digital-marketing.html: Error: ENOENT: no such file or directory, open 'C:\Users\Simon\source\repos\ublog\ublog\https:\simonfranklin-code.github.io\introduction-to-seo-and-digital-marketing.html'
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.readFile (node:internal/fs/promises:1279:14)
+    at async HtmlSection.fetchHTML (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:194:26)
+    at async HtmlSection.importSingleHtmlSection (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:348:26)
+    at async exports.importSingleHtmlSectionById (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:239:30) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Simon\\source\\repos\\ublog\\ublog\\https:\\simonfranklin-code.github.io\\introduction-to-seo-and-digital-marketing.html'
+}
+Error in main function Error: ENOENT: no such file or directory, open 'C:\Users\Simon\source\repos\ublog\ublog\https:\simonfranklin-code.github.io\introduction-to-seo-and-digital-marketing.html'
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.readFile (node:internal/fs/promises:1279:14)
+    at async HtmlSection.fetchHTML (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:194:26)
+    at async HtmlSection.importSingleHtmlSection (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:348:26)
+    at async exports.importSingleHtmlSectionById (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:239:30) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Simon\\source\\repos\\ublog\\ublog\\https:\\simonfranklin-code.github.io\\introduction-to-seo-and-digital-marketing.html'
+}
+Error updating HtmlSection witsec-modal-window-block-2y2 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2y3 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2xi TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2y4 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error fetching the file: https://simonfranklin-code.github.io/introduction-to-seo-and-digital-marketing.html: Error: ENOENT: no such file or directory, open 'C:\Users\Simon\source\repos\ublog\ublog\https:\simonfranklin-code.github.io\introduction-to-seo-and-digital-marketing.html'
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.readFile (node:internal/fs/promises:1279:14)
+    at async HtmlSection.fetchHTML (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:194:26)
+    at async HtmlSection.importSingleHtmlSection (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:348:26)
+    at async exports.importSingleHtmlSectionById (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:239:30) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Simon\\source\\repos\\ublog\\ublog\\https:\\simonfranklin-code.github.io\\introduction-to-seo-and-digital-marketing.html'
+}
+Error in main function Error: ENOENT: no such file or directory, open 'C:\Users\Simon\source\repos\ublog\ublog\https:\simonfranklin-code.github.io\introduction-to-seo-and-digital-marketing.html'
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.readFile (node:internal/fs/promises:1279:14)
+    at async HtmlSection.fetchHTML (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:194:26)
+    at async HtmlSection.importSingleHtmlSection (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:348:26)
+    at async exports.importSingleHtmlSectionById (C:\Users\Simon\source\repos\ublog\ublog\controllers\userHtmlSectionController.js:239:30) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Simon\\source\\repos\\ublog\\ublog\\https:\\simonfranklin-code.github.io\\introduction-to-seo-and-digital-marketing.html'
+}
+(node:13440) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Error updating HtmlSection witsec-modal-window-block-2y2 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2y3 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2xi TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2y4 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+Error updating HtmlSection witsec-modal-window-block-2y2 TypeError: Cannot read properties of undefined (reading 'replace')
+    at HtmlSection.insertHtmlSections (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:276:75)
+    at async HtmlSection.importHtml (C:\Users\Simon\source\repos\ublog\ublog\models\HtmlSection.js:328:13)
+(node:9268) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:12348) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[2026-02-04T07:45:01.796Z] [PID: 12348] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Wed Feb 04 2026 03:00:00 GMT+0000 (Horário do Meridiano de Greenwich)! Possible blocking IO or high CPU user at the same process used by node-cron.
+(node:4412) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)

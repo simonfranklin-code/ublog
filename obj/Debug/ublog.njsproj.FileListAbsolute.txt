@@ -1,0 +1,6 @@
+C:\Users\Simon\source\repos\ublog\ublog\obj\Debug\ublog.njsproj.AssemblyReference.cache
+C:\Users\Simon\source\repos\ublog\ublog\obj\Debug\ublog.njsproj.CoreCompileInputs.cache
+C:\Users\Simon\source\repos\ublog\ublog\bin\Microsoft.NodejsTools.WebRole.dll
+D:\ublog\ublog\obj\Debug\ublog.njsproj.AssemblyReference.cache
+D:\ublog\ublog\obj\Debug\ublog.njsproj.CoreCompileInputs.cache
+D:\ublog\ublog\bin\Microsoft.NodejsTools.WebRole.dll

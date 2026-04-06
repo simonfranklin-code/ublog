@@ -1,0 +1,3 @@
+C:\Users\Susana Rijo\Source\repos\Smf\YouBlog\YouBlog.ExpressApp\obj\Release\YouBlog.ExpressApp.njsproj.AssemblyReference.cache
+C:\Users\Susana Rijo\Source\repos\Smf\YouBlog\YouBlog.ExpressApp\obj\Release\YouBlog.ExpressApp.njsproj.CoreCompileInputs.cache
+C:\Users\Susana Rijo\Source\repos\Smf\YouBlog\YouBlog.ExpressApp\bin\Microsoft.NodejsTools.WebRole.dll

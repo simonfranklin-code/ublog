@@ -1,0 +1,2 @@
+C:\Users\Susana Rijo\Source\repos\Smf\YouBlog\YouBlog.ExpressApp\obj\Debug\YouBlog.ExpressApp.esproj.CoreCompileInputs.cache
+E:\Smf\YouBlog\YouBlog.ExpressApp\obj\Debug\YouBlog.ExpressApp.esproj.CoreCompileInputs.cache

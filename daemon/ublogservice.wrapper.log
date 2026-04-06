@@ -1,0 +1,276 @@
+2026-01-07 10:00:56 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-07 10:00:56 - Started 7680
+2026-01-08 12:04:57 - Stopping ublogservice.exe
+2026-01-08 12:04:57 - ProcessKill 7680
+2026-01-08 12:04:57 - Found child process: 5940 Name: conhost.exe
+2026-01-08 12:04:57 - Found child process: 7704 Name: node.exe
+2026-01-08 12:04:57 - Stopping process 5940
+2026-01-08 12:04:57 - Send SIGINT 5940
+2026-01-08 12:04:57 - SIGINT to 5940 failed - Killing as fallback
+2026-01-08 12:04:57 - Stopping process 7704
+2026-01-08 12:04:57 - Send SIGINT 7704
+2026-01-08 12:04:57 - SIGINT to 7704 failed - Killing as fallback
+2026-01-08 12:04:57 - Stopping process 7680
+2026-01-08 12:04:57 - Send SIGINT 7680
+2026-01-08 12:04:57 - SIGINT to 7680 failed - Killing as fallback
+2026-01-08 12:04:57 - Finished ublogservice.exe
+2026-01-08 12:04:59 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-08 12:04:59 - Started 10624
+2026-01-08 16:19:02 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-08 16:19:02 - Started 4084
+2026-01-09 15:46:25 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-09 15:46:25 - Started 4356
+2026-01-09 17:23:30 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-09 17:23:30 - Started 3328
+2026-01-10 10:07:55 - Stopping ublogservice.exe
+2026-01-10 10:07:55 - ProcessKill 3328
+2026-01-10 10:07:56 - Found child process: 1320 Name: conhost.exe
+2026-01-10 10:07:56 - Found child process: 4376 Name: node.exe
+2026-01-10 10:07:56 - Stopping process 1320
+2026-01-10 10:07:56 - Send SIGINT 1320
+2026-01-10 10:07:56 - SIGINT to 1320 failed - Killing as fallback
+2026-01-10 10:07:56 - Stopping process 4376
+2026-01-10 10:07:56 - Send SIGINT 4376
+2026-01-10 10:07:56 - SIGINT to 4376 failed - Killing as fallback
+2026-01-10 10:07:56 - Stopping process 3328
+2026-01-10 10:07:56 - Send SIGINT 3328
+2026-01-10 10:07:56 - SIGINT to 3328 failed - Killing as fallback
+2026-01-10 10:07:56 - Finished ublogservice.exe
+2026-01-10 10:07:57 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-10 10:07:57 - Started 3088
+2026-01-10 10:09:19 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-10 10:09:19 - Started 12980
+2026-01-10 10:12:56 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-10 10:12:57 - Started 12272
+2026-01-10 14:32:01 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-10 14:32:01 - Started 4108
+2026-01-10 18:41:56 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-10 18:41:56 - Started 4400
+2026-01-11 16:20:17 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-11 16:20:17 - Started 3848
+2026-01-11 18:42:56 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-11 18:42:56 - Started 4612
+2026-01-14 09:24:09 - Stopping ublogservice.exe
+2026-01-14 09:24:09 - ProcessKill 4612
+2026-01-14 09:24:10 - Found child process: 4624 Name: conhost.exe
+2026-01-14 09:24:10 - Found child process: 7808 Name: node.exe
+2026-01-14 09:24:10 - Stopping process 4624
+2026-01-14 09:24:10 - Send SIGINT 4624
+2026-01-14 09:24:10 - SIGINT to 4624 failed - Killing as fallback
+2026-01-14 09:24:10 - Stopping process 7808
+2026-01-14 09:24:10 - Send SIGINT 7808
+2026-01-14 09:24:10 - SIGINT to 7808 failed - Killing as fallback
+2026-01-14 09:24:10 - Stopping process 4612
+2026-01-14 09:24:10 - Send SIGINT 4612
+2026-01-14 09:24:10 - SIGINT to 4612 failed - Killing as fallback
+2026-01-14 09:24:10 - Finished ublogservice.exe
+2026-01-18 12:14:06 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-18 12:14:06 - Started 1104
+2026-01-18 19:54:27 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-18 19:54:27 - Started 3704
+2026-01-18 20:07:42 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-18 20:07:42 - Started 4084
+2026-01-20 15:17:00 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-20 15:17:00 - Started 4372
+2026-01-29 16:36:46 - Stopping ublogservice.exe
+2026-01-29 16:36:46 - ProcessKill 4372
+2026-01-29 16:36:47 - Found child process: 4396 Name: conhost.exe
+2026-01-29 16:36:47 - Found child process: 2056 Name: node.exe
+2026-01-29 16:36:47 - Stopping process 4396
+2026-01-29 16:36:47 - Send SIGINT 4396
+2026-01-29 16:36:47 - SIGINT to 4396 failed - Killing as fallback
+2026-01-29 16:36:47 - Stopping process 2056
+2026-01-29 16:36:47 - Send SIGINT 2056
+2026-01-29 16:36:47 - SIGINT to 2056 failed - Killing as fallback
+2026-01-29 16:36:47 - Stopping process 4372
+2026-01-29 16:36:47 - Send SIGINT 4372
+2026-01-29 16:36:47 - SIGINT to 4372 failed - Killing as fallback
+2026-01-29 16:36:47 - Finished ublogservice.exe
+2026-01-29 16:36:48 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-29 16:36:48 - Started 6696
+2026-01-30 11:19:26 - Stopping ublogservice.exe
+2026-01-30 11:19:26 - ProcessKill 6696
+2026-01-30 11:19:26 - Found child process: 11768 Name: conhost.exe
+2026-01-30 11:19:26 - Found child process: 2488 Name: node.exe
+2026-01-30 11:19:27 - Stopping process 11768
+2026-01-30 11:19:27 - Send SIGINT 11768
+2026-01-30 11:19:27 - SIGINT to 11768 failed - Killing as fallback
+2026-01-30 11:19:27 - Stopping process 2488
+2026-01-30 11:19:27 - Send SIGINT 2488
+2026-01-30 11:19:27 - SIGINT to 2488 failed - Killing as fallback
+2026-01-30 11:19:27 - Stopping process 6696
+2026-01-30 11:19:27 - Send SIGINT 6696
+2026-01-30 11:19:27 - SIGINT to 6696 failed - Killing as fallback
+2026-01-30 11:19:27 - Finished ublogservice.exe
+2026-01-30 11:19:28 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-30 11:19:28 - Started 11252
+2026-01-30 12:28:15 - Stopping ublogservice.exe
+2026-01-30 12:28:15 - ProcessKill 11252
+2026-01-30 12:28:15 - Found child process: 4832 Name: conhost.exe
+2026-01-30 12:28:15 - Found child process: 12692 Name: node.exe
+2026-01-30 12:28:15 - Stopping process 4832
+2026-01-30 12:28:15 - Send SIGINT 4832
+2026-01-30 12:28:15 - SIGINT to 4832 failed - Killing as fallback
+2026-01-30 12:28:15 - Stopping process 12692
+2026-01-30 12:28:15 - Send SIGINT 12692
+2026-01-30 12:28:15 - SIGINT to 12692 failed - Killing as fallback
+2026-01-30 12:28:15 - Stopping process 11252
+2026-01-30 12:28:15 - Send SIGINT 11252
+2026-01-30 12:28:15 - SIGINT to 11252 failed - Killing as fallback
+2026-01-30 12:28:15 - Finished ublogservice.exe
+2026-01-30 12:34:55 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-30 12:34:55 - Started 12472
+2026-01-31 08:44:40 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-01-31 08:44:40 - Started 3728
+2026-02-01 16:35:57 - Stopping ublogservice.exe
+2026-02-01 16:35:57 - ProcessKill 3728
+2026-02-01 16:35:58 - Found child process: 3744 Name: conhost.exe
+2026-02-01 16:35:58 - Found child process: 4420 Name: node.exe
+2026-02-01 16:35:58 - Stopping process 3744
+2026-02-01 16:35:58 - Send SIGINT 3744
+2026-02-01 16:35:58 - SIGINT to 3744 failed - Killing as fallback
+2026-02-01 16:35:58 - Stopping process 4420
+2026-02-01 16:35:58 - Send SIGINT 4420
+2026-02-01 16:35:58 - SIGINT to 4420 failed - Killing as fallback
+2026-02-01 16:35:58 - Stopping process 3728
+2026-02-01 16:35:58 - Send SIGINT 3728
+2026-02-01 16:35:58 - SIGINT to 3728 failed - Killing as fallback
+2026-02-01 16:35:58 - Finished ublogservice.exe
+2026-02-01 16:35:59 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-01 16:35:59 - Started 5784
+2026-02-02 12:42:16 - Stopping ublogservice.exe
+2026-02-02 12:42:16 - ProcessKill 5784
+2026-02-02 12:42:17 - Found child process: 6752 Name: conhost.exe
+2026-02-02 12:42:17 - Found child process: 13440 Name: node.exe
+2026-02-02 12:42:17 - Stopping process 6752
+2026-02-02 12:42:17 - Send SIGINT 6752
+2026-02-02 12:42:17 - SIGINT to 6752 failed - Killing as fallback
+2026-02-02 12:42:17 - Stopping process 13440
+2026-02-02 12:42:17 - Send SIGINT 13440
+2026-02-02 12:42:17 - SIGINT to 13440 failed - Killing as fallback
+2026-02-02 12:42:17 - Stopping process 5784
+2026-02-02 12:42:17 - Send SIGINT 5784
+2026-02-02 12:42:17 - SIGINT to 5784 failed - Killing as fallback
+2026-02-02 12:42:17 - Finished ublogservice.exe
+2026-02-02 12:42:19 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-02 12:42:19 - Started 14068
+2026-02-02 15:46:37 - Stopping ublogservice.exe
+2026-02-02 15:46:37 - ProcessKill 14068
+2026-02-02 15:46:37 - Found child process: 3792 Name: conhost.exe
+2026-02-02 15:46:37 - Found child process: 9268 Name: node.exe
+2026-02-02 15:46:37 - Stopping process 3792
+2026-02-02 15:46:37 - Send SIGINT 3792
+2026-02-02 15:46:37 - SIGINT to 3792 failed - Killing as fallback
+2026-02-02 15:46:37 - Stopping process 9268
+2026-02-02 15:46:38 - Send SIGINT 9268
+2026-02-02 15:46:38 - SIGINT to 9268 failed - Killing as fallback
+2026-02-02 15:46:38 - Stopping process 14068
+2026-02-02 15:46:38 - Send SIGINT 14068
+2026-02-02 15:46:38 - SIGINT to 14068 failed - Killing as fallback
+2026-02-02 15:46:38 - Finished ublogservice.exe
+2026-02-02 16:33:50 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-02 16:33:50 - Started 11004
+2026-02-02 16:57:23 - Stopping ublogservice.exe
+2026-02-02 16:57:23 - ProcessKill 11004
+2026-02-02 16:57:23 - Found child process: 12276 Name: conhost.exe
+2026-02-02 16:57:23 - Found child process: 14780 Name: node.exe
+2026-02-02 16:57:23 - Stopping process 12276
+2026-02-02 16:57:23 - Send SIGINT 12276
+2026-02-02 16:57:23 - SIGINT to 12276 failed - Killing as fallback
+2026-02-02 16:57:23 - Stopping process 14780
+2026-02-02 16:57:23 - Send SIGINT 14780
+2026-02-02 16:57:23 - SIGINT to 14780 failed - Killing as fallback
+2026-02-02 16:57:23 - Stopping process 11004
+2026-02-02 16:57:23 - Send SIGINT 11004
+2026-02-02 16:57:23 - SIGINT to 11004 failed - Killing as fallback
+2026-02-02 16:57:23 - Finished ublogservice.exe
+2026-02-02 17:28:53 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-02 17:28:53 - Started 14900
+2026-02-02 17:29:14 - Stopping ublogservice.exe
+2026-02-02 17:29:14 - ProcessKill 14900
+2026-02-02 17:29:15 - Found child process: 12560 Name: conhost.exe
+2026-02-02 17:29:15 - Found child process: 4112 Name: node.exe
+2026-02-02 17:29:15 - Stopping process 12560
+2026-02-02 17:29:15 - Send SIGINT 12560
+2026-02-02 17:29:15 - SIGINT to 12560 failed - Killing as fallback
+2026-02-02 17:29:15 - Stopping process 4112
+2026-02-02 17:29:15 - Send SIGINT 4112
+2026-02-02 17:29:15 - SIGINT to 4112 failed - Killing as fallback
+2026-02-02 17:29:15 - Stopping process 14900
+2026-02-02 17:29:15 - Send SIGINT 14900
+2026-02-02 17:29:15 - SIGINT to 14900 failed - Killing as fallback
+2026-02-02 17:29:15 - Finished ublogservice.exe
+2026-02-02 17:30:46 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-02 17:30:47 - Started 10036
+2026-02-02 17:46:53 - Stopping ublogservice.exe
+2026-02-02 17:46:53 - ProcessKill 10036
+2026-02-02 17:46:53 - Found child process: 11040 Name: conhost.exe
+2026-02-02 17:46:53 - Found child process: 13272 Name: node.exe
+2026-02-02 17:46:53 - Stopping process 11040
+2026-02-02 17:46:53 - Send SIGINT 11040
+2026-02-02 17:46:53 - SIGINT to 11040 failed - Killing as fallback
+2026-02-02 17:46:53 - Stopping process 13272
+2026-02-02 17:46:53 - Send SIGINT 13272
+2026-02-02 17:46:53 - SIGINT to 13272 failed - Killing as fallback
+2026-02-02 17:46:53 - Stopping process 10036
+2026-02-02 17:46:53 - Send SIGINT 10036
+2026-02-02 17:46:53 - SIGINT to 10036 failed - Killing as fallback
+2026-02-02 17:46:53 - Finished ublogservice.exe
+2026-02-02 17:48:57 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-02 17:48:57 - Started 14556
+2026-02-02 17:51:16 - Stopping ublogservice.exe
+2026-02-02 17:51:16 - ProcessKill 14556
+2026-02-02 17:51:17 - Found child process: 12648 Name: conhost.exe
+2026-02-02 17:51:17 - Found child process: 2424 Name: node.exe
+2026-02-02 17:51:17 - Stopping process 12648
+2026-02-02 17:51:17 - Send SIGINT 12648
+2026-02-02 17:51:17 - SIGINT to 12648 failed - Killing as fallback
+2026-02-02 17:51:17 - Stopping process 2424
+2026-02-02 17:51:17 - Send SIGINT 2424
+2026-02-02 17:51:17 - SIGINT to 2424 failed - Killing as fallback
+2026-02-02 17:51:17 - Stopping process 14556
+2026-02-02 17:51:17 - Send SIGINT 14556
+2026-02-02 17:51:17 - SIGINT to 14556 failed - Killing as fallback
+2026-02-02 17:51:17 - Finished ublogservice.exe
+2026-02-02 17:51:18 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-02 17:51:18 - Started 10808
+2026-02-04 11:28:38 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-04 11:28:39 - Started 3352
+2026-02-04 14:44:05 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-04 14:44:05 - Started 3892
+2026-02-04 17:16:47 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-04 17:16:47 - Started 4144
+2026-02-05 08:16:38 - Stopping ublogservice.exe
+2026-02-05 08:16:38 - ProcessKill 4144
+2026-02-05 08:16:39 - Found child process: 4172 Name: conhost.exe
+2026-02-05 08:16:39 - Found child process: 4500 Name: node.exe
+2026-02-05 08:16:39 - Stopping process 4172
+2026-02-05 08:16:39 - Send SIGINT 4172
+2026-02-05 08:16:39 - SIGINT to 4172 failed - Killing as fallback
+2026-02-05 08:16:39 - Stopping process 4500
+2026-02-05 08:16:39 - Send SIGINT 4500
+2026-02-05 08:16:39 - SIGINT to 4500 failed - Killing as fallback
+2026-02-05 08:16:39 - Stopping process 4144
+2026-02-05 08:16:39 - Send SIGINT 4144
+2026-02-05 08:16:39 - SIGINT to 4144 failed - Killing as fallback
+2026-02-05 08:16:39 - Finished ublogservice.exe
+2026-02-05 08:16:41 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-05 08:16:41 - Started 9564
+2026-02-05 18:13:32 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-05 18:13:32 - Started 3216
+2026-02-06 16:56:53 - Stopping ublogservice.exe
+2026-02-06 16:56:53 - ProcessKill 3216
+2026-02-06 16:56:53 - Found child process: 3640 Name: conhost.exe
+2026-02-06 16:56:53 - Found child process: 4412 Name: node.exe
+2026-02-06 16:56:53 - Stopping process 3640
+2026-02-06 16:56:53 - Send SIGINT 3640
+2026-02-06 16:56:53 - SIGINT to 3640 failed - Killing as fallback
+2026-02-06 16:56:53 - Stopping process 4412
+2026-02-06 16:56:53 - Send SIGINT 4412
+2026-02-06 16:56:53 - SIGINT to 4412 failed - Killing as fallback
+2026-02-06 16:56:53 - Stopping process 3216
+2026-02-06 16:56:53 - Send SIGINT 3216
+2026-02-06 16:56:53 - SIGINT to 3216 failed - Killing as fallback
+2026-02-06 16:56:53 - Finished ublogservice.exe
+2026-02-07 18:51:11 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Simon\source\repos\ublog\ublog\node_modules\node-windows\lib\wrapper.js --file C:\Users\Simon\source\repos\ublog\ublog\app.js --scriptoptions= --log "ublog Service wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2026-02-07 18:51:11 - Started 15096
