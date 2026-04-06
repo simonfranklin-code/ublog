@@ -1,0 +1,108 @@
+
+
+$(document).ready(function () {
+
+	// Set editor columns to max height available
+	$(".witsec-code-editor-iframe").css("height", window.innerHeight - 40);	// 40 is the height of the header
+	// Set references for quick access
+	ifrHTML = $("#witsec-code-editor-iframe-html")[0].contentWindow;
+	ifrCSS = $("#witsec-code-editor-iframe-css")[0].contentWindow;
+	var url = `/editor/geComponentByPageNameAndAnchor/${pageName}/${pageAnchor}`;
+	$.ajax({
+		url: url,
+		method: 'GET',
+		success: function (data) {
+			curr = data.component;
+			// Empty the editors (this will put the cursor back on line 1)
+			ifrHTML.editor.setValue("");
+			ifrCSS.editor.setValue("");
+			// Put the HTML and CSS in the editor windows
+			ifrHTML.editor.setValue(curr._customHTML.replace(/<\/script/img, "<\/script"));	// Escape closing script tag to prevent bad things from happening
+			ifrCSS.editor.setValue(json2css(curr._styles));
+		},
+		error: function (err) {
+			console.error('Error fetching blog posts:', err);
+		}
+	});
+
+	$(window).resize(function () {
+		$(".witsec-code-editor-iframe").height(window.innerHeight - 40);	// 140 is the height of the header
+	});
+
+});
+
+// Function to translate JSON to CSS
+function json2css(json)
+{
+	var css = "";
+	var prevdepth = 0;
+
+	function eachRecursive(obj, depth=0)
+	{
+		for (var k in obj) {
+			// Indentation
+			var spaces = " ".repeat(depth * 2);
+
+			// If we're getting another hash, dive deeper
+			if (typeof obj[k] == "object" && obj[k] !== null) {
+				// Let's not have a white line as first line
+				css += (css ? "\n" : "");
+
+				// Open brackets
+				css += spaces + k + " {\n";
+
+				// Dive deeper
+				eachRecursive(obj[k], depth+1);
+			} else {
+				// Write the css
+				css += spaces + k + ": " + obj[k] + ";\n";
+			}
+
+			// If current depth is less than previous depth, we've exited a hash, so let's place a closing bracket
+			if (depth < prevdepth || JSON.stringify(obj[k]) == "{}") {
+				css += spaces + "}\n";
+			}
+			prevdepth = depth;
+		}
+	}
+
+	// Go!
+	eachRecursive(json);
+
+	// Return beautiful css :)
+	return css.trim();
+}
+
+
+// Function to check if LESS variables are present in <mbr-parameters>
+function checkLessVars(html, css) {
+	// Extract variables from LESS
+	let regex = /@[a-zA-Z0-9_\-{]+/gm;
+	let vars = [];
+	vars = css.match(regex);
+
+	// Clean up found vars
+	vars.forEach((v, i) => {
+		vars[i] = v.replace(/@/g, "").replace(/{/g, "").replace(/^bg-.+$/, "bg");
+	});
+
+	// Remove at-rules, style variables and other 'reserved' words
+	let reserved = ["charset", "color-profile", "counter-style", "document", "font-face", "font-feature-values", "import", "keyframes", "media", "namespace", "page", "property", "supports", "viewport"];
+	reserved = reserved.concat(["arrowColor", "dangerColor", "display1Font", "display1Size", "display2Font", "display2Size", "display4Font", "display4Size", "display5Font", "display5Size", "display7Font", "display7Size", "infoColor", "isAnimatedOnScroll", "isGhostButtonBorder", "isRoundedButtons", "isScrollToTopButton", "mainFont", "primaryColor", "secondaryColor", "successColor", "underlinedLinks", "warningColor"]);
+	vars = vars.filter(function(el) {
+		return reserved.indexOf(el) < 0;
+	});
+
+	// Remove duplicates
+	vars = vars.filter((a, b) => vars.indexOf(a) === b)
+
+	// Check if found LESS vars exist in <mbr-parameters>
+	let noexist = [];
+	html = $(html);
+	vars.forEach(function(v) {
+	  if ( html.find("mbr-parameters [name='" + v + "']").length == 0 )
+		noexist[noexist.length] = v;
+	});
+
+	return (noexist.length === 0 ? false : noexist);
+}
