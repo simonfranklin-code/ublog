@@ -1,5 +1,11 @@
+/* eslint-disable no-undef */
 const MobiriseProject = require('../models/MobiriseProject');
 const HtmlSection = require('../models/HtmlSection');
+const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
+const crypto = require("crypto");
+
 exports.index = async (req, res) => {
     const pages = await MobiriseProject.getPageList();
     res.render('index', { pages });
@@ -73,5 +79,39 @@ exports.findComponentByPage = async (req, res) => {
         res.json(component);
     } catch (err) {
         res.status(400).send('Error finding component: ' + err.message);
+    }
+};
+
+exports.importExternalImage = async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) return res.status(400).json({ error: "Missing URL" });
+
+        const ext = path.extname(new URL(url).pathname) || ".jpg";
+        const fileName = crypto.randomUUID() + ext;
+
+        const imagesDir = path.join(__dirname, "../public/digital-marketing-dreams/assets/images");
+        const localPath = path.join(imagesDir, fileName);
+
+        const response = await axios({
+            method: "GET",
+            url,
+            responseType: "stream"
+        });
+
+        await new Promise((resolve, reject) => {
+            const stream = fs.createWriteStream(localPath);
+            response.data.pipe(stream);
+            stream.on("finish", resolve);
+            stream.on("error", reject);
+        });
+
+        res.json({
+            localUrl: `assets/images/${fileName}`
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Image download failed" });
     }
 };

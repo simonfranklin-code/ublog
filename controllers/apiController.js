@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const DeepSeekApi = require('../models/DeepSeekApi');
 
 exports.deepseekDashboard = async (req, res) => {

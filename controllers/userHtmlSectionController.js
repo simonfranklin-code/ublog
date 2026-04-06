@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const HtmlSection = require('../models/HtmlSection');
 const Blog = require('../models/Blog');
 const BlogPost = require('../models/BlogPost');
@@ -195,7 +196,7 @@ exports.uploadImage = (req, res) => {
     }
 
     const image = req.files.image;
-    const uploadDir = path.join(__dirname, '../public/uploads');
+    const uploadDir = path.join(__dirname, '../public/assets/images');
 
     if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir);
@@ -209,7 +210,7 @@ exports.uploadImage = (req, res) => {
             return res.status(500).json({ success: false, message: 'Image upload failed.' });
         }
 
-        res.json({ success: true, imageUrl: `/uploads/${image.name}` });
+        res.json({ success: true, imageUrl: `/assets/images/${image.name}` });
     });
 };
 
