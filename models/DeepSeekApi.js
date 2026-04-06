@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 const db = require('./db');
 const deepseek_chat_db = require('./deepseek-chat');
 const fs = require('fs');
@@ -13,7 +15,7 @@ class DeepSeekApi {
 
     static async createCompletion(message, session_id, user_id) {
         const systemPrompt = `
-            The user will provide some exam text. Please parse the "question" and "answer" and output them in JSON format. The answer should be in Html.
+            The user will provide some exam text. Please parse the "question" and "answer" and output them in JSON format. The answer should be in Html surrounded with pre and code tags, and encode the html code. h3 tags should be used for headings and p tags for paragraphs. The answer should be concise and directly address the question. Include any additional information or explanations not outside of the question and answer format. The output should strictly follow the JSON structure with "question" and "answer" keys. h3 tags should have the following format: <h3 class="card-title mbr-fonts-style" mbr-theme-style="display-5" mbr-if="showTitle" data-app-selector=".card-title">. p tags should have the following format: <p class="mbr-text mbr-fonts-style" mbr-theme-style="display-7" data-app-selector=".mbr-text">. Include any other HTML tags or attributes in the answer. The output should be a valid JSON object with the question as a string and the answer as a string of HTML content. Please ensure that the JSON output is properly formatted and does not contain any syntax errors.
 
             EXAMPLE INPUT: 
             Which is the highest mountain in the world? Mount Everest.
