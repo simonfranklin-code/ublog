@@ -12,6 +12,7 @@ const { renderCustomHTML } = require('../lib/renderer');
 const { extractDefaultParams } = require('../lib/defaultParams');
 var path = require('path');
 const fs = require('fs');
+const MobiriseProject = require('../models/MobiriseProject');
 let _BlogSlug = '';
 let _BlogPostSlug = '';
 let _Blogs = null;
@@ -68,18 +69,18 @@ exports.getHtmlSections = async (req, res) => {
 
 exports.createHtmlSection = async (req, res) => {
     try {
-        const { html, blogPostId, viewIndex, anchor, slug, page, header, body } = req.body;
-        await HtmlSection.add(html, blogPostId, viewIndex, anchor, slug, page, header, body);
-        req.flash('success_msg', `Html Section "${anchor}" has been created. by. ${req.user.username}`);
+        const { html, blogPostId, viewIndex, anchor, slug, page, header, body, component, css, paramsJson } = req.body;
+        const htmlSectionId = await HtmlSection.add(html, blogPostId, viewIndex, anchor , slug, page, header, body, component, css, paramsJson);
+        await HtmlSection.editComponentSet(htmlSectionId, anchor, component);
+        req.flash('success_msg', `Html Section ID "${htmlSectionId}" "${anchor}" has been created. by. ${req.user.username}`);
         // Emit flash message to connected clients
         const flashMessage = req.flash('success_msg');
         req.io.emit('flash', { message: flashMessage, isError: false });
-        await Notification.createNotification(req.user.id, `Html Section "${anchor}" has been created.`);
+        await Notification.createNotification(req.user.id, flashMessage);
         // Notify followers
         const followers = await Follower.getFollowers(req.user.id);
         followers.forEach(async follower => {
-            const username = req.user.username;
-            await Notification.createNotification(follower.FollowerUserId, `User ${username} has created a new html section "${anchor}".`);
+            await Notification.createNotification(follower.FollowerUserId, flashMessage);
         });
         res.json({ success: true });
     } catch (e) {
@@ -112,7 +113,7 @@ exports.editHtmlSection = async (req, res) => {
 
 exports.editComponentSet = async (req, res) => {
     try {
-        const {  anchor, component } = req.body;
+        const { anchor, component } = req.body;
         await HtmlSection.editComponentSet(req.params.id, component);
         req.flash('success_msg', `Html Section "${anchor}" has been edited by. ${req.user.username}`);
         // Emit flash message to connected clients
@@ -130,6 +131,16 @@ exports.editComponentSet = async (req, res) => {
         req.io.emit('flash', { message: `An error occured :` + e.message, isError: true });
         res.json({ success: false });
     }
+};
+
+exports.insertComponent = async (req, res) => {
+    const { pageName, anchor, newComponent } = req.body;
+    await MobiriseProject.insertComponent(pageName, anchor, newComponent).then(() => {
+        res.json({ success: true });
+    }).catch((e) => {
+        req.io.emit('flash', { message: `An error occured :` + e.message, isError: true });
+        res.json({ success: false });
+    });
 };
 
 exports.deleteHtmlSection = async (req, res) => {
@@ -216,7 +227,7 @@ exports.uploadImage = (req, res) => {
 
 exports.importHtml = async (req, res) => {
     try {
-        
+
         const slug = req.params.slug;
         const pageName = slug + '.html';
         const blogPostId = parseInt(req.params.id);

@@ -2,6 +2,7 @@
 const MobiriseProject = require('../models/MobiriseProject');
 const HtmlSection = require('../models/HtmlSection');
 const fs = require("fs");
+const fsp = require("fs/promises");
 const path = require("path");
 const axios = require("axios");
 const crypto = require("crypto");
@@ -21,7 +22,7 @@ exports.listAll = async (req, res) => {
 
 exports.editByPageName = async (req, res) => {
     const { pageName, anchor } = req.params;
-    const component = await MobiriseProject.findComponentByPage(pageName, anchor );
+    const component = await MobiriseProject.findComponentByPage(pageName, anchor);
     if (!component) return res.status(404).send('Component not found');
     res.json({ component: component });
 };
@@ -87,7 +88,7 @@ exports.findComponentByPage = async (req, res) => {
 
 exports.loadSiteGallery = async (req, res) => {
     try {
-        const files = await fs.readdir(GALLERY_FOLDER, { withFileTypes: true });
+        const files = await fsp.readdir(GALLERY_FOLDER, { withFileTypes: true });
 
         const imageUrls = files
             .filter(file => file.isFile())
@@ -110,15 +111,24 @@ exports.importExternalImage = async (req, res) => {
         const ext = path.extname(new URL(url).pathname) || ".jpg";
         const fileName = crypto.randomUUID() + ext;
 
-        const localPath = path.join(__dirname, "../public/digital-marketing-dreams/assets/images");
-         const response = await axios({
+        const dirPath = path.join(
+            __dirname,
+            "../public/digital-marketing-dreams/assets/images"
+        );
+
+        const filePath = path.join(dirPath, fileName); // ✅ FIX
+
+        // Ensure directory exists
+        fs.mkdirSync(dirPath, { recursive: true });
+
+        const response = await axios({
             method: "GET",
             url,
             responseType: "stream"
         });
 
         await new Promise((resolve, reject) => {
-            const stream = fs.createWriteStream(localPath);
+            const stream = fs.createWriteStream(filePath); // ✅ FIX
             response.data.pipe(stream);
             stream.on("finish", resolve);
             stream.on("error", reject);
@@ -130,6 +140,9 @@ exports.importExternalImage = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Image download failed" });
+        res.status(500).json({
+            error: "Image download failed",
+            details: err.message
+        });
     }
 };

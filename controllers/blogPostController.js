@@ -1,4 +1,4 @@
-
+/* eslint-disable no-undef */
 exports.getBlogPost = (req, res) => {
     const db = require('../models/db');
     const blog = require('../models/Blog')
@@ -44,6 +44,7 @@ exports.getBlogPost = (req, res) => {
             const metaKeywords = blogPostFromSlug.MetaKeywords;
             const blogFromSlug = await blog.getBlogBySlug(blogSlug);
             const footer = blogPostFromSlug.Footer;
+            // eslint-disable-next-line no-unused-vars
             const beforeEndOfBodyScript = blogPostFromSlug.beforeEndOfBodyScript;
             const blogPostStats = await blogPost.getBlogPostsStats(blogPostId);
             let sql = 'SELECT * FROM HtmlSections WHERE Slug = ? ORDER BY ViewIndex ASC';
@@ -145,7 +146,7 @@ exports.getBlogPost = (req, res) => {
                                     <div class="col-md-12 col-12">
                                         <p class="mbr-text mbr-fonts-style mb-4 display-7">
                                             By ${blogPostFromSlug.Author}<br>
-                                            ${new Date(blogPostFromSlug.CreatedAt).toLocaleString() }
+                                            ${new Date(blogPostFromSlug.CreatedAt).toLocaleString()}
                                         </p>
                                     </div>
                                 </div>
@@ -288,14 +289,13 @@ exports.getBlogPost = (req, res) => {
     getBlogPostSections();
 
 
-
 }
-exports.getBlogPostStats = (req, res) => {
-    try {
-        const blogPostId = req.params.blogPostId
-        const row = blogPost.getBlogPostStats(blogPostId);
-        res.json({ row })
-    } catch (err) {
 
-    }
+
+exports.getBlogPostStats = (req, res) => {
+
+    const blogPostId = req.params.blogPostId
+    const row = blogPost.getBlogPostStats(blogPostId);
+    res.json({ row })
+
 }
