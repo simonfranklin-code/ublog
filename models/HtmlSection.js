@@ -259,7 +259,7 @@ class HtmlSection {
 
                 try {
                     if (_item === null) {
-                        
+
                         let css = null;
                         let component = await MobiriseProject.findComponentByPage(pageName, anchor);
                         if (component) {
@@ -294,7 +294,7 @@ class HtmlSection {
                             cid: cid,
                             anchor: anchor
                         });
-                        
+
                         if (_item === null) {
                             this.edit(lastId, html, i, anchor, slug, pageName, '', '', JSON.stringify(component), css, JSON.stringify(paramsJson));
                         } else {

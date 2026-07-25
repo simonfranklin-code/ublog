@@ -121,7 +121,7 @@ class MobiriseProject {
     }
 
 
-    //here
+	//here
     static async updateComponent(pageName, anchor, component) {
         const project = this.load();
 
@@ -177,7 +177,7 @@ class MobiriseProject {
         return null;
     }
 
-    static async insertComponent(pageName, anchor, newComponent) {
+    static async insertComponent(pageName, anchor, newComponent ) {
         try {
             const project = this.load();
             if (project.pages[pageName]) {
@@ -196,7 +196,7 @@ class MobiriseProject {
                 const insertIndex = indexMap[clickedAnchor] + 1
                 const _component = JSON.parse(newComponent);
 
-                components.splice(insertIndex, 0, _component);
+                components.splice(insertIndex, 0, _component );
                 this.save(project);
             }
         } catch (err) {
