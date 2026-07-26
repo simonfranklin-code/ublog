@@ -89,6 +89,7 @@ router.get('/htmlSections/getBlogPosts/:BlogId', ensureAuthenticated, ensurePerm
 router.get('/htmlSections', ensureAuthenticated, ensurePermission('manage_htmlSections'), userHtmlSectionController.getHtmlSectionsPage);
 router.get('/htmlSections/api', ensureAuthenticated, ensurePermission('view_htmlSections'), userHtmlSectionController.getHtmlSections);
 router.post('/htmlSections/create', ensureAuthenticated, ensurePermission('add_htmlSections'), userHtmlSectionController.createHtmlSection);
+router.post('/htmlSections/insertComponent', ensureAuthenticated, ensurePermission('add_htmlSections'), userHtmlSectionController.insertComponent);
 router.post('/htmlSections/edit/:id', ensureAuthenticated, ensurePermission('edit_htmlSections'), userHtmlSectionController.editHtmlSection);
 router.post('/htmlSections/editComponentSet/:id', ensureAuthenticated, ensurePermission('edit_htmlSections'), userHtmlSectionController.editComponentSet);
 router.post('/htmlSections/delete/:id', ensureAuthenticated, ensurePermission('delete_htmlSections'), userHtmlSectionController.deleteHtmlSection);

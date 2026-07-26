@@ -23,4 +23,6 @@ router.get('/list', EditorController.listAll);
 
 router.post('/importExternalImage', EditorController.importExternalImage);
 
+router.get('/loadSiteGallery', EditorController.loadSiteGallery);
+
 module.exports = router;
