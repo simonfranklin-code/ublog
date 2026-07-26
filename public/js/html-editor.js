@@ -158,8 +158,49 @@ let pixabayRequest = null;              // current AJAX request
 const pixabayCache = new Map();         // cache per query+page
 const pixabayLoadedPages = new Set();   // prevent duplicate loads
 
+function renderImages(hits, append = true) {
 
+    const $r = $("#pixabayResults");
 
+    hits.forEach(hit => {
+
+        const img = new Image();
+        img.src = hit.webformatURL;
+        img.className = "selectable-img";
+        img.dataset.url = hit.largeImageURL;
+
+        img.onload = function () {
+            $(img).addClass("loaded");
+        };
+
+        const $item = $("<div class='masonry-item'>").append(img);
+
+        if (append) $r.append($item);
+        else $r.prepend($item);
+    });
+}
+
+function renderSiteGalleryImages(hits, append = true) {
+
+    const $r = $("#pixabayResults");
+
+    hits.forEach(hit => {
+
+        const img = new Image();
+        img.src = hit.webformatURL;
+        img.className = "selectable-img";
+        img.dataset.url = hit.largeImageURL;
+
+        img.onload = function () {
+            $(img).addClass("loaded");
+        };
+
+        const $item = $("<div class='masonry-item'>").append(img);
+
+        if (append) $r.append($item);
+        else $r.prepend($item);
+    });
+}
 /**
  * Build a default params object from a Mobirise component's <mbr-parameters>
  * @param {string} customHTML - the Mobirise _customHTML string
@@ -205,6 +246,13 @@ function extractDefaultParams(customHTML) {
                 ctrl.options[0];
 
             params[ctrl.name] = selected ? selected.value : null;
+        }
+        else if (ctrl.kind === 'image') {
+            if (ctrl.value.includes('@PROJECT_PATH@/')) {
+                ctrl.value.replace(/@PROJECT_PATH@\//g, '');
+            }
+
+            params[ctrl.name] = ctrl.value;
         }
     });
 
@@ -318,27 +366,6 @@ function parseMbrParameters(customHTML) {
 
     return { controls, meta: { found: true, count: controls.length } };
 }
-function renderImages(hits, append = true) {
-
-    const $r = $("#pixabayResults");
-
-    hits.forEach(hit => {
-
-        const img = new Image();
-        img.src = hit.webformatURL;
-        img.className = "selectable-img";
-        img.dataset.url = hit.largeImageURL;
-
-        img.onload = function () {
-            $(img).addClass("loaded");
-        };
-
-        const $item = $("<div class='masonry-item'>").append(img);
-
-        if (append) $r.append($item);
-        else $r.prepend($item);
-    });
-}
 
 async function setReferences() {
     //// Set references for quick access
@@ -447,170 +474,6 @@ $(document).ready(async function () {
 
     }, 400));
 
-
-
-
-    //function loadPixabayPage(isFirstLoad = false) {
-
-    //    if (pixabayLoading || !pixabayHasMore) return;
-
-    //    pixabayLoading = true;
-
-    //    $.getJSON("https://pixabay.com/api/", {
-    //        key: "54600336-c7a5ddf6ff8b42202cfacc7f6",
-    //        q: pixabayQuery,
-    //        image_type: "photo",
-    //        per_page: 20,
-    //        page: pixabayPage
-    //    }, res => {
-
-    //        const $r = $("#pixabayResults");
-
-    //        if (isFirstLoad) {
-    //            $r.empty(); // remove skeletons
-    //        }
-
-    //        if (!res.hits.length) {
-    //            pixabayHasMore = false;
-    //            return;
-    //        }
-
-    //        res.hits.forEach(hit => {
-
-    //            const img = new Image();
-    //            img.src = hit.webformatURL;
-    //            img.className = "selectable-img";
-    //            img.dataset.url = hit.largeImageURL;
-
-    //            img.onload = function () {
-    //                $(img).addClass("loaded");
-    //            };
-
-    //            $r.append(
-    //                $("<div class='masonry-item'>").append(img)
-    //            );
-    //        });
-
-    //        pixabayPage++;
-    //        pixabayLoading = false;
-
-    //    }).fail(() => {
-    //        pixabayLoading = false;
-    //    });
-    //}
-    //function loadPixabayPage(reset = false) {
-
-    //    if (pixabayLoading) return;
-
-    //    pixabayLoading = true;
-
-    //    const $r = $("#pixabayResults");
-
-    //    if (!reset) {
-    //        // ✅ Add spinner at bottom
-    //        $r.append(createBottomSpinner());
-    //    }
-
-    //    $.getJSON("https://pixabay.com/api/", {
-    //        key: "54600336-c7a5ddf6ff8b42202cfacc7f6",
-    //        q: pixabayQuery,
-    //        image_type: "photo",
-    //        per_page: 20,
-    //        page: pixabayPage
-    //    }, res => {
-
-    //        // ✅ Remove bottom spinner
-    //        $("#pixabayBottomSpinner").remove();
-
-    //        if (!res.hits.length) {
-    //            pixabayHasMore = false;
-    //            pixabayLoading = false;
-    //            return;
-    //        }
-
-    //        res.hits.forEach(hit => {
-
-    //            const img = new Image();
-    //            img.src = hit.webformatURL;
-    //            img.className = "selectable-img";
-    //            img.dataset.url = hit.largeImageURL;
-
-    //            img.onload = function () {
-    //                $(img).addClass("loaded");
-    //            };
-
-    //            $r.append(
-    //                $("<div class='masonry-item'>").append(img)
-    //            );
-    //        });
-
-    //        pixabayPage++;
-    //        pixabayLoading = false;
-
-    //    }).fail(() => {
-    //        $("#pixabayBottomSpinner").remove();
-    //        pixabayLoading = false;
-    //    });
-    //}
-
-    //function loadPixabayPage(reset = false) {
-
-    //    if (pixabayLoading) return;
-    //    pixabayLoading = true;
-
-    //    const $r = $("#pixabayResults");
-
-    //    // ✅ Show bottom spinner only for infinite scroll
-    //    if (!reset) {
-    //        $r.append(createBottomSpinner());
-    //    }
-
-    //    $.getJSON("https://pixabay.com/api/", {
-    //        key: "54600336-c7a5ddf6ff8b42202cfacc7f6",
-    //        q: pixabayQuery,
-    //        image_type: "photo",
-    //        per_page: 20,
-    //        page: pixabayPage
-    //    }, res => {
-
-    //        // ✅ REMOVE SKELETONS on initial load
-    //        if (reset) {
-    //            $r.find(".skeleton").remove();
-    //        }
-
-    //        // ✅ Remove bottom spinner
-    //        $("#pixabayBottomSpinner").remove();
-
-    //        if (!res.hits.length) {
-    //            pixabayHasMore = false;
-    //            pixabayLoading = false;
-    //            return;
-    //        }
-
-    //        res.hits.forEach(hit => {
-
-    //            const img = new Image();
-    //            img.src = hit.webformatURL;
-    //            img.className = "selectable-img";
-    //            img.dataset.url = hit.largeImageURL;
-
-    //            img.onload = function () {
-    //                $(img).addClass("loaded");
-    //            };
-
-    //            $r.append(
-    //                $("<div class='masonry-item'>").append(img)
-    //            );
-    //        });
-
-    //        pixabayPage++;
-    //        pixabayLoading = false;
-
-    //    }).fail(() => {
-    //        $("#pixabayBottomSpinner").remove();
-    //        pixabayLoading = false;
-    //    });
-    //}
     function loadPixabayPage(reset = false) {
 
         if (!pixabayQuery || pixabayLoading || !pixabayHasMore) return;
@@ -705,13 +568,11 @@ $(document).ready(async function () {
     }
 
     function loadSiteGallery() {
-        $.getJSON("/admin/images/list", function (images) {
+        $.getJSON("/editor/loadSiteGallery", function (images) {
             const $g = $("#siteGallery").empty();
             images.forEach(url => {
                 $g.append(`
-                <div class="col-3">
-                    <img src="${url}" class="img-fluid selectable-img">
-                </div>
+                <img src="${url}" class="masonry-item img-fluid gallery-img">
             `);
             });
         });
@@ -719,7 +580,12 @@ $(document).ready(async function () {
 
     $(document).on("shown.bs.tab", '[data-bs-target="#img-gallery"]', loadSiteGallery);
 
+    $(document).on("click", ".gallery-img", function () {
+        const externalUrl = $(this).data("url") || this.src;
 
+        applyImageUrl(externalUrl);
+        
+    });
 
     $(document).on("click", ".selectable-img", function () {
         const externalUrl = $(this).data("url") || this.src;
@@ -740,8 +606,8 @@ $(document).ready(async function () {
                 // Use LOCAL image path
                 applyImageUrl(res.localUrl);
             },
-            error() {
-                alert("Failed to import image");
+            error(e) {
+                alert("Failed to import image" + JSON.stringify(e));
             }
         });
     });
@@ -754,6 +620,8 @@ $(document).ready(async function () {
         bootstrap.Modal.getInstance(
             document.getElementById("imagePickerModal")
         ).hide();
+        document.body.classList.remove('modal-open');
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
     }
 
     function debounce(fn, ms) {
@@ -895,18 +763,18 @@ $(document).ready(async function () {
     });
 
 
-    $('#save-html').on('click', async function () {
+    $('#save-html').on('click', async function (e) {
         try {
 
+            e.preventDefault();
             const $form = $("#controls");
-            const $compObj = JSON.parse(ifrJSON.editor.getValue());
+            const $compObj = $form.data("component");
             const $compEl = $form.data("componentEl");
             if (!$compObj) return;
 
-            if ($compEl && $compEl.length) {
-                $compObj._customHTML = ifrHTML.editor.getValue();
-            }
-            //
+            // Sync HTML from preview
+            //$compObj._customHTML = $compEl[0].outerHTML;
+            $compObj._customHTML = ifrHTML.editor.getValue();
             const payload = {
                 component: $compObj,
                 HtmlSectionId: htmlSectionId || null
@@ -1016,12 +884,34 @@ $(document).ready(async function () {
     });
 
     $('#image-html').on('click', triggerImageUpload);
-
+    $('#upload').on('click', uploadComponent);
     $(document).on('click', '.image-wrapper > img', triggerImageUpload);
     function triggerImageUpload() {
         const $input = $('#imageUploadInput');
         $('#imageUploadInput').on('change', imageUpload);
         $input.click();
+    }
+
+    function uploadComponent() {
+        try {
+            const $compObj = JSON.parse(ifrJSON.editor.getValue());
+            if (!$compObj) return;
+
+            const payload = {
+                component: $compObj,
+                HtmlSectionId: htmlSectionId || null
+            };
+
+            $.ajax({
+                url: `/editor/edit/${pageName}/${$compObj._anchor || ''}`,
+                method: "POST",
+                data: payload,
+                success: async () => await initComponent(),
+                error: (err) => console.error("Save failed", err)
+            });
+        } catch (e) {
+            alert(JSON.stringify(e));
+        }
     }
 
     $('#download').on('click', async function () {
@@ -1849,7 +1739,7 @@ $(document).ready(async function () {
 
                               <!-- SITE GALLERY -->
                               <div class="tab-pane fade" id="img-gallery">
-                                <div id="siteGallery" class="row g-3"></div>
+                                <div id="siteGallery" class="masonry-grid" style=""></div>
                               </div>
 
                               <!-- PIXABAY -->

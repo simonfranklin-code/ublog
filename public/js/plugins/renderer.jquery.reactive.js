@@ -21,8 +21,17 @@
             const doc = new DOMParser().parseFromString(customHTML, 'text/html');
             const $parsed = $(doc).find('body').children().first();
 
-            const PATH_ATTRS = ['src', 'href', 'data-src', 'data-bg', 'data-poster'];
-
+            const PATH_ATTRS = ['src', 'href', 'data-src', 'data-bg', 'data-poster', 'value'];
+            // Replace @PROJECT_PATH@ in safe attributes
+            // // $parsed.find('mbr-parameters *').each(function () {
+            // //     const $el = $(this);
+            // //     $.each(this.attributes, function (_, attr) {
+            // //         if (!attr || !attr.value) return;
+            // //         if (attr.value.includes('@PROJECT_PATH@/') && PATH_ATTRS.includes(attr.name)) {
+            // //             $el.attr(attr.name, attr.value.replace(/@PROJECT_PATH@\//g, PROJECT_PATH));
+            // //         }
+            // //     });
+            // // });
             // Hide <mbr-parameters>
             $parsed.find('mbr-parameters').remove();
 
@@ -228,10 +237,10 @@
         try {
             const jsonish = String(str || '')
                 .replace(/([a-zA-Z0-9_-]+)\s*:/g, '"$1":')
-                .replace(/'/g, '"'); 
+                .replace(/'/g, '"');
             return JSON.parse(jsonish);
         } catch {
-            
+
             return {};
         }
     }
@@ -332,9 +341,7 @@
                         const isRgb = /^\s*rgba?\(/i.test(safeVal);
                         const isNamedColor = /^[a-zA-Z]+$/.test(safeVal.trim()); // simple color names like 'white'
 
-                        if (
-                            ['hamburgerColor', 'menuBgColor', 'overlayColor', 'cardColor', 'tColor', 'bgColor'].includes(varName)
-                        ) {
+                        if (varName === 'titleTextColor' || varName === 'subTitleTextColor' || varName === 'textColor' || varName === 'hamburgerColor' || varName === 'menuBgColor' || varName === 'bgColor' || varName === 'overlayColor' || varName === 'cardColor' || varName === 'tColor') {
                             // These are color tokens — keep raw (no extra quoting)
                             modifyVars[varName] = `${safeVal}`;
                         } else if (varName === 'bg-value') {

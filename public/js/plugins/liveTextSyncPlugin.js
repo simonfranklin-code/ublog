@@ -181,22 +181,23 @@ const LiveTextSyncPlugin = (function () {
         const bar = document.createElement("div");
         bar.id = "liveTextToolbar";
         bar.innerHTML = `
-    <div>
-        <button data-cmd="bold"><b>B</b></button>
-        <button data-cmd="italic"><i>I</i></button>
-        <button data-cmd="link">🔗</button>
+        <div>
+            <button data-cmd="bold"><b>B</b></button>
+            <button data-cmd="italic"><i>I</i></button>
+            <button data-cmd="link">🔗</button>
 
-        <label>Display</label>
-        <select id="typoDisplay">
-            <option value="display-1">Title 1</option>
-            <option value="display-2">Title 2</option>
-            <option value="display-3">Title 3</option>
-            <option value="display-4">Menu</option>
-            <option value="display-5">Title 5</option>
-            <option value="display-7">Text</option>
-        </select>
-    </div>
-    `;
+            <label>Display</label>
+            <select id="typoDisplay">
+                <option value="display-1">Title 1</option>
+                <option value="display-2">Title 2</option>
+                <option value="display-3">Title 3</option>
+                <option value="display-4">Menu</option>
+                <option value="display-5">Title 5</option>
+                <option value="display-7">Text</option>
+            </select>
+            <input type="color" id="typoColor" title="Text Color" style="width: 24px; height: 24px;" />    
+        </div>
+        `;
 
         document.body.appendChild(bar);
 
@@ -252,6 +253,7 @@ const LiveTextSyncPlugin = (function () {
                     openLinkEditor(linkEl);
                 });
             }
+
         });
 
         // ✅ FIX: attach once, not inside mousedown
@@ -279,61 +281,63 @@ const LiveTextSyncPlugin = (function () {
             ) {
                 bar.style.display = "none";
             }
+
+
         });
     }
 
-    function wrapRange(range, tagName, attrs = {}) {
+        function wrapRange(range, tagName, attrs = {}) {
 
-        const wrapper = document.createElement(tagName);
+            const wrapper = document.createElement(tagName);
 
-        Object.entries(attrs).forEach(([k, v]) => {
-            wrapper.setAttribute(k, v);
-        });
+            Object.entries(attrs).forEach(([k, v]) => {
+                wrapper.setAttribute(k, v);
+            });
 
-        const content = range.extractContents();
+            const content = range.extractContents();
 
-        // Prevent wrapping already formatted content
-        if (content.firstChild && content.firstChild.tagName === tagName.toUpperCase()) {
-            return content.firstChild;
+            // Prevent wrapping already formatted content
+            if (content.firstChild && content.firstChild.tagName === tagName.toUpperCase()) {
+                return content.firstChild;
+            }
+
+            wrapper.appendChild(content);
+            range.insertNode(wrapper);
+
+            return wrapper;
         }
 
-        wrapper.appendChild(content);
-        range.insertNode(wrapper);
-
-        return wrapper;
-    }
 
 
 
+        function openLinkEditor(button) {
 
-    function openLinkEditor(button) {
+            isEditingLink = true;
+            activeButton = button;  // 🔥 YOU NEED THIS
 
-        isEditingLink = true;
-        activeButton = button;  // 🔥 YOU NEED THIS
+            createLinkEditor();
 
-        createLinkEditor();
+            const editor = document.getElementById("liveLinkEditor");
+            const input = document.getElementById("liveLinkInput");
 
-        const editor = document.getElementById("liveLinkEditor");
-        const input = document.getElementById("liveLinkInput");
+            const rect = button.getBoundingClientRect();
 
-        const rect = button.getBoundingClientRect();
+            editor.style.top = (rect.bottom + window.scrollY + 8) + "px";
+            editor.style.left = (rect.left + window.scrollX) + "px";
+            editor.style.display = "block";
 
-        editor.style.top = (rect.bottom + window.scrollY + 8) + "px";
-        editor.style.left = (rect.left + window.scrollX) + "px";
-        editor.style.display = "block";
+            input.value = button.getAttribute("href") || "";
 
-        input.value = button.getAttribute("href") || "";
+            setTimeout(() => input.focus(), 0);
+        }
 
-        setTimeout(() => input.focus(), 0);
-    }
+        function createLinkEditor() {
 
-    function createLinkEditor() {
+            if (document.getElementById("liveLinkEditor")) return;
 
-        if (document.getElementById("liveLinkEditor")) return;
-
-        const editor = document.createElement("div");
-        editor.id = "liveLinkEditor";
-        editor.innerHTML = `
+            const editor = document.createElement("div");
+            editor.id = "liveLinkEditor";
+            editor.innerHTML = `
             <div class="live-link-box">
                 <input type="text" id="liveLinkInput" placeholder="Enter URL">
 
@@ -345,438 +349,440 @@ const LiveTextSyncPlugin = (function () {
             </div>
             `;
 
-        document.body.appendChild(editor);
+            document.body.appendChild(editor);
 
-        const saveBtn = editor.querySelector("#liveLinkSave");
-        const removeBtn = editor.querySelector("#liveLinkRemove");
-        const cancelBtn = editor.querySelector("#liveLinkCancel");
-        const input = editor.querySelector("#liveLinkInput");
-        saveBtn.onclick = function () {
+            const saveBtn = editor.querySelector("#liveLinkSave");
+            const removeBtn = editor.querySelector("#liveLinkRemove");
+            const cancelBtn = editor.querySelector("#liveLinkCancel");
+            const input = editor.querySelector("#liveLinkInput");
+            saveBtn.onclick = function () {
 
-            if (!activeButton) return;
+                if (!activeButton) return;
 
-            const url = input.value.trim() || "#";
+                const url = input.value.trim() || "#";
 
-            activeButton.setAttribute("href", url);
+                activeButton.setAttribute("href", url);
 
-            isEditingLink = false;
-            editor.style.display = "none";
+                isEditingLink = false;
+                editor.style.display = "none";
 
-        };
+            };
 
-        removeBtn.onclick = function () {
+            removeBtn.onclick = function () {
 
-            if (!activeButton) return;
+                if (!activeButton) return;
 
-            const parent = activeButton.parentNode;
+                const parent = activeButton.parentNode;
 
-            while (activeButton.firstChild) {
-                parent.insertBefore(activeButton.firstChild, activeButton);
-            }
-
-            parent.removeChild(activeButton);
-
-            activeButton = null;
-            isEditingLink = false;
-
-            editor.style.display = "none";
-        };
-
-
-        cancelBtn.onclick = function () {
-
-            isEditingLink = false;
-            editor.style.display = "none";
-
-        };
-
-
-        // 🔥 SAVE
-        saveBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-
-            if (activeButton) {
-                const url = input.value.trim();
-
-                if (url) {
-                    activeButton.setAttribute("href", url);
-                } else {
-                    activeButton.removeAttribute("href");
+                while (activeButton.firstChild) {
+                    parent.insertBefore(activeButton.firstChild, activeButton);
                 }
-            }
 
-            editor.style.display = "none";
-            isEditingLink = false;
-        });
+                parent.removeChild(activeButton);
 
-        // 🔥 CANCEL
-        cancelBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            editor.style.display = "none";
-            isEditingLink = false;
-        });
+                activeButton = null;
+                isEditingLink = false;
 
-        // 🔥 Close on outside click
-        document.addEventListener("mousedown", e => {
+                editor.style.display = "none";
+            };
 
-            const toolbar = document.getElementById("liveTextToolbar");
 
-            if (
-                !editor.contains(e.target) &&
-                !(toolbar && toolbar.contains(e.target))
-            ) {
+            cancelBtn.onclick = function () {
+
+                isEditingLink = false;
+                editor.style.display = "none";
+
+            };
+
+
+            // 🔥 SAVE
+            saveBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+
+                if (activeButton) {
+                    const url = input.value.trim();
+
+                    if (url) {
+                        activeButton.setAttribute("href", url);
+                    } else {
+                        activeButton.removeAttribute("href");
+                    }
+                }
+
                 editor.style.display = "none";
                 isEditingLink = false;
-            }
-        });
-    }
+            });
+
+            // 🔥 CANCEL
+            cancelBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                editor.style.display = "none";
+                isEditingLink = false;
+            });
+
+            // 🔥 Close on outside click
+            document.addEventListener("mousedown", e => {
+
+                const toolbar = document.getElementById("liveTextToolbar");
+
+                if (
+                    !editor.contains(e.target) &&
+                    !(toolbar && toolbar.contains(e.target))
+                ) {
+                    editor.style.display = "none";
+                    isEditingLink = false;
+                }
+            });
+        }
 
 
-    function bindButtonEditing() {
+        function bindButtonEditing() {
 
-        const preview = document.getElementById("editableDraftHtmlContent");
+            const preview = document.getElementById("editableDraftHtmlContent");
 
-        preview.querySelectorAll(".btn").forEach(btn => {
+            preview.querySelectorAll(".btn").forEach(btn => {
 
-            if (btn.dataset.hrefBound) return;
+                if (btn.dataset.hrefBound) return;
 
-            btn.dataset.hrefBound = "true";
-            btn.setAttribute("contenteditable", "true");
+                btn.dataset.hrefBound = "true";
+                btn.setAttribute("contenteditable", "true");
 
-            btn.addEventListener("dblclick", function (e) {
+                btn.addEventListener("dblclick", function (e) {
+                    e.preventDefault();
+                    openLinkEditor(this);
+                });
+            });
+        }
+
+        function start() {
+            const preview = document.querySelector(previewSelector);
+            document.addEventListener("keydown", onKeyDown);
+            if (!preview) return;
+
+            observer = new MutationObserver(onMutations);
+            historyStack = [preview.innerHTML];
+            historyIndex = 0;
+            observer.observe(preview, {
+                subtree: true,
+                characterData: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ["href"]
+            });
+            createTextToolbar();
+            bindTextSelection();
+            bindButtonEditing(); // keep your existing
+            bindLinkClicks();
+        }
+
+        function bindLinkClicks() {
+
+            const preview = document.getElementById("editableDraftHtmlContent");
+
+            preview.addEventListener("click", function (e) {
+
+                const link = e.target.closest("a");
+
+                if (!link) return;
+
                 e.preventDefault();
-                openLinkEditor(this);
+
+                openLinkEditor(link);
+
             });
-        });
-    }
-
-    function start() {
-        const preview = document.querySelector(previewSelector);
-        document.addEventListener("keydown", onKeyDown);
-        if (!preview) return;
-
-        observer = new MutationObserver(onMutations);
-        historyStack = [preview.innerHTML];
-        historyIndex = 0;
-        observer.observe(preview, {
-            subtree: true,
-            characterData: true,
-            childList: true,
-            attributes: true,
-            attributeFilter: ["href"]
-        });
-        createTextToolbar();
-        bindTextSelection();
-        bindButtonEditing(); // keep your existing
-        bindLinkClicks();
-    }
-
-    function bindLinkClicks() {
-
-        const preview = document.getElementById("editableDraftHtmlContent");
-
-        preview.addEventListener("click", function (e) {
-
-            const link = e.target.closest("a");
-
-            if (!link) return;
-
-            e.preventDefault();
-
-            openLinkEditor(link);
-
-        });
 
 
-    }
-    function onKeyDown(e) {
-
-        if (e.ctrlKey && e.key === "z") {
-            e.preventDefault();
-            undo();
         }
+        function onKeyDown(e) {
 
-        if (e.ctrlKey && e.key === "y") {
-            e.preventDefault();
-            redo();
-        }
-    }
-    function stop() {
-        document.removeEventListener("keydown", onKeyDown);
-        observer?.disconnect();
-        observer = null;
-    }
-    function safelyApply(fn) {
-        //isApplying = true;
-        try {
-            fn();
-        } finally {
-            // Delay reset to next microtask
-            Promise.resolve().then(() => {
-                isApplying = false;
-            });
-        }
-    }
-
-    function onMutations(mutations) {
-        if (isApplying) return;
-
-        const ctx = {
-            component: $("#controls").data("component"),
-            componentEl: $("#controls").data("componentEl")
-        };
-
-        if (!ctx.component || !ctx.componentEl) return;
-
-        let changed = false;
-
-        mutations.forEach(m => {
-            let rawTarget = m.target;
-
-            if (rawTarget.nodeType === Node.TEXT_NODE) {
-                rawTarget = rawTarget.parentElement;
+            if (e.ctrlKey && e.key === "z") {
+                e.preventDefault();
+                undo();
             }
 
-            if (m.addedNodes && m.addedNodes.length) {
-                rawTarget = m.addedNodes[0];
+            if (e.ctrlKey && e.key === "y") {
+                e.preventDefault();
+                redo();
+            }
+        }
+        function stop() {
+            document.removeEventListener("keydown", onKeyDown);
+            observer?.disconnect();
+            observer = null;
+        }
+        function safelyApply(fn) {
+            //isApplying = true;
+            try {
+                fn();
+            } finally {
+                // Delay reset to next microtask
+                Promise.resolve().then(() => {
+                    isApplying = false;
+                });
+            }
+        }
+
+        function onMutations(mutations) {
+            if (isApplying) return;
+
+            const ctx = {
+                component: $("#controls").data("component"),
+                componentEl: $("#controls").data("componentEl")
+            };
+
+            if (!ctx.component || !ctx.componentEl) return;
+
+            let changed = false;
+
+            mutations.forEach(m => {
+                let rawTarget = m.target;
+
+                if (rawTarget.nodeType === Node.TEXT_NODE) {
+                    rawTarget = rawTarget.parentElement;
+                }
+
+                if (m.addedNodes && m.addedNodes.length) {
+                    rawTarget = m.addedNodes[0];
+                }
+
+
+                if (!rawTarget) return;
+
+                const editableEl = resolveEditableEl(rawTarget);
+                if (!editableEl) return;
+
+                let selector = editableEl.dataset.appSelector;
+
+                // If no explicit selector, build one from class
+                if (!selector) {
+
+                    if (editableEl.id) {
+                        selector = "#" + editableEl.id;
+                    }
+
+                    else if (editableEl.classList.length) {
+                        selector = "." + editableEl.classList[0];
+                    }
+
+                }
+
+
+                if (!selector) return;
+
+                schedulePatch(ctx, editableEl, selector);
+                changed = true;
+            });
+
+            if (changed) {
+                Hooks.emit("html:updated", ctx.component._customHTML, ctx);
             }
 
+            if (changed) {
+                bindButtonEditing();
+            }
+        }
 
-            if (!rawTarget) return;
+        //document.addEventListener("mousedown", function (e) {
 
-            const editableEl = resolveEditableEl(rawTarget);
+        //    const panel = document.getElementById("typographyPanel");
+        //    if (!panel) return;
+
+        //    if (panel.contains(e.target)) {
+        //        e.stopPropagation(); // keep selection alive
+        //    }
+
+        //});
+
+
+        function resolveEditableEl(node) {
+            if (!node) return null;
+
+            // Text node → element
+            if (node.nodeType === Node.TEXT_NODE) {
+                node = node.parentElement;
+            }
+
+            if (!node) return null;
+
+            // 1️⃣ First priority: explicit selector
+            const explicit = node.closest("[data-app-selector]");
+            if (explicit) return explicit;
+
+            // 2️⃣ Fallback classes (auto-detect editable elements)
+            const fallbackClasses = [
+                ".mbr-section-title",
+                ".mbr-section-subtitle",
+                ".mbr-text",
+                ".mbr-item-title",
+                ".mbr-item-subtitle",
+                ".mbr-section-btn .btn",
+                ".btn",
+                ".mbr-text, .mbr-section-btn"
+            ];
+
+            for (const selector of fallbackClasses) {
+                const found = node.closest(selector);
+                if (found) return found;
+            }
+
+            return null;
+        }
+
+        function normalizeFormatting(root) {
+
+            root.querySelectorAll("b b").forEach(node => {
+                const parent = node.parentNode;
+                while (node.firstChild) parent.insertBefore(node.firstChild, node);
+                parent.removeChild(node);
+            });
+
+            root.querySelectorAll("i i").forEach(node => {
+                const parent = node.parentNode;
+                while (node.firstChild) parent.insertBefore(node.firstChild, node);
+                parent.removeChild(node);
+            });
+
+        }
+
+        function patchHTML(ctx, liveEl, appSelector) {
+
+            safelyApply(() => {
+                try {
+                    const temp = document.createElement("div");
+                    temp.innerHTML = componentRef._customHTML || document.querySelector(previewSelector).innerHTML;
+                    normalizeFormatting(liveEl);
+
+                    const sourceEl = temp.querySelector(appSelector);
+                    console.log("Source element found:", sourceEl);
+                    if (!sourceEl) return;
+
+
+
+                    sourceEl.innerHTML = liveEl.innerHTML;
+
+                    const newHTML = temp.innerHTML;
+
+                    if (!isUndoing && historyStack[historyIndex] !== newHTML) {
+                        historyStack = historyStack.slice(0, historyIndex + 1);
+                        historyStack.push(newHTML);
+                        historyIndex++;
+                    }
+
+                    componentRef._customHTML = newHTML;
+
+                    if (ifrHTML?.editor?.getValue() !== newHTML) {
+                        ifrHTML.editor.setValue(newHTML);
+                    }
+                    console.log("Patching selector:", appSelector);
+                } catch (e) {
+                    alert("Error applying changes: " + e.message);
+                }
+
+            });
+
+        }
+
+        function hideTypographyPanel() {
+            const panel = document.getElementById("typographyPanel");
+            if (panel) panel.style.display = "none";
+        }
+        function syncTypographyPanel() {
+
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            let node = selection.anchorNode;
+
+            if (node.nodeType === Node.TEXT_NODE) {
+                node = node.parentElement;
+            }
+
+            const editableEl = resolveEditableEl(node);
             if (!editableEl) return;
 
-            let selector = editableEl.dataset.appSelector;
+            const current = editableEl.getAttribute("mbr-theme-style");
 
-            // If no explicit selector, build one from class
-            if (!selector) {
+            const select = document.getElementById("typoDisplay");
+            if (!select) return;
 
-                if (editableEl.id) {
-                    selector = "#" + editableEl.id;
-                }
+            if (current) {
+                select.value = current;
+            }
+        }
 
-                else if (editableEl.classList.length) {
-                    selector = "." + editableEl.classList[0];
-                }
 
+        async function updateThemeStyle(selector, newStyle) {
+
+            if (!componentRef?._customHTML) return;
+
+            const temp = document.createElement("div");
+            temp.innerHTML = componentRef._customHTML;
+
+            const el = temp.querySelector(selector);
+            if (!el) return;
+
+            el.setAttribute("mbr-theme-style", newStyle);
+
+            const newHTML = temp.innerHTML;
+
+            // history
+            if (historyStack[historyIndex] !== newHTML) {
+                historyStack = historyStack.slice(0, historyIndex + 1);
+                historyStack.push(newHTML);
+                historyIndex++;
             }
 
+            componentRef._customHTML = newHTML;
 
-            if (!selector) return;
-
-            schedulePatch(ctx, editableEl, selector);
-            changed = true;
-        });
-
-        if (changed) {
-            Hooks.emit("html:updated", ctx.component._customHTML, ctx);
-        }
-
-        if (changed) {
-            bindButtonEditing();
-        }
-    }
-
-    //document.addEventListener("mousedown", function (e) {
-
-    //    const panel = document.getElementById("typographyPanel");
-    //    if (!panel) return;
-
-    //    if (panel.contains(e.target)) {
-    //        e.stopPropagation(); // keep selection alive
-    //    }
-
-    //});
-
-
-    function resolveEditableEl(node) {
-        if (!node) return null;
-
-        // Text node → element
-        if (node.nodeType === Node.TEXT_NODE) {
-            node = node.parentElement;
-        }
-
-        if (!node) return null;
-
-        // 1️⃣ First priority: explicit selector
-        const explicit = node.closest("[data-app-selector]");
-        if (explicit) return explicit;
-
-        // 2️⃣ Fallback classes (auto-detect editable elements)
-        const fallbackClasses = [
-            ".mbr-section-title",
-            ".mbr-section-subtitle",
-            ".mbr-text",
-            ".mbr-item-title",
-            ".mbr-item-subtitle",
-            ".mbr-section-btn .btn",
-            ".btn",
-            ".mbr-text, .mbr-section-btn"
-        ];
-
-        for (const selector of fallbackClasses) {
-            const found = node.closest(selector);
-            if (found) return found;
-        }
-
-        return null;
-    }
-
-    function normalizeFormatting(root) {
-
-        root.querySelectorAll("b b").forEach(node => {
-            const parent = node.parentNode;
-            while (node.firstChild) parent.insertBefore(node.firstChild, node);
-            parent.removeChild(node);
-        });
-
-        root.querySelectorAll("i i").forEach(node => {
-            const parent = node.parentNode;
-            while (node.firstChild) parent.insertBefore(node.firstChild, node);
-            parent.removeChild(node);
-        });
-
-    }
-
-    function patchHTML(ctx, liveEl, appSelector) {
-
-        safelyApply(() => {
-            try {
-                const temp = document.createElement("div");
-                temp.innerHTML = componentRef._customHTML || document.querySelector(previewSelector).innerHTML;
-                normalizeFormatting(liveEl);
-
-                const sourceEl = temp.querySelector(appSelector);
-                console.log("Source element found:", sourceEl);
-                if (!sourceEl) return;
-
-
-
-                sourceEl.innerHTML = liveEl.innerHTML;
-
-                const newHTML = temp.innerHTML;
-
-                if (!isUndoing && historyStack[historyIndex] !== newHTML) {
-                    historyStack = historyStack.slice(0, historyIndex + 1);
-                    historyStack.push(newHTML);
-                    historyIndex++;
-                }
-
-                componentRef._customHTML = newHTML;
-
-                if (ifrHTML?.editor?.getValue() !== newHTML) {
-                    ifrHTML.editor.setValue(newHTML);
-                }
-                console.log("Patching selector:", appSelector);
-            } catch (e) {
-                alert("Error applying changes: " + e.message);
+            if (ifrHTML?.editor?.getValue() !== newHTML) {
+                ifrHTML.editor.setValue(newHTML);
             }
 
-        });
+            // reflect in live preview
+            const liveEl = document.querySelector(selector);
+            if (liveEl) {
+                liveEl.setAttribute("mbr-theme-style", newStyle);
+            }
 
-    }
-
-    function hideTypographyPanel() {
-        const panel = document.getElementById("typographyPanel");
-        if (panel) panel.style.display = "none";
-    }
-    function syncTypographyPanel() {
-
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-
-        let node = selection.anchorNode;
-
-        if (node.nodeType === Node.TEXT_NODE) {
-            node = node.parentElement;
         }
 
-        const editableEl = resolveEditableEl(node);
-        if (!editableEl) return;
+        function undo() {
+            if (historyIndex <= 0) return;
 
-        const current = editableEl.getAttribute("mbr-theme-style");
+            isUndoing = true;
+            historyIndex--;
 
-        const select = document.getElementById("typoDisplay");
-        if (!select) return;
-
-        if (current) {
-            select.value = current;
+            const html = historyStack[historyIndex];
+            applyHistory(html);
+            isUndoing = false;
         }
-    }
 
+        function redo() {
+            if (historyIndex >= historyStack.length - 1) return;
 
-    async function updateThemeStyle(selector, newStyle) {
-
-        if (!componentRef?._customHTML) return;
-
-        const temp = document.createElement("div");
-        temp.innerHTML = componentRef._customHTML;
-
-        const el = temp.querySelector(selector);
-        if (!el) return;
-
-        el.setAttribute("mbr-theme-style", newStyle);
-
-        const newHTML = temp.innerHTML;
-
-        // history
-        if (historyStack[historyIndex] !== newHTML) {
-            historyStack = historyStack.slice(0, historyIndex + 1);
-            historyStack.push(newHTML);
+            isUndoing = true;
             historyIndex++;
+
+            const html = historyStack[historyIndex];
+            applyHistory(html);
+            isUndoing = false;
         }
 
-        componentRef._customHTML = newHTML;
+        function applyHistory(html) {
+            const ctx = {
+                component: $("#controls").data("component")
+            };
 
-        if (ifrHTML?.editor?.getValue() !== newHTML) {
-            ifrHTML.editor.setValue(newHTML);
+            ctx.component._customHTML = html;
+
+            document.getElementById("editableDraftHtmlContent").innerHTML = html;
+            ifrHTML.editor.setValue(html);
         }
 
-        // reflect in live preview
-        const liveEl = document.querySelector(selector);
-        if (liveEl) {
-            liveEl.setAttribute("mbr-theme-style", newStyle);
+        Hooks.on("editor:ready", start);
+        Hooks.on("editor:destroy", stop);
+
+        return {
+            init, start, stop 
         }
-
-    }
-
-    function undo() {
-        if (historyIndex <= 0) return;
-
-        isUndoing = true;
-        historyIndex--;
-
-        const html = historyStack[historyIndex];
-        applyHistory(html);
-        isUndoing = false;
-    }
-
-    function redo() {
-        if (historyIndex >= historyStack.length - 1) return;
-
-        isUndoing = true;
-        historyIndex++;
-
-        const html = historyStack[historyIndex];
-        applyHistory(html);
-        isUndoing = false;
-    }
-
-    function applyHistory(html) {
-        const ctx = {
-            component: $("#controls").data("component")
-        };
-
-        ctx.component._customHTML = html;
-
-        document.getElementById("editableDraftHtmlContent").innerHTML = html;
-        ifrHTML.editor.setValue(html);
-    }
-
-    Hooks.on("editor:ready", start);
-    Hooks.on("editor:destroy", stop);
-
-    return { init, start, stop };
-})();
+}) ();
