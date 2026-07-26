@@ -1,0 +1,104 @@
+extends layout
+include ./mixins/tree.pug
+
+block content
+    // begin::App Content Header
+    .app-content-header
+      // begin::Container
+      .container-fluid
+        // begin::Row
+        .row
+          .col-sm-6
+            h3.mb-0 #{title}
+          .col-sm-6
+            ol.breadcrumb.float-sm-end
+              li.breadcrumb-item
+                a(href='/admin/dashboard') Admin
+              li.breadcrumb-item.active(aria-current='page')
+                | #{title}
+          // end::Row
+        // end::Container
+    // end::App Content Header
+    .row.g-4#items
+      // begin::Col
+      .col-md-12.connectedSortable#callout
+        .callout.callout-info#callout-info
+          | For detailed documentation of Form visit 
+          a.callout-link(href='https://getbootstrap.com/docs/5.3/forms/overview/' target='_blank' rel='noopener noreferrer')
+            | Bootstrap Form
+      // end::Col
+      // begin::Col
+      .col-md-12.connectedSortable#filterExplorer
+        // begin::Filters
+        .card.card-primary.card-outline.mb-4#explorer
+          // begin::Header
+          .card-header
+            .card-title File Explorer
+          // end::Header
+            // begin::Body
+          .card-body
+            .row
+                .col-md-3.sidebar
+                    .sidebar-title Explorer Demo
+                    nav.folder-tree(aria-label="Folders")
+                        each root in tree
+                            +treeNode(root)
+                .col-md-9.shell
+
+                      header.toolbar
+                        if parentPath
+                          a.icon-button(href=`/explorer?path=${encodeURIComponent(parentPath)}` aria-label="Go up" title="Go up") Up
+                        else
+                          span.icon-button.disabled Up
+                        nav.breadcrumbs(aria-label="Current path")
+                          each crumb, index in breadcrumbs
+                            a(href=`/explorer?path=${encodeURIComponent(crumb.path)}`)= crumb.name
+                            if index < breadcrumbs.length - 1
+                              span.separator /
+                        form.search(action="/explorer" method="get")
+                          input(type="hidden" name="path" value=currentPath)
+                          input(type="search" name="q" value=query placeholder="Search this folder" aria-label="Search this folder")
+                          button(type="submit") Search
+
+                      section.commandbar(aria-label="File actions")
+                        button(type="button" data-action="open" disabled) Open
+                        button(type="button" data-action="copy" disabled) Copy
+                        button(type="button" data-action="cut" disabled) Cut
+                        button(type="button" data-action="paste") Paste
+                        button(type="button" data-action="rename" disabled) Rename
+                        button.danger(type="button" data-action="delete" disabled) Delete
+                        span.status(data-status) Select an item
+
+                      section.content(data-current-path=currentPath)
+                        .table-responsive
+                          table.file-table.table.table-striped.table-hover.table-dark
+                            thead
+                              tr
+                                th Name
+                                th Type
+                                th Size
+                                th Modified
+                            tbody
+                              each item in items
+                                tr(data-path=item.path data-name=item.name data-directory=item.isDirectory)
+                                  td.name-cell
+                                    span.file-icon(class=item.isDirectory ? "folder-icon" : "")= item.icon
+                                    if item.isDirectory
+                                      a(href=`/explorer?path=${encodeURIComponent(item.path)}`)= item.name
+                                    else
+                                      span= item.name
+                                  td= item.type
+                                  td= item.size
+                                  td= item.modified
+
+
+
+                
+
+
+        .card-footer
+
+
+    .alert.alert-danger#logError(style='display: none;') Error fetching blog posts
+    #toast-container.position-fixed.top-0.end-0.p-3( style="z-index: 10000;")  
+

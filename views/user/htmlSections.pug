@@ -137,6 +137,7 @@ block content
           .modal-body(id="editHtmlSectionBody")
             form#htmlSectionForm
               input(type='hidden' id='htmlSectionId' name='id')
+              input(type='hidden' id='parentAnchor' name='parentAnchor')
               .formgroup.mb-2
                 label(for='blogPostId') Blog Post
                 select.form-control.form-control-sm#addBlogPostId( name='blogPostId')
@@ -332,7 +333,8 @@ block content
         let selectedBlogPostIndex;
         let blogSlug = '';
         let blogPostSlug = '';            
-
+        let newComponent = null;
+        let parentAnchor = '';
         socket.on('flash', function (data) {
             // Create a Bootstrap Toast dynamically
             const toastHTML = `
@@ -367,14 +369,14 @@ block content
                 $('#limit').val(25);
             }
             const blogId = $('#blogId').val();
-            if (!limit) {
-                alert('Please select a limit.');
-                return;
-            }
-            if (!blogId) {
-                alert('Please select a blog.');
-                return;
-            }
+            //- if (!limit) {
+            //-     alert('Please select a limit.');
+            //-     return;
+            //- }
+            //- if (!blogId) {
+            //-     alert('Please select a blog.');
+            //-     return;
+            //- }
 
             $.ajax({
                 url: '/users/htmlSections/api',
@@ -412,7 +414,7 @@ block content
                               <td class="admin-blogs-ellipsis" data-bs-toggle="popover" data-bs-title="HtmlSection Slug details" data-bs-content="${section.Slug}">${section.Slug}</td>
                               <td class="admin-blogs-ellipsis" data-bs-toggle="popover" data-bs-title="HtmlSection Body details" data-bs-content="${section.Body}">${section.Body}</td>
                               <td>
-                                
+                                <i class="fas fa-copy mbr-iconfont mbr-iconfont-btn clone-btn" data-page="${section.Page}" data-anchor="${section.Anchor}" data-slug="${section.Slug}" data-viewIndex="${section.ViewIndex}" data-id="${section.HtmlSectionID}"></i>
                                 <i class="fas fa-file-import mbr-iconfont mbr-iconfont-btn import-btn" data-anchor="${section.Anchor}" data-slug="${section.Slug}"></i>
                                 <i class="fas fa-eye mbr-iconfont mbr-iconfont-btn view-btn" data-blogSlug="${blogSlug}" data-blogPostSlug="${blogPostSlug}" data-anchor="${section.Anchor}" data-id="${section.HtmlSectionID}"></i>
                                 <i class="fas fa-edit mbr-iconfont mbr-iconfont-btn edit-btn" data-anchor="${section.Anchor}" data-id="${section.HtmlSectionID}"></i>
@@ -471,6 +473,7 @@ block content
         });
 
         $('#saveHtmlSection').on('click', function (e) {
+
             $('#htmlSectionForm').submit();
         });
 
@@ -529,7 +532,35 @@ block content
                 $('#htmlSectionModal').modal('show');
             });
         });
+        
+        $(document).on('click', '.clone-btn', function () {
+            const htmlSectionId = $(this).data('id');
+            const pageName = $(this).data('page');
+            const anchor = $(this).data('anchor');
+            parentAnchor = anchor;
+            $.get(`/users/htmlSections/${htmlSectionId}`, function (section) {
+                $('#htmlSectionModalTitle').text('Clone HTML Section');
+                $('#htmlContent').val(section.Html);
+                $('#viewIndex').val((section.ViewIndex + 0.1));
+                $('#anchor').val(section.Anchor);
+                $('#slug').val(section.Slug);
+                $('#page').val(section.Page);
+                $('#header').val(section.Header);
+                $('#body').val(section.Body);
+                $('#component').val(section.Component);
+                $('#css').val(section.Css);
+                $('#paramsJson').val(section.ParamsJson);
+                $('#htmlSectionId').val('');
+                $('#parentAnchor').val(parentAnchor);
+                $('#htmlSectionModal').modal('show');
+                newComponent = section.Component;
+            });
 
+
+        });
+
+
+        
         $(document).on('click', '.view-btn', function () {
 
             currentHtmlSectionAnchor = $(this).data('anchor');

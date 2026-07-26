@@ -1,0 +1,8 @@
+mixin treeNode(node)
+  details.tree-item(open=node.expanded)
+    summary
+      a(class=node.active ? "active-tree-link" : "" href=`/explorer?path=${encodeURIComponent(node.path)}`)= node.name
+    if node.children && node.children.length
+      .tree-children
+        each child in node.children
+          +treeNode(child)
